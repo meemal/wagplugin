@@ -12,6 +12,9 @@ jQuery(document).ready(function($) {
             data: filterData,
             success: function(response) {
                 $('#directory-listings').html(response);
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', status, error);
             }
         });
     });

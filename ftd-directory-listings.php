@@ -32,3 +32,17 @@ require_once(ABSPATH . 'wp-admin/includes/media.php');
 require_once(ABSPATH . 'wp-admin/includes/image.php');
 
 
+add_action('wp_enqueue_scripts', function() {
+    wp_enqueue_script(
+        'directory-ajax-filter',
+        plugin_dir_url(__FILE__) . 'js/directory-ajax-filter.js',
+        ['jquery'],
+        null,
+        true
+    );
+
+    wp_localize_script('directory-ajax-filter', 'directory_ajax_obj', [
+        'ajax_url' => admin_url('admin-ajax.php'),
+        'nonce'    => wp_create_nonce('directory_ajax_nonce')
+    ]);
+});
