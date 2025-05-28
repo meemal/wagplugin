@@ -1,4 +1,13 @@
 <?php
+if (function_exists('acf_add_options_page')) {
+    acf_add_options_page(array(
+        'page_title' => 'We Are Geniuses Settings',
+        'menu_title' => 'We Are Geniuses Settings',
+        'menu_slug'  => 'We Are Geniuses Settings',
+        'capability' => 'manage_options',
+        'redirect'   => false
+    ));
+}
 
 
 if( function_exists('acf_add_local_field_group') ):

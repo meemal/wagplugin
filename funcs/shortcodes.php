@@ -4,6 +4,33 @@ add_shortcode('submit_directory_form', function() {
         return '<p>Please <a href="/login/">log in</a> to submit a listing.</p>';
     }
 
+    $current_user = wp_get_current_user();
+    $level = pmpro_getMembershipLevelForUser($current_user->ID);
+    $limit = ($level->id == 2) ? 1 : (($level->id == 3) ? 3 : 0);
+
+    $args = [
+        'post_type' => 'directory_listing',
+        'post_status' => ['publish', 'pending'],
+        'author' => $current_user->ID,
+        'posts_per_page' => -1,
+    ];
+    
+    $query = new WP_Query($args);
+    $current_count = $query->found_posts;
+    wp_reset_postdata();
+
+    $txt = '<h2>You have reached the maximum number of directory listings allowed for your membership level.</h2>';
+    $upgrade_url = site_url('/membership-checkout/?level=3'); 
+    if ($level->id == 2){
+        $txt .= '<div class="upgrade-prompt">';
+        $txt .= '<p>You can unlock more directory listings by upgrading your plan!</p>';
+        $txt .= '<a href="' . esc_url($upgrade_url) . '" class="button">Upgrade Now</a>';
+        $txt .= '</div>'; 
+    }
+    if ($current_count >= $limit) {
+        return $txt;
+    }
+
     ob_start();
 
     // Handle form submission
