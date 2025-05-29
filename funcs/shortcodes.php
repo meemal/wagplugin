@@ -140,3 +140,132 @@ add_shortcode('submit_directory_form', function() {
 
     return ob_get_clean();
 });
+
+
+// Shortcode for frontend Directory Listing edit form
+// https://we-are-geniuses.local/edit-directory-listing/?edit_listing=1045
+add_shortcode('edit_directory_listing', function($atts) {
+    if (!is_user_logged_in()) {
+        return '<p>Please <a href="/login/">log in</a> to edit a listing.</p>';
+    }
+
+    $current_user = wp_get_current_user();
+
+    $atts = shortcode_atts(['id' => ''], $atts);
+    $listing_id = $atts['id'] ?: (isset($_GET['edit_listing']) ? intval($_GET['edit_listing']) : 0);
+
+    if (!$listing_id || get_post_type($listing_id) !== 'directory_listing') {
+        return '<p>Invalid listing.</p>';
+    }
+
+    $post = get_post($listing_id);
+
+    if ($post->post_author != $current_user->ID) {
+        return '<p>You are not allowed to edit this listing.</p>';
+    }
+
+    if (isset($_POST['directory_update'])) {
+        $title = sanitize_text_field($_POST['title']);
+        $content = wp_kses_post($_POST['content']);
+        $category = intval($_POST['category']);
+        $tags = sanitize_text_field($_POST['tags']);
+        $headline = sanitize_text_field($_POST['headline']);
+        $business_name = sanitize_text_field($_POST['business_name']);
+        $looking_for = sanitize_textarea_field($_POST['looking_for']);
+        $website = esc_url_raw($_POST['website']);
+        $phone = sanitize_text_field($_POST['phone']);
+        $email = sanitize_email($_POST['email']);
+        $facebook = esc_url_raw($_POST['facebook']);
+        $linkedin = esc_url_raw($_POST['linkedin']);
+        $youtube = esc_url_raw($_POST['youtube']);
+
+        wp_update_post([
+            'ID' => $listing_id,
+            'post_title' => $business_name,
+            'post_content' => $content,
+        ]);
+
+        wp_set_post_terms($listing_id, [$category], 'category');
+        wp_set_post_terms($listing_id, explode(',', $tags), 'post_tag');
+
+        if (function_exists('update_field')) {
+            update_field('headline', $headline, $listing_id);
+            update_field('business_name', $business_name, $listing_id);
+            update_field('looking_for', $looking_for, $listing_id);
+            update_field('website', $website, $listing_id);
+            update_field('phone', $phone, $listing_id);
+            update_field('email', $email, $listing_id);
+            update_field('facebook', $facebook, $listing_id);
+            update_field('linkedin', $linkedin, $listing_id);
+            update_field('youtube', $youtube, $listing_id);
+
+            if (!empty($_FILES['cover_picture']['name'])) {
+                $cover_id = media_handle_upload('cover_picture', 0);
+                if (!is_wp_error($cover_id)) {
+                    update_field('cover_picture', $cover_id, $listing_id);
+                }
+            }
+
+            if (!empty($_FILES['profile_picture']['name'])) {
+                $profile_id = media_handle_upload('profile_picture', 0);
+                if (!is_wp_error($profile_id)) {
+                    update_field('profile_picture', $profile_id, $listing_id);
+                }
+            }
+        }
+
+        echo '<p>Your listing has been updated.</p>';
+    }
+
+    $headline = get_field('headline', $listing_id);
+    $business_name = get_field('business_name', $listing_id);
+    $looking_for = get_field('looking_for', $listing_id);
+    $website = get_field('website', $listing_id);
+    $phone = get_field('phone', $listing_id);
+    $email = get_field('email', $listing_id);
+    $facebook = get_field('facebook', $listing_id);
+    $linkedin = get_field('linkedin', $listing_id);
+    $youtube = get_field('youtube', $listing_id);
+
+    $cover = get_field('cover_picture', $listing_id);
+    $cover_url = (is_array($cover) && isset($cover['url'])) ? $cover['url'] : '';
+
+    $profile = get_field('profile_picture', $listing_id);
+    $profile_url = (is_array($profile) && isset($profile['url'])) ? $profile['url'] : '';
+
+
+    ob_start();
+    ?>
+    <form method="post" enctype="multipart/form-data">
+        <p><label>Business Name:<br><input type="text" name="business_name" value="<?php echo esc_attr($business_name); ?>" required></label></p>
+        <p><label>Headline:<br><input type="text" name="headline" value="<?php echo esc_attr($headline); ?>"></label></p>
+        <p><label>Description:<br><textarea name="content" rows="4"><?php echo esc_textarea($post->post_content); ?></textarea></label></p>
+        <p><label>Looking For:<br><textarea name="looking_for" rows="3"><?php echo esc_textarea($looking_for); ?></textarea></label></p>
+
+        <p><label>Sector (Category):<br><?php wp_dropdown_categories(['taxonomy' => 'category', 'name' => 'category', 'hide_empty' => false, 'selected' => wp_get_post_terms($listing_id, 'category', ['fields' => 'ids'])[0] ?? '']); ?></label></p>
+
+        <p><label>Skills (Tags, comma separated):<br><input type="text" name="tags" value="<?php echo esc_attr(implode(', ', wp_get_post_terms($listing_id, 'post_tag', ['fields' => 'names']))); ?>"></label></p>
+
+        <p><label>Website:<br><input type="url" name="website" value="<?php echo esc_url($website); ?>"></label></p>
+        <p><label>Phone Number:<br><input type="text" name="phone" value="<?php echo esc_attr($phone); ?>"></label></p>
+        <p><label>Email:<br><input type="email" name="email" value="<?php echo esc_attr($email); ?>"></label></p>
+        <p><label>Facebook:<br><input type="url" name="facebook" value="<?php echo esc_url($facebook); ?>"></label></p>
+        <p><label>LinkedIn:<br><input type="url" name="linkedin" value="<?php echo esc_url($linkedin); ?>"></label></p>
+        <p><label>YouTube:<br><input type="url" name="youtube" value="<?php echo esc_url($youtube); ?>"></label></p>
+
+        <?php if ($cover_url): ?>
+            <p>Current Cover Picture:<br><img src="<?php echo esc_url($cover_url); ?>" style="max-width:200px; height:auto; border:1px solid #ccc; padding:5px;"></p>
+        <?php endif; ?>
+        <p><label>Cover Picture (Upload to replace):<br><input type="file" name="cover_picture" accept="image/*"></label></p>
+
+        <?php if ($profile_url): ?>
+            <p>Current Profile Picture:<br><img src="<?php echo esc_url($profile_url); ?>" style="max-width:200px; height:auto; border:1px solid #ccc; padding:5px;"></p>
+        <?php endif; ?>
+        <p><label>Profile Picture (Upload to replace):<br><input type="file" name="profile_picture" accept="image/*"></label></p>
+
+        <p><input type="submit" name="directory_update" value="Update Listing"></p>
+    </form>
+    <?php
+
+    return ob_get_clean();
+});
