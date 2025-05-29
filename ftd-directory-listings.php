@@ -31,7 +31,6 @@ require_once(ABSPATH . 'wp-admin/includes/file.php');
 require_once(ABSPATH . 'wp-admin/includes/media.php');
 require_once(ABSPATH . 'wp-admin/includes/image.php');
 
-
 add_action('wp_enqueue_scripts', function() {
     wp_enqueue_script(
         'directory-ajax-filter',
@@ -46,3 +45,12 @@ add_action('wp_enqueue_scripts', function() {
         'nonce'    => wp_create_nonce('directory_ajax_nonce')
     ]);
 });
+
+function ftd_get_plugin_template( $template_name, $args = array() ) {
+    $template_path = plugin_dir_path( __FILE__ ) . 'templates/' . $template_name . '.php';
+    if ( file_exists( $template_path ) ) {
+        extract( $args );
+        include $template_path;
+    }
+}
+
