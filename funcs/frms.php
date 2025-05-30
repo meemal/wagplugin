@@ -29,3 +29,23 @@ function add_tags_to_post_from_form($entry_id, $form_id) {
     }
 }
 
+// Save Formidable Entry ID into a specific ACF field on CPT post
+add_action('frm_after_create_entry', 'ftd_save_entry_id_to_acf', 30, 2);
+add_action('frm_after_update_entry', 'ftd_save_entry_id_to_acf', 30, 2);
+
+function ftd_save_entry_id_to_acf($entry_id, $form_id) {
+    // Replace with your actual Formidable Form ID
+    $target_form_id = 123; // e.g., Directory Listings form ID
+
+    if ($form_id != $target_form_id) {
+        return; // Not the right form, exit early
+    }
+
+    // Get the post ID linked to this Formidable Entry
+    $post_id = FrmProEntriesController::get_post_id($entry_id);
+
+    if ($post_id) {
+        // Update the ACF field with the Entry ID
+        update_field('associated_ff_post_id', $entry_id, $post_id);
+    }
+}
