@@ -34,19 +34,19 @@ function display_add_user_directory_listings() {
 
   ob_start();
 
-  // Display existing listings
-  if ( $listing_count > 0 ) {
-      echo '<h3>Your Existing Directory Listings</h3><ul>';
-      foreach ( $user_listings as $listing_id ) {
-        ftd_get_plugin_template( 'content-directory_listing_sm', array(
-            'listing_id' => $listing_id,
-        ));
-    }
+  // // Display existing listings
+  // if ( $listing_count > 0 ) {
+  //     echo '<h3>Your Existing Directory Listings</h3><ul>';
+  //     foreach ( $user_listings as $listing_id ) {
+  //       ftd_get_plugin_template( 'content-directory_listing_sm', array(
+  //           'listing_id' => $listing_id,
+  //       ));
+  //   }
     
-      echo '</ul>';
-  } else {
-      echo '<p>You have no directory listings.</p>';
-  }
+  //     echo '</ul>';
+  // } else {
+  //     echo '<p>You have no directory listings.</p>';
+  // }
 
   // Display remaining listings info
   $remaining = $allowed_listings - $listing_count;

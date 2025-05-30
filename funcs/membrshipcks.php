@@ -26,7 +26,9 @@ add_shortcode('user_directory_listings', function() {
       echo '<h3>Your Directory Listings</h3>';
       echo '<div class="directory-grid">';
       while ($query->have_posts()) : $query->the_post();
-          get_template_part('template-parts/content', 'directory_listing');
+      include plugin_dir_path( __FILE__ ) . '../templates/content-directory_listing_sm.php';
+
+
       endwhile;
       echo '</div>';
 

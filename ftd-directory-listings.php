@@ -18,6 +18,13 @@ if ( is_dir( $funcs_dir ) ) {
     }
 }
 
+// Enqueue plugin CSS files
+add_action('wp_enqueue_scripts', function() {
+    wp_enqueue_style(
+        'directory-listings-style',
+        plugin_dir_url(__FILE__) . 'css/directory-listings.css'
+    );
+});
 // Flush rewrite rules on activation/deactivation
 register_activation_hook(__FILE__, function() {
     flush_rewrite_rules();
