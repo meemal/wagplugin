@@ -4,10 +4,11 @@
   gap: 1rem;
 }
 
-.directory-card {
+.directory-card, .card {
   background: rgba(255,255,255,0.6);
   padding: 1rem;
   border-radius: 8px;
+  
 }
 
 .directory-card-inner {
@@ -17,7 +18,7 @@
   gap: 1rem;
 }
 
-.directory-col.profile-pic img {
+.profile-pic {
   width: 60px;
   height: 60px;
   object-fit: cover;
@@ -44,3 +45,33 @@
   text-decoration: none;
   font-size: 0.9rem;
 }
+
+.directory-card-mini {
+  position: relative;
+  text-align: center;
+  padding: 1rem;
+}
+
+.status-tag {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: inline-block;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.7rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  border-radius: 999px;
+  color: #fff;
+  letter-spacing: 0.5px;
+}
+
+.status-live {
+  background-color: #247556; /* Green for live */
+}
+
+.status-pending {
+  background-color: #e67e22; /* Orange for pending */
+}
+
+/* #sidebar */
