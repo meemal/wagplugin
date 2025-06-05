@@ -19,7 +19,7 @@ function user_directory_listings_shortcode( $atts ) {
   $args = array(
       'post_type'      => 'directory_listing',
       'author'         => $user_id,
-      'post_status'    => array( 'publish', 'pending', 'draft' ),
+      'post_status'    => array( 'publish', 'pending', 'draft', 'disabled' ),
       'posts_per_page' => -1,
   );
 

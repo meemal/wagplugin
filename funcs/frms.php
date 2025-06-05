@@ -29,23 +29,30 @@ function add_tags_to_post_from_form($entry_id, $form_id) {
     }
 }
 
-// Save Formidable Entry ID into a specific ACF field on CPT post
 add_action('frm_after_create_entry', 'ftd_save_entry_id_to_acf', 30, 2);
-add_action('frm_after_update_entry', 'ftd_save_entry_id_to_acf', 30, 2);
 
 function ftd_save_entry_id_to_acf($entry_id, $form_id) {
-    // Replace with your actual Formidable Form ID
-    $target_form_id = 123; // e.g., Directory Listings form ID
+    $target_form_id = 2; // Replace with your actual Formidable Form ID
 
     if ($form_id != $target_form_id) {
-        return; // Not the right form, exit early
+        return; // Exit if it's not the target form
     }
 
-    // Get the post ID linked to this Formidable Entry
-    $post_id = FrmProEntriesController::get_post_id($entry_id);
+    global $wpdb;
+
+    // Retrieve the post_id directly from the frm_items table
+    $post_id = $wpdb->get_var(
+        $wpdb->prepare(
+            "SELECT post_id FROM {$wpdb->prefix}frm_items WHERE id = %d",
+            $entry_id
+        )
+    );
 
     if ($post_id) {
-        // Update the ACF field with the Entry ID
+        // Update the ACF field with the entry ID
         update_field('associated_ff_post_id', $entry_id, $post_id);
+    } else {
+        error_log("No post_id found for Formidable entry ID: $entry_id");
     }
 }
+

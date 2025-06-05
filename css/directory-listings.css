@@ -65,6 +65,9 @@
   color: #fff;
   letter-spacing: 0.5px;
 }
+.pmpro_account-section .status-tag{
+  position: relative;
+}
 
 .status-live {
   background-color: #247556; /* Green for live */
@@ -73,5 +76,17 @@
 .status-pending {
   background-color: #e67e22; /* Orange for pending */
 }
+.status-disabled {
+  background-color: #f44336; /* Red */
+  color: white;
+}
 
 /* #sidebar */
+
+#sideabar a{
+  color: #f76349
+}
+
+.directory-listing-usage--cta{
+
+}

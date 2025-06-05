@@ -18,13 +18,25 @@ if ( is_dir( $funcs_dir ) ) {
     }
 }
 
-// Enqueue plugin CSS files
 add_action('wp_enqueue_scripts', function() {
+    global $post;
+
+    // Always enqueue core directory styles
     wp_enqueue_style(
         'directory-listings-style',
         plugin_dir_url(__FILE__) . 'css/directory-listings.css'
     );
+
+    // Only enqueue toggle CSS if the shortcode is used on the page
+    if ( is_a($post, 'WP_Post') && has_shortcode($post->post_content, 'my_directory_listings') ) {
+        wp_enqueue_style(
+            'directory-toggle-style',
+            plugin_dir_url(__FILE__) . 'css/directory-toggle.css'
+        );
+    }
 });
+
+
 // Flush rewrite rules on activation/deactivation
 register_activation_hook(__FILE__, function() {
     flush_rewrite_rules();
