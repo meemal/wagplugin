@@ -76,9 +76,8 @@ function ftd_sm_user_directory_listings_shortcode($atts) {
             $status = get_post_status();
             ?>
             <div class="directory-card-mini card">
-                <span class="status-tag <?php echo ($status === 'publish') ? 'status-live' : 'status-pending'; ?>">
-                    <?php echo ($status === 'publish') ? 'Live' : 'Pending Review'; ?>
-                </span>
+                <?php echo ftd_get_directory_listing_status_tag($status); ?>
+
                 <div class="directory-card-content has-text-align-center">
                     <?php if ($profile) : ?>
                         <img src="<?php echo esc_url($profile['url']); ?>" alt="Profile Picture" class="profile-pic profile-pic-mini">
@@ -241,27 +240,11 @@ function my_directory_listings_as_list_shortcode() {
                         $entry_id = get_field('associated_ff_post_id');
                         $post_id = get_the_ID();
                         $status = get_post_status();
-                        $status_label = 'Unknown';
-                        $status_class = 'status-tag';
-
-                        switch ($status) {
-                            case 'publish':
-                                $status_label = 'Live';
-                                $status_class .= ' status-live';
-                                break;
-                            case 'pending':
-                                $status_label = 'Pending Review';
-                                $status_class .= ' status-pending';
-                                break;
-                            case 'disabled':
-                                $status_label = 'Disabled';
-                                $status_class .= ' status-disabled';
-                                break;
-                        }
+                       
                         ?>
                         <tr>
                             <td><strong><?php the_title(); ?></strong></td>
-                            <td><span class="<?php echo esc_attr($status_class); ?>"><?php echo $status_label; ?></span></td>
+                            <td><?= ftd_get_directory_listing_status_tag($status); ?></td>
                             <td>
                                 <a href="<?php the_permalink(); ?>" class="pmpro_actionlink">View</a>
                                 <?php if ($entry_id) : ?>
