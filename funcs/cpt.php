@@ -24,4 +24,36 @@ add_action('init', function() {
       'show_in_rest' => true,
       'menu_icon' => 'dashicons-businessman',
   ]);
+
+
+
+  // Helper function to DRY
+  function register_directory_taxonomy($taxonomy, $singular, $plural) {
+      register_taxonomy($taxonomy, 'directory_listing', [
+          'labels' => [
+              'name' => $plural,
+              'singular_name' => $singular,
+              'search_items' => 'Search ' . $plural,
+              'all_items' => 'All ' . $plural,
+              'edit_item' => 'Edit ' . $singular,
+              'update_item' => 'Update ' . $singular,
+              'add_new_item' => 'Add New ' . $singular,
+              'new_item_name' => 'New ' . $singular . ' Name',
+              'menu_name' => $plural,
+          ],
+          'hierarchical' => false,
+          'public' => true,
+          'show_ui' => true,
+          'show_in_rest' => true,
+          'rewrite' => [ 'slug' => $taxonomy ],
+      ]);
+  }
+
+  register_directory_taxonomy('skills', 'Skill', 'Skills');
+  register_directory_taxonomy('services', 'Service', 'Services');
+  register_directory_taxonomy('opportunities_attracting', 'Opportunity I’m Attracting', 'Opportunities I’m Attracting');
 });
+
+
+
+

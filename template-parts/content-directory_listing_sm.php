@@ -12,6 +12,7 @@ $view_link = get_permalink( $listing_id );
 $author_id = get_post_field( 'post_author', $listing_id );
 $author_name = get_the_author_meta( 'display_name', $author_id );
 $author_avatar = get_avatar( $author_id, 48 );
+$current_user_id = get_current_user_id();
 
 // Generate delete URL with nonce
 $delete_url = add_query_arg( array(
@@ -29,8 +30,17 @@ $delete_url = add_query_arg( array(
         <h3 class="listing-title"><?php echo esc_html( $title ); ?></h3>
     </div>
     <div class="listing-actions">
-        <a href="<?php echo esc_url( $edit_link ); ?>" class="button">Edit</a>
+        <?php if ($current_user_id === (int) $author_id): ?>
+            <a href="<?php echo esc_url( $edit_link ); ?>" class="button">Edit</a>
+        
+        
         <a href="<?php echo esc_url( $view_link ); ?>" class="button">View</a>
-        <a href="<?php echo esc_url( $delete_url ); ?>" class="button delete-listing" onclick="return confirm('Are you sure you want to delete this listing? This action cannot be undone.');">Delete</a>
+        <?php if ($current_user_id === (int) $author_id): ?>
+       
+            <a href="<?php echo esc_url( $delete_url ); ?>" class="button delete-listing" onclick="return confirm('Are you sure you want to delete this listing? This action cannot be undone.');">Delete</a>
+            <?php endif; ?>
     </div>
 </div>
+
+
+
