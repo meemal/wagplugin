@@ -28,7 +28,7 @@ add_action('wp_enqueue_scripts', function() {
     );
 
     // Only enqueue toggle CSS if the shortcode is used on the page
-    if ( is_a($post, 'WP_Post') && has_shortcode($post->post_content, 'my_directory_listings') ) {
+    if ( is_a($post, 'WP_Post') && has_shortcode($post->post_content, 'my_directory_listings_account_page') ) {
         wp_enqueue_style(
             'directory-toggle-style',
             plugin_dir_url(__FILE__) . 'css/directory-toggle.css'

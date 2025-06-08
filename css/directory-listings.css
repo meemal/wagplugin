@@ -51,11 +51,15 @@
   text-align: center;
   padding: 1rem;
 }
-
-.status-tag {
+.directory-card-mini .status-tag{
   position: absolute;
   top: 10px;
   right: 10px;
+}
+
+
+.status-tag {
+
   display: inline-block;
   padding: 0.3rem 0.7rem;
   font-size: 0.7rem;
@@ -82,11 +86,3 @@
 }
 
 /* #sidebar */
-
-#sideabar a{
-  color: #f76349
-}
-
-.directory-listing-usage--cta{
-
-}
