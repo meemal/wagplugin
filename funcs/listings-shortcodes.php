@@ -192,50 +192,50 @@ add_shortcode('my_directory_listings_as_list', 'my_directory_listings_as_list_sh
 
 // 4. Display listings for users profile as small cards in directory-grid - [profile_directory_listings_cards]
 // Shortcode to display user's own directory listings
-add_shortcode('profile_directory_listings_cards', function() {
+// add_shortcode('profile_directory_listings_cards', function() {
 
 
-    global $current_user;
-    $profile_user_id = $current_user->ID;
-    if (!$profile_user_id) {
-        return '<p>User not found.</p>';
-    }
+//     global $current_user;
+//     $profile_user_id = $current_user->ID;
+//     if (!$profile_user_id) {
+//         return '<p>User not found.</p>';
+//     }
 
-    // Get the profile user's display name
-    $profile_user = get_userdata($profile_user_id);
-    $profile_display_name = $profile_user ? $profile_user->display_name : 'Genius';
+//     // Get the profile user's display name
+//     $profile_user = get_userdata($profile_user_id);
+//     $profile_display_name = $profile_user ? $profile_user->display_name : 'Genius';
 
-    // Query the directory listings for the profile user
-    $args = [
-        'post_type'      => 'directory_listing',
-        'post_status'    => ['publish'],
-        'author'         => $profile_user_id,
-        'posts_per_page' => -1,
-    ];
-    $query = new WP_Query($args);
+//     // Query the directory listings for the profile user
+//     $args = [
+//         'post_type'      => 'directory_listing',
+//         'post_status'    => ['publish'],
+//         'author'         => $profile_user_id,
+//         'posts_per_page' => -1,
+//     ];
+//     $query = new WP_Query($args);
 
-    ob_start();
+//     ob_start();
 
-    echo '<h3>' . esc_html($profile_display_name) . ' - Directory Listings</h3>';
+//     echo '<h3>' . esc_html($profile_display_name) . ' - Directory Listings</h3>';
 
-    if ($query->have_posts()) {
-        echo '<div class="directory-grid">';
-        while ($query->have_posts()) {
-            $query->the_post();
-            // Include your template part for displaying each listing
-            include plugin_dir_path(__FILE__) . '../templates/content-directory_listing_sm.php';
-        }
-        echo '</div>';
-    } else {
-        // Get the ACF field value for no listings message
-        $no_listings_message = get_field('no_listings_on_profile', 'option');
-        echo '<p>' . esc_html($no_listings_message) . '</p>';
-    }
+//     if ($query->have_posts()) {
+//         echo '<div class="directory-grid">';
+//         while ($query->have_posts()) {
+//             $query->the_post();
+//             // Include your template part for displaying each listing
+//             include plugin_dir_path(__FILE__) . '../templates/content-directory_listing_sm.php';
+//         }
+//         echo '</div>';
+//     } else {
+//         // Get the ACF field value for no listings message
+//         $no_listings_message = get_field('no_listings_on_profile', 'option');
+//         echo '<p>' . esc_html($no_listings_message) . '</p>';
+//     }
 
-    wp_reset_postdata();
+//     wp_reset_postdata();
 
-    return ob_get_clean();
-});
+//     return ob_get_clean();
+// });
 
 //
 

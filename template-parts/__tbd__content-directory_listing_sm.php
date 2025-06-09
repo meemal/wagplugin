@@ -32,7 +32,7 @@ $delete_url = add_query_arg( array(
     <div class="listing-actions">
         <?php if ($current_user_id === (int) $author_id): ?>
             <a href="<?php echo esc_url( $edit_link ); ?>" class="button">Edit</a>
-        
+            <?php endif; ?>
         
         <a href="<?php echo esc_url( $view_link ); ?>" class="button">View</a>
         <?php if ($current_user_id === (int) $author_id): ?>
@@ -41,6 +41,3 @@ $delete_url = add_query_arg( array(
             <?php endif; ?>
     </div>
 </div>
-
-
-

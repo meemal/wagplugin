@@ -85,4 +85,13 @@
   color: white;
 }
 
+.pmpro_actions_nav a{
+  color:white;
+}
+.pmpro_actions_nav a:hover{
+  color:#f2a341;
+}
+/* #sidebar a{
+  color:#f44336;
+} */
 /* #sidebar */
