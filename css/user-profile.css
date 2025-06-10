@@ -1,0 +1,107 @@
+
+
+/* Headings and Titles */
+.listing-title {
+  font-size: 3rem;
+  font-weight: bold;
+  margin-top: 1.5rem;
+  color: #673f69;
+}
+
+.headline {
+  font-size: 1.6rem;
+  color: white;
+  margin: 0.5rem 0;
+  background-color: #673f69;
+  font-style: italic;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+}
+
+
+
+
+
+
+
+.description{
+  font-size: 1.2rem;
+  line-height: 1.3;
+  
+  color: #4b4b4b;
+  text-align: justify;
+  margin-bottom: 2rem !important;
+}
+.description-events {
+  font-size: 1rem;
+}
+
+
+
+
+/* Directory User Card */
+.directory-user-card {
+  position: relative;
+}
+
+.directory-user-card h3 {
+  color: #673f69;
+  margin-bottom: 1rem;
+}
+
+
+blockquote.user-card-quote {
+  font-size: 1.1rem;
+  font-style: italic;
+  color: white;
+  margin: 0;
+  background-color: #673f69 !important;
+  text-align: center;
+  width: 100%;
+}
+
+
+
+
+
+.profile-pic-container {
+  /* position: absolute;
+  bottom: -125px;
+  left: 40px; */
+  width: 250px;
+  height: 250px;
+  border-radius: 50%;
+  background: #fff;
+  padding: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.user-card-profile-pic {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: #fff;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 4px #fff, 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.user-card-profile-pic img {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 50%;
+}

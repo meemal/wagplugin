@@ -53,3 +53,21 @@ add_shortcode('custom_member_profile', function () {
   return ob_get_clean();
 });
 
+
+// function pmpro_custom_profile_update_message() {
+//     if (
+//         is_page(get_option('pmpro_member_profile_edit_page_id')) &&
+//         isset($_REQUEST['update']) &&
+//         $_REQUEST['update'] == '1'
+//     ) {
+//         $account_url = pmpro_url('account');
+//         $profile_url = home_url('/profile');
+
+//         echo '<div class="pmpro_message pmpro_success">';
+//         echo '<p>Your profile has been updated.</p>';
+//         echo '<p><a href="' . esc_url($account_url) . '">View your membership account</a> | ';
+//         echo '<a href="' . esc_url($profile_url) . '">View your profile</a></p>';
+//         echo '</div>';
+//     }
+// }
+// add_action('pmpro_after_profile_fields', 'pmpro_custom_profile_update_message');
