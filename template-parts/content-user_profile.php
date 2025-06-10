@@ -17,9 +17,7 @@ $favourite_quote = get_user_meta($user->ID, 'favourite_dr_joe_quote', true);
     <div class="listing-header">
         <div class="profile-pic-container"><?php echo $avatar; ?></div>
         <h1 class="listing-title"><?php echo esc_html($display_name); ?></h1>
-        <?php if ($headline): ?>
-            <p class="headline"><?php echo esc_html($headline); ?></p>
-        <?php endif; ?>
+   
     </div>
 
     <div class="wp-block-columns directory-content">

@@ -49,9 +49,9 @@ add_action('init', function() {
       ]);
   }
 
-  register_directory_taxonomy('skills', 'Skill', 'Skills');
+  register_directory_taxonomy('attracting', 'Attracting', 'Attracting');
   register_directory_taxonomy('services', 'Service', 'Services');
-  register_directory_taxonomy('opportunities_attracting', 'Opportunity I’m Attracting', 'Opportunities I’m Attracting');
+ 
 });
 
 
