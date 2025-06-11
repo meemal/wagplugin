@@ -37,10 +37,17 @@ add_action('wp_enqueue_scripts', function() {
         // Only enqueue toggle CSS if the shortcode is used on the page
         if ( is_a($post, 'WP_Post') && has_shortcode($post->post_content, 'custom_member_profile') ) {
             wp_enqueue_style(
-                'directory-toggle-style',
+                'user-profile-style',
                 plugin_dir_url(__FILE__) . 'css/user-profile.css'
             );
         }
+    // Only enqueue toggle CSS if the shortcode is used on the page
+    if ( is_a($post, 'WP_Post') && has_shortcode($post->post_content, 'genius_levels_cta') ) {
+        wp_enqueue_style(
+            'genius-cta-style',
+            plugin_dir_url(__FILE__) . 'css/genius-cta.css'
+        );
+    }
 });
 
 

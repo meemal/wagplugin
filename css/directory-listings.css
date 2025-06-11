@@ -141,3 +141,19 @@
 #button{
   text-shadow:none;
 }
+
+.btn-outline{
+  background-color: transparent;
+  color: white;
+  border: 4px solid white;
+  padding: 2rem 4rem;
+  font-size: 2em;
+  border-radius: 0;
+}
+
+.coral {
+  color: #F26849
+}
+.golden {
+  color: #F2A341
+}

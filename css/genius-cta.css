@@ -1,0 +1,44 @@
+.genius-cta {
+  background: rgba(255, 255, 255, 0.4);
+  padding: 2rem;
+  text-align: center;
+  max-width: 400px;
+  margin: 2rem auto;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.cta-badge {
+  font-size: 1.75rem;
+  font-weight: bold;
+  background: #ffffff;
+  color: #673f69;
+  width: 3rem;
+  height: 3rem;
+  line-height: 3rem;
+  border-radius: 50%;
+  margin: 0 auto 1rem;
+}
+
+.cta-title {
+  font-size: 1.5rem;
+  margin: 0.5rem 0;
+}
+
+.cta-subtitle {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.cta-body {
+  margin-bottom: 1rem;
+}
+
+.cta-price {
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color:white;
+  font-size: 2rem;
+}
+
+
