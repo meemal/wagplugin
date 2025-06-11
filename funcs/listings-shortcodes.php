@@ -1,19 +1,20 @@
 <?php
 
 // Directory Listing Displays
-// 1. Display user's own directory listings as small cards on sidebar - [user_directory_listings_sb]
+// 1. Display user's own directory listings as small cards on sidebar - [user_directory_listings]
 // 2. Display user's own directory listings as list with editing quick links and directory listings allowance- [my_directory_listings_account_page]
 //  - Bundles with [my_directory_listings_as_list] to display listings in a table format
 //  - And [directory_listing_usage]
 // 3. Display user's own directory listings as list with editing quick links - [my_directory_listings_as_list]
-// 4. Display listings for users profile as small cards in directory-grid - [profile_directory_listings_cards]
+
 
 // Directory Listing Messaging
 // 5. Display usage and upgrade options - [directory_listing_usage]
+// 6. Get Listing URL from Formidable entry ID in queryvar - [view_listing_button_frm_queryvar]
 
 //
 //
-// 1. Display user's own directory listings as small cards on sidebar - [user_directory_listings_sb]
+// 1. Display user's own directory listings as small cards on sidebar - [user_directory_listings]
 function ftd_sb_user_directory_listings_shortcode($atts) {
     ob_start();
 
@@ -27,13 +28,20 @@ function ftd_sb_user_directory_listings_shortcode($atts) {
         'author'         => $current_user_id,
         'post_status'    => array('publish', 'pending', 'disabled'),
         'posts_per_page' => -1,
+        'grid'            => isset($atts['grid']) ? filter_var($atts['grid'], FILTER_VALIDATE_BOOLEAN) : false, // Use grid layout for small cards
     );
     $query = new WP_Query($args);
 
     if ($query->have_posts()) {
-        echo '<div class="wp-block-group">';
+    
+       
+       
         echo '<h3 class="has-text-align-center">My Directory Listings</h3>';
-        
+        if ($args['grid']) {
+            echo '<div class="directory-grid">';
+        } else {
+            echo '<div class="wp-block-group">';
+        }
         while ($query->have_posts()) {
             $query->the_post();
             $profile = get_field('profile_picture');
@@ -69,7 +77,7 @@ function ftd_sb_user_directory_listings_shortcode($atts) {
 
     return ob_get_clean();
 }
-add_shortcode('user_directory_listings_sb', 'ftd_sb_user_directory_listings_shortcode');
+add_shortcode('user_directory_listings', 'ftd_sb_user_directory_listings_shortcode');
 //
 
 // 2. Display user's own directory listings as list with editing quick links
@@ -190,52 +198,7 @@ function my_directory_listings_as_list_shortcode() {
 add_shortcode('my_directory_listings_as_list', 'my_directory_listings_as_list_shortcode');
 //
 
-// 4. Display listings for users profile as small cards in directory-grid - [profile_directory_listings_cards]
-// Shortcode to display user's own directory listings
-// add_shortcode('profile_directory_listings_cards', function() {
 
-
-//     global $current_user;
-//     $profile_user_id = $current_user->ID;
-//     if (!$profile_user_id) {
-//         return '<p>User not found.</p>';
-//     }
-
-//     // Get the profile user's display name
-//     $profile_user = get_userdata($profile_user_id);
-//     $profile_display_name = $profile_user ? $profile_user->display_name : 'Genius';
-
-//     // Query the directory listings for the profile user
-//     $args = [
-//         'post_type'      => 'directory_listing',
-//         'post_status'    => ['publish'],
-//         'author'         => $profile_user_id,
-//         'posts_per_page' => -1,
-//     ];
-//     $query = new WP_Query($args);
-
-//     ob_start();
-
-//     echo '<h3>' . esc_html($profile_display_name) . ' - Directory Listings</h3>';
-
-//     if ($query->have_posts()) {
-//         echo '<div class="directory-grid">';
-//         while ($query->have_posts()) {
-//             $query->the_post();
-//             // Include your template part for displaying each listing
-//             include plugin_dir_path(__FILE__) . '../templates/content-directory_listing_sm.php';
-//         }
-//         echo '</div>';
-//     } else {
-//         // Get the ACF field value for no listings message
-//         $no_listings_message = get_field('no_listings_on_profile', 'option');
-//         echo '<p>' . esc_html($no_listings_message) . '</p>';
-//     }
-
-//     wp_reset_postdata();
-
-//     return ob_get_clean();
-// });
 
 //
 
@@ -291,7 +254,9 @@ function display_directory_listing_usage() {
     $output  .= '<p>' . ftd_get_directory_usage_message( $used_listings, $allowed_listings ) . '</p>';
     
   if ( $used_listings >= $allowed_listings ) {
-        $output .= '<p><strong>You have reached your directory listing limit.</strong> </p> <p><a href="/membership-levels/" class="btn btn-small">Upgrade</a></p>';
+        $output .= '<p><strong>You have reached your directory listing limit.</strong> </p>
+        <p>Contact us to let us know if you require more directory listings!</p>
+        <p><a href="/contact/" class="btn btn-small">Contact</a></p>';
     } else {
         $remaining = $allowed_listings - $used_listings;
         $output .= '<p>You can add <strong>' . esc_html( $remaining ) . '</strong> more directory listing(s).</p>';
@@ -330,4 +295,28 @@ add_action('template_redirect', function() {
     }
 });
 
+
+// function ftd_view_listing_button_shortcode() {
+//     error_log( "shortcode  ".$_GET['entry'] );
+//     // echo $_GET['entry'];
+//     if (!isset($_GET['entry'])) {
+//         return ''; // No entry ID present
+//     }
+    
+
+//     $entry_id = absint($_GET['entry']);
+//     if (!$entry_id) {
+//         return ''; // Invalid entry ID
+//     }
+
+//     // Get the associated post ID from ACF field
+//     $post_id = get_field('associated_ff_post_id', 'entry_' . $entry_id);
+//     if (!$post_id || !get_post_status($post_id)) {
+//         return ''; // No associated post or post doesn't exist
+//     }
+    
+//     $post_url = get_permalink($post_id);
+//     return '<a href="' . esc_url($post_url) . '" class="btn">View this listing</a>';
+// }
+// add_shortcode('view_listing_button_frm_queryvar', 'ftd_view_listing_button_shortcode');
 
