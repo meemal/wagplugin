@@ -95,3 +95,11 @@
   color:#f44336;
 } */
 /* #sidebar */
+
+#pmpro_login .pmpro_member_display_name a, #pmpro_login .pmpro_card_actions a{
+  color:#F26849;
+}
+#pmpro_login .pmpro_member_display_name a:hover, #pmpro_login .pmpro_card_actions a:hover{
+  color:#f2a341;
+}
+

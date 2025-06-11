@@ -254,9 +254,9 @@ function display_directory_listing_usage() {
     $output  .= '<p>' . ftd_get_directory_usage_message( $used_listings, $allowed_listings ) . '</p>';
     
   if ( $used_listings >= $allowed_listings ) {
-        $output .= '<p><strong>You have reached your directory listing limit.</strong> </p>
-        <p>Contact us to let us know if you require more directory listings!</p>
-        <p><a href="/contact/" class="btn btn-small">Contact</a></p>';
+        $output .= "<p><strong>You have reached your directory listing limit.</strong> </p>
+        <p>You really are multidimentional! Let us know if you require more directory listings.</p>
+        <p><a href='/contact/' class='btn btn-small'>Contact</a></p>";
     } else {
         $remaining = $allowed_listings - $used_listings;
         $output .= '<p>You can add <strong>' . esc_html( $remaining ) . '</strong> more directory listing(s).</p>';
