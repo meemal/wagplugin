@@ -102,10 +102,31 @@
 #pmpro_login .pmpro_member_display_name a:hover, #pmpro_login .pmpro_card_actions a:hover{
   color:#f2a341;
 }
-
-
+.widget_pmpro_member_login{
+  border:none;
+}
+#menu-account-sidebar-menu {
+  margin-top:2rem;
+  margin-bottom: 2rem;
+}
+#pmpro_login  .menu-btn.menu-item a {
+  color:#F26849;
+  margin-left: 2rem;
+  margin-top: 1rem;
+}
+#pmpro_login .menu-btn.menu-item a:hover {
+  color:#F2A341;
+}
+#pmpro_login  .pmpro_card_actions a{
+  color:#F26849 !important;
+}
+.pmpro .pmpro_card.pmpro_logged_in_welcome_wrap{
+  border: none;
+  border-radius: 12px;
+  background-color: rgba(255, 255, 255, 0.6);
+}
 /* Button styles */
-.btn, .menu-btn.menu-item a {
+.btn{
   display: inline-block;
   padding: 0.5rem 1rem;
   border-radius: 6px;
@@ -117,7 +138,7 @@
   font-size:1.2em;
   text-align: center;
 }
-.btn:hover, .menu-btn.menu-item a:hover {
+.btn:hover{
   background-color: #F2A341;
   color: #fff;
   border-color: #F2A341;
