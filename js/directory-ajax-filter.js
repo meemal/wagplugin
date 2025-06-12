@@ -1,21 +1,17 @@
-jQuery(document).ready(function($) {
-    $('#directory-filter-form').on('submit', function(e) {
-        e.preventDefault();
-
-        var filterData = $(this).serialize();
-        filterData += '&action=filter_directory';
-        filterData += '&nonce=' + directory_ajax_obj.nonce;
-
-        $.ajax({
-            url: directory_ajax_obj.ajax_url,
-            type: 'POST',
-            data: filterData,
-            success: function(response) {
-                $('#directory-listings').html(response);
-            },
-            error: function(xhr, status, error) {
-                console.error('AJAX Error:', status, error);
-            }
-        });
+jQuery(function($){
+    $('#directory-filter-form').on('submit', function(e){
+      e.preventDefault();
+      var $form = $(this),
+          data = {
+            action: 'directory_filter',
+            search: $form.find('[name="search"]').val(),
+            sector: $form.find('[name="sector"]').val()
+          };
+      $.post($form.data('ajax-url'), data, function(res){
+        if (res.success) {
+          $('#directory-listings').html(res.data);
+        }
+      });
     });
-});
+  });
+  
