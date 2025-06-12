@@ -187,3 +187,9 @@ text-decoration:underline
 .golden {
   color: #F2A341
 }
+.text-white {
+  color: white;
+}
+.text-center {
+  text-align: center;
+}

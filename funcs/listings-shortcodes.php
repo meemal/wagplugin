@@ -203,7 +203,14 @@ add_shortcode('my_directory_listings_as_list', 'my_directory_listings_as_list_sh
 //
 
 // 5. Display usage and upgrade options - [directory_listing_usage]
-function display_directory_listing_usage() {
+function display_directory_listing_usage($atts) {
+    // Extract attributes
+    $atts = shortcode_atts(
+        array(
+            'title' => '', // Default title
+        ),
+        $atts
+    );
     // Get current user ID
     $user_id = get_current_user_id();
     if ( ! $user_id ) {
@@ -230,7 +237,9 @@ function display_directory_listing_usage() {
             }
         }
     }
-
+    if ($atts['title'] != '') {
+        echo '<h3 class="pmpro_card_title text-center">' . esc_html( $atts['title'] ) . '</h3>';
+    }
     // Count the number of directory listings created by the user
     $args = array(
         'post_type'      => 'directory_listing',
@@ -241,15 +250,17 @@ function display_directory_listing_usage() {
     );
     $user_listings = get_posts( $args );
     $used_listings = count( $user_listings );
+
+
   // Conditional messages
   if ( $allowed_listings === 0 ) {
-    echo '<h3 class="pmpro_card_title pmpro_font-large">No directory listings included in your membership plan</h3>
-    <p>Upgrade your plan to create an offer, the community is here for you!</strong></p>
-    <p><a href="/membership-levels/" class="btn btn-small">Upgrade Your Membership</a></p>';
+    echo '<div class="directory-listing-usage card text-center"><h3 class="pmpro_card_title pmpro_font-large">Upgrade your plan to create an offer,
+    <strong> the community is here for you!</strong></p>
+    <p><a href="/membership-levels/" class="btn btn-small">Upgrade Your Membership</a></p></div>';
     return;
     }
     // Display the usage information
-    $output  = '<div class="directory-listing-usage card">';
+    $output  = '<div class="directory-listing-usage card text-center">';
   
     $output  .= '<p>' . ftd_get_directory_usage_message( $used_listings, $allowed_listings ) . '</p>';
     
