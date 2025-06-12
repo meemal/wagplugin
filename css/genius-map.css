@@ -1,0 +1,34 @@
+.pmpromm_infowindow h2 a{
+  color: #673f69;
+}
+.pmpromm_infowindow h2 a:hover{
+  color: #F26849;
+}
+.pmpromm_avatar img{
+  border-radius:50%;
+}
+.pmpromm_date{
+  display:none
+}
+.pmpromm_profile a{
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: bold;
+  background-color: #F26849;
+  color: #fff;
+  border: 2px solid #F26849;
+  font-size:1.2em;
+  text-align: center;
+}
+.pmpromm_profile a:hover {
+  background-color: #F2A341;
+  color: #fff;
+  border-color: #F2A341;
+  text-decoration:none;
+}
+
+.pmpromm_infowindow .bodyContent {
+  text-align: center;
+}

@@ -48,6 +48,13 @@ add_action('wp_enqueue_scripts', function() {
             plugin_dir_url(__FILE__) . 'css/genius-cta.css'
         );
     }
+    // Enqueue genius-map CSS if we are on the /genius-map/ page
+    if ( is_page('genius-map') ) {
+        wp_enqueue_style(
+            'genius-map-style',
+            plugin_dir_url(__FILE__) . 'css/genius-map.css'
+        );
+    }
 });
 
 
