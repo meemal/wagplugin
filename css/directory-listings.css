@@ -123,8 +123,17 @@
 .pmpro .pmpro_card.pmpro_logged_in_welcome_wrap{
   border: none;
   border-radius: 12px;
-  background-color: rgba(255, 255, 255, 0.6);
+  /* background-color: rgba(255, 255, 255, 0.6); */
 }
+.pmpro .pmpro_card.pmpro_logged_in_welcome_wrap .menu a {
+color: #673f69 !important;
+text-decoration:underline
+
+}
+.pmpro .pmpro_card.pmpro_logged_in_welcome_wrap .menu a:hover {
+  color: #F2A341 !important;
+  text-decoration:none;
+  }
 /* Button styles */
 .btn{
   display: inline-block;
