@@ -71,3 +71,5 @@ add_shortcode('custom_member_profile', function () {
 //     }
 // }
 // add_action('pmpro_after_profile_fields', 'pmpro_custom_profile_update_message');
+
+

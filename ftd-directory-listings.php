@@ -84,7 +84,28 @@ add_action('wp_enqueue_scripts', function() {
         'ajax_url' => admin_url('admin-ajax.php'),
         'nonce'    => wp_create_nonce('directory_ajax_nonce')
     ]);
+
+    if (is_page('membership-account')) {  // OR use is_page(123)
+        wp_enqueue_script(
+            'map-settings-ajax',
+            plugin_dir_url(__FILE__) .  '/js/map-settings.js',
+            ['jquery'],
+            null,
+            true
+          );
+          wp_localize_script('map-settings-ajax', 'directory_ajax_obj', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce'    => wp_create_nonce('directory_ajax_nonce'),
+          ]);
+    }
+
+
 });
+
+
+
+  
+
 
 function ftd_get_plugin_template( $template_name, $args = array() ) {
     $template_path = plugin_dir_path( __FILE__ ) . 'templates/' . $template_name . '.php';
@@ -93,4 +114,7 @@ function ftd_get_plugin_template( $template_name, $args = array() ) {
         include $template_path;
     }
 }
+
+
+
 

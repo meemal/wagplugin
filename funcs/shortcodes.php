@@ -6,8 +6,8 @@ function ftd_genius_buttons_shortcode() {
   if (!is_user_logged_in()) {
       // User not logged in
       $output .= '
-          <a href="/membership-account/membership-checkout/" class="btn btn-outline">JOIN THE GENIUSES</a><br>
-          <p style="color:white;padding-top:16px;">Already a member? <a style="color:white;" href="/join-we-are-geniuses/" >Log in</a></p>
+          <a href="/membership-account/join-we-are-geniuses/" class="btn btn-outline">JOIN THE GENIUSES</a><br>
+          <p style="color:white;padding-top:16px;">Already a member? <a style="color:white;" href="/login/" >Log in</a></p>
       ';
   } else {
       // Logged in user
