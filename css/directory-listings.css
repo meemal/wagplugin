@@ -164,6 +164,12 @@ text-decoration:underline
   border-color: #F2A341;
   color: white;
 }
+.btn.btn-disabled {
+
+  background-color : grey !import
+  color: white;
+  cursor: not-allowed;
+}
 .btn-small {
   font-size:1em;
   padding: 0.3rem 0.8rem;
@@ -194,6 +200,6 @@ text-decoration:underline
   text-align: center;
 }
 
-#pmpromm_address_fields {
+/* #pmpromm_address_fields {
   display: flex !important
-}
+} */

@@ -2,29 +2,53 @@ jQuery(document).ready(function($) {
   $('#map-settings-form').on('submit', function(e) {
     e.preventDefault();
     var form = $(this);
-    var formData = form.serialize();
+    var button = form.find('button');
 
-    form.find('button').prop('disabled', true);
+    button.addClass('btn-disabled').prop('disabled', true);
 
     $.ajax({
-        url: directory_ajax_obj.ajax_url,
-        type: 'POST',
-        data: formData + '&action=save_map_settings&security=' + directory_ajax_obj.nonce,
-        success: function(response) {
-            form.find('button').prop('disabled', false);
-            form.find('.pmpro_message').remove(); 
-            if (response.success) {
-                form.prepend('<div class="pmpro_message">' + response.data.message + '</div>');
-            } else {
-                alert('Error: ' + response.data.message);
-            }
-        },
-        error: function(xhr) {
-            form.find('button').prop('disabled', false);
-            alert('Ajax error: ' + xhr.status + ' - ' + xhr.statusText);
+      url: directory_ajax_obj.ajax_url,
+      type: 'POST',
+      data: form.serialize() + '&action=save_map_settings&security=' + directory_ajax_obj.nonce,
+      success: function(response) {
+        button.removeClass('btn-disabled').prop('disabled', false);
+
+        $('#map-settings-message').remove();
+        if (response.success) {
+          const message = $('<div id="map-settings-message" class="pmpro_message" style="display:none;">' + response.data.message + '</div>');
+          form.prepend(message);
+          message.fadeIn().delay(10000).fadeOut();
+        } else {
+          alert('Error: ' + response.data.message);
         }
+      },
+      error: function(xhr) {
+        button.removeClass('btn-disabled').prop('disabled', false);
+        alert('Ajax error: ' + xhr.status + ' - ' + xhr.statusText);
+      }
     });
+  });
+
 });
 
+jQuery(document).ready(function($) {
+  var $toggle = $('input[name="pmpromm_optin"]'),
+      $fields = $('#pmpromm_address_fields');
 
+  if ($toggle.length) {
+    // On page load – show/hide based on state
+    if (!$toggle.prop('checked')) {
+      $fields.hide();
+    }
+
+    // On change – slide fields
+    $toggle.on('change', function(){
+      console
+      if ($(this).prop('checked')) {
+        $fields.slideDown().css('display', 'flex');
+      } else {
+        $fields.slideUp();
+      }
+    });
+  }
 });
