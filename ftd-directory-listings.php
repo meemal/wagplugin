@@ -55,7 +55,37 @@ add_action('wp_enqueue_scripts', function() {
             plugin_dir_url(__FILE__) . 'css/genius-map.css'
         );
     }
+   
 });
+
+add_action('wp', function () {
+    global $post;
+    if ($post instanceof WP_Post) {
+        if (
+            has_shortcode($post->post_content, 'user_directory_listings') ||
+            has_shortcode($post->post_content, 'custom_member_profile') ||
+            is_post_type_archive('directory_listing') // For archive template part
+        ) {
+            add_action('wp_enqueue_scripts', 'ftd_enqueue_view_counter_script');
+        }
+    }
+});
+
+
+function ftd_enqueue_view_counter_script() {
+    wp_enqueue_script(
+        'ftd-view-counter',
+        plugin_dir_url(__FILE__) . 'js/view-counter.js',
+        ['jquery'],
+        null,
+        true
+    );
+
+    wp_localize_script('ftd-view-counter', 'ftdViewCounter', [
+        'ajax_url' => admin_url('admin-ajax.php'),
+        'nonce' => wp_create_nonce('ftd_view_nonce'),
+    ]);
+}
 
 
 // Flush rewrite rules on activation/deactivation
