@@ -32,7 +32,7 @@ add_shortcode('member_map_settings_form', function () {
           </div>
 
           <br>
-          <div id="pmpromm_address_fields" class="pmpro_form_fields pmpro_cols-2" style="display: block !important;">
+          <div id="pmpromm_address_fields" class="pmpro_form_fields " style="display: block !important;">
             <div class="pmpro_form_field pmpro_form_field-text pmpro_form_field-pmpromm_street_name">
               <label for="pmpromm_street_name">Street Address</label>
               <input type="text" id="pmpromm_street_name" name="pmpromm_street_name" class="pmpro_form_input pmpro_form_input-text" value="<?php echo esc_attr($street); ?>">

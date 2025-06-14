@@ -125,6 +125,9 @@
   border-radius: 12px;
   /* background-color: rgba(255, 255, 255, 0.6); */
 }
+.pmpro_card_actions button#other_discount_code_toggle{
+  color:#F26849 !important;
+}
 .pmpro .pmpro_card.pmpro_logged_in_welcome_wrap .menu a {
 color: #673f69 !important;
 text-decoration:underline
@@ -135,7 +138,7 @@ text-decoration:underline
   text-decoration:none;
   }
 /* Button styles */
-.btn{
+.btn, #pmpro_btn-submit, .pmpro_btn{
   display: inline-block;
   padding: 0.5rem 1rem;
   border-radius: 6px;
@@ -146,30 +149,34 @@ text-decoration:underline
   border: 2px solid #F26849;
   font-size:1.2em;
   text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
-.btn:hover{
+
+.btn:hover, #pmpro_btn-submit:hover, .pmpro_btn:hover{
   background-color: #F2A341;
   color: #fff;
   border-color: #F2A341;
   text-decoration:none;
 }
-.btn.btn-secondary {
+/* .btn.btn-secondary {
   background-color: rgba(255,255,255,0.2);
   border-color : #F26849;
   color: #F26849;
-}
+} */
 .btn.btn-secondary:hover {
 
   background-color : #F2A341;
   border-color: #F2A341;
   color: white;
 }
-.btn.btn-disabled {
+.btn.btn-disabled{
 
-  background-color : grey !import
+  background-color : rgb(140, 139, 139) !important;
+  border-color :  grey !important;
   color: white;
   cursor: not-allowed;
 }
+
 .btn-small {
   font-size:1em;
   padding: 0.3rem 0.8rem;
@@ -203,3 +210,44 @@ text-decoration:underline
 /* #pmpromm_address_fields {
   display: flex !important
 } */
+
+/* .break {
+  flex-basis: 100%;
+  height: 0;
+}
+
+.col-2 { 
+  max-width: 48%
+} */
+#pmpro_form_fieldset-application-information-private .pmpro_form_fields,
+#pmpro_form_fieldset-about-your-work-with-dr-joe .pmpro_form_fields{
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 10px;
+}
+.pmpro .pmpromm_address_fields {
+  grid-template-columns: repeat(3, 1fr) !important;
+}
+.full-row, .pmpro_form_fields-description {
+  grid-column: 1 / -1; /* spans the entire row */
+}
+.pmpro_form_field-file-preview img {
+  height: 150px;
+  width: auto;
+}
+
+#user_avatar_div{
+  text-align: center;
+}
+
+.pmpro_form_field-file-preview img {
+  height: 150px !important;
+  width: 150px !important;
+
+  object-fit: cover;
+}
+
+.pmpro_form_field-user_avatar .pmpro_form_field-file-preview img {
+  border-radius:50%;
+}
+
