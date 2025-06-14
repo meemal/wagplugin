@@ -158,11 +158,11 @@ text-decoration:underline
   border-color: #F2A341;
   text-decoration:none;
 }
-/* .btn.btn-secondary {
-  background-color: rgba(255,255,255,0.2);
+.btn.btn-secondary {
+  background-color: rgba(255,255,255,0.05);
   border-color : #F26849;
   color: #F26849;
-} */
+}
 .btn.btn-secondary:hover {
 
   background-color : #F2A341;
@@ -251,3 +251,24 @@ text-decoration:underline
   border-radius:50%;
 }
 
+/* Tag Styling */
+.tags {
+  margin: 0.5rem 0;
+}
+
+.tag {
+  display: inline-block;
+  background-color: #247556;
+  color: #fff;
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  margin: 0.2rem 0.3rem 0.2rem 0;
+}
+.tag.tag-skills { 
+  background-color: #f26849;    
+
+}
+.tag.tag-opportunities { 
+  background-color: #d94e81;    
+}
