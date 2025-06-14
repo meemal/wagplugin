@@ -26,7 +26,7 @@ function user_directory_listings_shortcode( $atts ) {
   $listings = get_posts( $args );
 
   if ( empty( $listings ) ) {
-      return '<p>You have no directory listings yet.</p>';
+      return;
   }
 
   ob_start();
