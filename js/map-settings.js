@@ -35,11 +35,13 @@ jQuery(document).ready(function($) {
   var $toggle = $('input[name="pmpromm_optin"]'),
       $fields = $('#pmpromm_address_fields');
 
-  if ($toggle.length) {
-    // On page load – show/hide based on state
-    if (!$toggle.prop('checked')) {
-      $fields.hide();
-    }
+      if ($toggle.length) {
+        // Explicitly show or hide on load
+        if ($toggle.prop('checked')) {
+          $fields.show(); // or use .css('display', 'flex') if needed
+        } else {
+          $fields.hide();
+        }
 
     // On change – slide fields
     $toggle.on('change', function(){

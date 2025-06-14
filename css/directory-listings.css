@@ -220,6 +220,7 @@ text-decoration:underline
   max-width: 48%
 } */
 #pmpro_form_fieldset-application-information-private .pmpro_form_fields,
+#pmpro_form_fieldset-map-settings .pmpro_form_fields,
 #pmpro_form_fieldset-about-your-work-with-dr-joe .pmpro_form_fields{
   display: grid !important;
   grid-template-columns: repeat(2, 1fr) !important;

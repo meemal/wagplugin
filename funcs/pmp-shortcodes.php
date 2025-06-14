@@ -16,7 +16,7 @@ add_shortcode('member_map_settings_form', function () {
   $country     = $pin['country'] ?? '';
 
   ob_start(); ?>
-<div class="pmpro">
+<div id="pmpro_form_fieldset-map-settings" class="pmpro">
   <h2 class="pmpro_section_title pmpro_font-x-large">My Genius Map Listing</h2>
   <div class="pmpro_card">
     <div class="pmpro_account-section">
