@@ -7,7 +7,7 @@ function ftd_genius_buttons_shortcode() {
       // User not logged in
       $output .= '
           <a href="/membership-account/join-we-are-geniuses/" class="btn btn-outline">JOIN THE GENIUSES</a><br>
-          <p style="color:white;padding-top:16px;">Already a member? <a style="color:white;" href="/login/" >Log in</a></p>
+          <p style="color:white;padding-top:16px;">Already a member? <a href="/login/" >Log in</a></p>
       ';
   } else {
       // Logged in user
@@ -15,8 +15,8 @@ function ftd_genius_buttons_shortcode() {
       $level = pmpro_getMembershipLevelForUser($user_id);
       $level_id = $level ? (int) $level->id : 0;
 
-      $directory = '<a href="/genius-directory" class="btn btn-outline">VIEW GENIUS DIRECTORY</a>';
-      $map = '<a href="/genius-map" class="btn btn-outline">VIEW GENIUS MAP</a>';
+      $directory = '<a href="/genius-directory" class="btn">GENIUS DIRECTORY</a>';
+      $map = '<a href="/genius-map" class="btn btn-secondary">GENIUS MAP</a>';
       $upgrade = '<a href="/membership-account/membership-checkout/" class="btn btn-outline">UPGRADE NOW TO SHARE YOUR GENIUS</a>';
 
       if ($level_id === 1) {
