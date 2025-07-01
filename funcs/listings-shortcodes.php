@@ -56,13 +56,13 @@ function ftd_sb_user_directory_listings_shortcode($atts) {
                     <?php if ($profile) : ?>
                         <img src="<?php echo esc_url($profile['url']); ?>" alt="Profile Picture" class="profile-pic profile-pic-mini">
                     <?php endif; ?>
-                    <h4><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h4>
+                    <h4><a class='text-purple' href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h4>
 
-                    <div class="directory-card-buttons">
+                    <div class="directory-card-buttons ">
                     
-                        <a href="<?php the_permalink(); ?>" class="btn btn-small ">View Listing</a>
+                        <a href="<?php the_permalink(); ?>" class="btn btn-small text-white">View Listing</a>
                         <?php if ($entry_id) : ?>
-                            <a href="/your-directory-listing/?frm_action=edit&entry=<?php echo esc_attr($entry_id); ?>" class="btn btn-small edit-btn">Edit Listing</a>
+                            <a href="/your-directory-listing/?frm_action=edit&entry=<?php echo esc_attr($entry_id); ?>" class="btn btn-small btn-secondary coral">Edit Listing</a>
                         <?php endif; ?>
                     </div>
                 </div>

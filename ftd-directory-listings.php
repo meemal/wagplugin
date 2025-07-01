@@ -147,4 +147,13 @@ function ftd_get_plugin_template( $template_name, $args = array() ) {
 
 
 
+add_action('wp_logout', 'ftd_redirect_after_logout');
+function ftd_redirect_after_logout() {
+    wp_redirect(home_url('/login/')); // Change '/login/' to your actual front-end login page slug
+    exit;
+}
 
+add_filter('frm_protected_file_readonly_permission', function($perm) {
+    return 0644; // Standard readable/writable for owner, readable for group & public
+});
+// This ensures uploaded files adopt 0644, making them accessible for copying and syncing while still respecting protection limits .
