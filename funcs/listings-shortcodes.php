@@ -65,9 +65,10 @@ function ftd_sb_user_directory_listings_shortcode($atts) {
                             <a href="/your-directory-listing/?frm_action=edit&entry=<?php echo esc_attr($entry_id); ?>" class="btn btn-small btn-secondary coral">Edit Listing</a>
                         <?php endif; ?>
                     </div>
+                  
                 </div>
             </div>
-            <?php
+        <?php
         }
 
         echo '</div>'; // .wp-block-group
@@ -146,6 +147,7 @@ function my_directory_listings_as_list_shortcode() {
                         <th>Status</th>
                         <th>Actions</th>
                         <th>Enabled</th>
+                        <th>Views</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -184,6 +186,16 @@ function my_directory_listings_as_list_shortcode() {
                                     <em>-</em>
                                 <?php endif; ?>
                             </td>
+                            <td>
+                                <?php
+                                $views = get_field('view_count', $post_id);
+                                if ($views === false) {
+                                    $views = 0; // Default to 0 if view count is not set
+                                }
+                                echo esc_html($views);
+                                ?>
+                            </td>   
+                            
                         </tr>
                     <?php endwhile; ?>
                 </tbody>

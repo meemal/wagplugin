@@ -153,9 +153,12 @@
   border-radius: 12px;
   /* background-color: rgba(255, 255, 255, 0.6); */
 }
-.pmpro_card_actions button#other_discount_code_toggle{
+/* .pmpro_card_actions button#other_discount_code_toggle{
   color:#F26849 !important;
-}
+} */
+
+
+
 .pmpro .pmpro_card.pmpro_logged_in_welcome_wrap .menu a {
 color: #673f69 !important;
 text-decoration:underline
