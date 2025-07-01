@@ -12,6 +12,7 @@ $events_attended = get_user_meta($user->ID, 'events_attended', true);
 $favourite_quote = get_user_meta($user->ID, 'favourite_dr_joe_quote', true);
 $favourite_meditation = get_user_meta($user->ID, 'favourite_meditation', true);
 $year_work_began = get_user_meta($user->ID, 'year_work_began', true);
+$user_email = $user->user_email;
 ?>
 
 <div class="directory-listing-card card">
@@ -39,11 +40,19 @@ $year_work_began = get_user_meta($user->ID, 'year_work_began', true);
        
     </div>
     <div class="wp-block-columns">
-    <div class="description">
-                <?php if ($favourite_quote): ?>
-                    <h3>Favourite Dr Joe Quote</h3>
-                    <blockquote class='user-card-quote'><?php echo esc_html($favourite_quote); ?></blockquote>
-                <?php endif; ?>
+        <div class="description">
+            <?php if ($favourite_quote): ?>
+                <h3>Favourite Dr Joe Quote</h3>
+                <blockquote class='user-card-quote'><?php echo esc_html($favourite_quote); ?></blockquote>
+            <?php endif; ?>
+        </div>
+    </div>
+        <div class="wp-block-columns">
+        <div class="description">
+            <h3>Email</h3>
+            <?php if ($user_email): ?>
+                <a href="mailto:<?php echo esc_html($user_email); ?>"><?php echo esc_html($user_email); ?></a>
+            <?php endif; ?>
         </div>
     </div>
     <div class="wp-block-columns">
