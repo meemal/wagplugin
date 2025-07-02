@@ -48,7 +48,6 @@ add_shortcode('custom_member_profile', function () {
       echo '<p>This member has not added any directory listings yet.</p>';
   }
 
- include plugin_dir_path(__FILE__) . '../template-parts/bottom_buttons.php';
   wp_reset_postdata();
 
   return ob_get_clean();

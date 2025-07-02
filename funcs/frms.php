@@ -89,9 +89,6 @@ add_action('frm_after_create_entry', 'add_tags_to_post_from', 10, 2);
 // add_action('frm_after_update_entry', 'add_tags_to_post_from', 10, 2);
 // add_action('save_post_directory_listing', 'ftd_force_assign_tax_terms', 20, 3);
 
-//This website is in perfect alignment with where I am - working with geniuses and being abundant! There is so much room for expansion and so many ways I can further offer benefits to the community - I just can't wait to do more!
-
-//If any genius wants to help I would love to have you on board! Im looking for funding in order to invest even more time making this better, user testers to help me as I make updates, customer support to help me with the moderation ensuring that the directory listings and users are all authentic! If anyone can see where they would like to add value I would love to hear from you!
 
 add_filter('frm_new_post', 'ftd_add_entry_id_to_new_post', 20, 2);
 function ftd_add_entry_id_to_new_post($post, $args) {

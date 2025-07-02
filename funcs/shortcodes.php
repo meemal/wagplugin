@@ -128,3 +128,17 @@ function geniuses_join_link_shortcode() {
     return '';
 }
 add_shortcode( 'geniuses_join_link', 'geniuses_join_link_shortcode' );
+
+function geniuses_bottom_buttons_shortcode() {
+    ob_start();
+    ?>
+    <div class='bottom-buttons text-center'>
+        <span class="divider"></span>
+        <a href="<?php echo esc_url( home_url( '/genius-directory/' ) ); ?>" class="btn btn-light">Genius Directory</a>
+        <a href="<?php echo esc_url( home_url( '/genius-map/' ) ); ?>" class="btn btn-light">Genius Map</a>
+    </div>
+    <?php
+    return ob_get_clean();
+}
+add_shortcode( 'directory_map_btns', 'geniuses_bottom_buttons_shortcode' );
+
