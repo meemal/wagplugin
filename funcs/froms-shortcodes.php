@@ -44,7 +44,7 @@ function user_directory_listings_shortcode( $atts ) {
 
       $edit_link = $entry_id ? do_shortcode( '[frm-entry-edit-link id=' . esc_attr( $form_id ) . ' entry=' . esc_attr( $entry_id ) . ' label="Edit Listing"]' ) : '';
 
-      echo '<div class="directory-card">';
+      echo '<div class="directory-card card">';
       echo '<div class="directory-card-inner">';
       
       // Column 1: Profile Pic

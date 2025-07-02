@@ -120,3 +120,11 @@ function ftd_pmpro_level_description_shortcode($atts) {
   return '';
 }
 add_shortcode('pmpro_level_description', 'ftd_pmpro_level_description_shortcode');
+
+function geniuses_join_link_shortcode() {
+    if ( ! is_user_logged_in() ) {
+        return '<span style="color: white; text-align:right;">Not a member yet? <a style="color: white;text-decoration:underline;" href="/join-we-are-geniuses/">Join Now</a></span>';
+    }
+    return '';
+}
+add_shortcode( 'geniuses_join_link', 'geniuses_join_link_shortcode' );
