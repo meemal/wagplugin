@@ -20,8 +20,10 @@
 }
 
 .cta-title {
-  font-size: 1.5rem;
+  font-size: 2rem;
   margin: 0.5rem 0;
+  font-weight:bold;
+  line-height:1.2;
 }
 
 .cta-subtitle {
@@ -31,14 +33,20 @@
 }
 
 .cta-body {
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .cta-price {
   font-weight: bold;
-  margin-bottom: 1rem;
+  margin-bottom: 2.5rem;
   color: var(--color-white);
   font-size: 2rem;
 }
-
+.genius-cta .btn {
+  margin-bottom:1rem;
+  width:80%;
+}
+.genius-cta .cta-compare {
+  color: var(--color-purple);
+}
 

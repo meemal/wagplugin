@@ -87,17 +87,18 @@ function ftd_genius_cta_shortcode($atts) {
     ?>
     <div class="genius-cta">
         <div class="cta-badge"><?php echo esc_html($level_id); ?></div>
-        <h2 class="cta-title"><?php echo esc_html($atts['title']); ?></h2>
+        <h2 class="cta-title text-pinkcoral"><?php echo esc_html($atts['title']); ?></h2>
         <strong class="cta-subtitle"><?php echo esc_html($atts['subtitle']); ?></strong>
         <p class="cta-body"><?php echo !empty($description) ? wp_kses_post($description) : esc_html($atts['body']); ?></p>
         <?php if (!empty($price)): ?>
             <p class="cta-price"><?php echo wp_kses_post($price); ?></p>
         <?php endif; ?>
         <?php if ($button_link): ?>
-            <a href="<?php echo $button_link; ?>" class="<?php echo esc_attr($button_class); ?>"><?php echo esc_html($button_text); ?></a>
+            <a href="<?php echo $button_link; ?>" class="<?php echo esc_attr($button_class); ?> btn-secondary"><?php echo esc_html($button_text); ?></a>
         <?php else: ?>
             <span class="btn disabled"><?php echo esc_html($button_text); ?></span>
         <?php endif; ?>
+        <p><a class="cta-compare" href='/join-we-are-geniuses/'><em>Compare features</em></a></p>
     </div>
     <?php
     return ob_get_clean();

@@ -1,28 +1,40 @@
 :root {
-  --color-coral: #F26849;
+  --color-orange: #e67e22;
   --color-golden: #F2A341;
+  --color-coral: #F26849;
+  --color-red: #f44336;
   --color-pinkcoral: #d13d60;
   --color-pinkdusk: #d94e81;
+  --color-softpink: #F8D9FF;
+  --color-softpink2: #efa9fe;
   --color-purple: #673f69;
   --color-green: #247556;
-  --color-orange: #e67e22;
-  --color-red: #f44336;
   --color-white: #fff;
   --color-midgrey: #4b4b4b;
+  --color-darkgrey: #111;
+  --color-cyan: #00E6E6;
+   --color-cyan2: #00cccc;
 }
 
-/* Example usage:
-   color: var(--color-coral);
-   background-color: var(--color-golden);
-*/
-
+/* Text color utility classes */
+.text-coral { color: var(--color-coral); }
+.text-golden { color: var(--color-golden); }
+.text-pinkcoral { color: var(--color-pinkcoral); }
+.text-pinkdusk { color: var(--color-pinkdusk); }
+.text-purple { color: var(--color-purple); }
+.text-green { color: var(--color-green); }
+.text-orange { color: var(--color-orange); }
+.text-red { color: var(--color-red); }
+.text-white { color: var(--color-white); }
+.text-midgrey { color: var(--color-midgrey); }
 
 .join-btn .menu-item-text {
-  background-color: var(--color-golden);
+  background-color: var(--color-coral);
   padding: 8px 12px;
+    color: var(--color-white) ;
 }
 .join-btn a:hover .menu-item-text {
-  background-color: var(--color-pinkdusk);
+  background-color: var(--color-pinkcoral);
 }
 .join-btn a:hover .menu-text {
   color: var(--color-white)  !important;
@@ -47,17 +59,7 @@
 .content-card a:hover{
   text-decoration:underline;
 }
-/* .directory-card, .card {
-  background: rgba(255,255,255);
-  padding: 1rem;
-  border-radius: 8px;
-  
-} */
 
-
-/* .card-white {
-  background: rgba(255,255,255) !important;
-} */
 .directory-card-inner {
   display: grid;
   grid-template-columns: 80px 1fr auto;
@@ -197,51 +199,56 @@
 /* Button styles */
 .btn,  
 .pmpro_btn, 
-button {
+button{
   display: inline-block;
   padding: 0.5rem 1rem;
   border-radius: 6px;
   text-decoration: none;
   font-weight: bold;
-  background-color: var(--color-coral);
-  color: var(--color-white);
-  border: 2px solid var(--color-coral);
+  background-color: var(--color-cyan);
+  color: var(--color-darkgrey);
+  border: 2px solid var(--color-cyan);
   font-size:1.2em;
   text-align: center;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   line-height:1.5;
+  transition: all 0.3s ease;
 }
 
 .btn:hover, 
 #pmpro_btn-submit:hover, 
 .pmpro_btn:hover, 
 button:hover{
-  background-color: var(--color-golden);
-  color: var(--color-white);
-  border-color: var(--color-golden);
+  background-color: var(--color-cyan2);
+  color: var(--color-darkgrey);
+  border-color: var(--color-cyan2);
   text-decoration:none;
 }
-.btn.btn-secondary {
-  background-color: var(--color-white);
-  border-color : var(--color-coral);
-  color: var(--color-coral);
-}
-.btn.btn-light, .pmpro_btn-submit-checkout{
-  background-color: var(--color-golden);
-  border-color : var(--color-golden);
-  color: var(--color-white);
-}
-.btn.btn-light:hover, .pmpro_btn-submit-checkout:hover {
-  background-color: var(--color-white);
-  border-color : var(--color-white);
-  color: var(--color-golden);
+.btn.btn-secondary, .pmpro_btn-submit-checkout {
+  background-color: rgba(0,0,0,0);
+  border-color : var(--color-cyan);
 }
 
-.btn.btn-secondary:hover {
+.btn.btn-secondary:hover, .pmpro_btn-submit-checkout:hover {
+  background-color:  var(--color-cyan2);
+  border-color : var(--color-cyan2);
+   color: var(--color-darkgrey);
+}
+.btn.btn-soft{
+  background-color: var(--color-softpink);
+  border-color : var(--color-softpink);
+  color: var(--color-darkgrey);
+}
 
-  background-color : var(--color-golden);
-  border-color: var(--color-golden);
-  color: var(--color-white);
+.btn.btn-soft:hover{
+  background-color: var(--color-softpink2);
+  border-color : var(--color-softpink2);
+ color: var(--color-darkgrey);
+}
+.btn.btn-outline {
+  background-color: var(--color-purple);
+  border-color : var(--color-cyan);
+  color: var(--color-cyan);
 }
 .btn.btn-disabled{
 
