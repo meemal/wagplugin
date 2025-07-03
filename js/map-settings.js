@@ -17,7 +17,7 @@ jQuery(document).ready(function($) {
         if (response.success) {
           const message = $('<div id="map-settings-message" class="pmpro_message" style="display:none;">' + response.data.message + '</div>');
           form.prepend(message);
-          message.fadeIn().delay(10000).fadeOut();
+          message.fadeIn();
         } else {
           alert('Error: ' + response.data.message);
         }

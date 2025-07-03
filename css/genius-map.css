@@ -1,8 +1,8 @@
 .pmpromm_infowindow h2 a{
-  color: #673f69;
+  color: var(--color-purple);
 }
 .pmpromm_infowindow h2 a:hover{
-  color: #F26849;
+  color: var(--color-coral);
 }
 .pmpromm_avatar img{
   border-radius:50%;
@@ -16,16 +16,16 @@
   border-radius: 6px;
   text-decoration: none;
   font-weight: bold;
-  background-color: #F26849;
-  color: #fff;
-  border: 2px solid #F26849;
+  background-color: var(--color-coral);
+  color: var(--color-white);
+  border: 2px solid var(--color-coral);
   font-size:1.2em;
   text-align: center;
 }
 .pmpromm_profile a:hover {
-  background-color: #F2A341;
-  color: #fff;
-  border-color: #F2A341;
+  background-color: var(--color-golden);
+  color: var(--color-white);
+  border-color: var(--color-golden);
   text-decoration:none;
 }
 

@@ -63,7 +63,7 @@ add_shortcode('member_map_settings_form', function () {
               </select>
             </div>
           </div>
-          <p><button type="submit" class="btn btn-small">Save Map Settings</button></p>
+          <p><button type="submit" class="btn btn-small">Save Map Settings</button> <a href="/genius-map/" class="btn-small btn btn-secondary">View Genius Map</a></p>
         </form>
         <div id="map-settings-response"></div>
       </div>

@@ -10,8 +10,8 @@
 .cta-badge {
   font-size: 1.75rem;
   font-weight: bold;
-  background: #ffffff;
-  color: #673f69;
+  background: var(--color-white);
+  color: var(--color-purple);
   width: 3rem;
   height: 3rem;
   line-height: 3rem;
@@ -37,7 +37,7 @@
 .cta-price {
   font-weight: bold;
   margin-bottom: 1rem;
-  color:white;
+  color: var(--color-white);
   font-size: 2rem;
 }
 
