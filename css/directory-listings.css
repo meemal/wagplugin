@@ -2,8 +2,11 @@
   --color-orange: #e67e22;
   --color-golden: #F2A341;
   --color-coral: #F26849;
+    --color-coral2: #ef4f2b;
   --color-red: #f44336;
   --color-pinkcoral: #d13d60;
+    --color-pinkcoral2: #dc254f;
+
   --color-pinkdusk: #d94e81;
   --color-softpink: #F8D9FF;
   --color-softpink2: #efa9fe;
@@ -104,39 +107,7 @@
 .directory-grid .directory-card-mini {
   margin-bottom:0;
 }
-.directory-card-mini .status-tag{
-  position: absolute;
-  top: 10px;
-  right: 10px;
-}
 
-
-.status-tag {
-
-  display: inline-block;
-  padding: 0.3rem 0.7rem;
-  font-size: 0.7rem;
-  font-weight: bold;
-  text-transform: uppercase;
-  border-radius: 999px;
-  color: var(--color-white);
-  letter-spacing: 0.5px;
-}
-.pmpro_account-section .status-tag{
-  position: relative;
-}
-
-.status-live {
-  background-color: var(--color-green); /* Green for live */
-}
-
-.status-pending {
-  background-color: var(--color-orange); /* Orange for pending */
-}
-.status-disabled {
-  background-color: var(--color-red); /* Red */
-  color: var(--color-white);
-}
 
 .pmpro_actions_nav a{
   color: var(--color-white);
@@ -147,8 +118,11 @@
 #sidebar a.btn{
   color: var(--color-white);
 }
-#sidebar a.btn-secondary{
+#sidebar a.btn.btn-coral-outline{
   color: var(--color-coral);
+}
+#sidebar a.btn.btn-coral-outline:hover{
+  color: white;
 }
 /* #sidebar */
 
@@ -234,6 +208,28 @@ button:hover{
   border-color : var(--color-cyan2);
    color: var(--color-darkgrey);
 }
+.btn.btn-coral{
+  background-color: var(--color-coral);
+  border-color : var(--color-coral);
+  color:white;
+}
+
+.btn.btn-coral:hover{
+  background-color: var(--color-coral2);
+  border-color : var(--color-coral2);
+  color:white;
+}
+.btn.btn-coral-outline{
+   background-color: rgba(0,0,0,0);
+  border-color : var(--color-coral);
+  color: var(--color-coral);
+}
+
+.btn.btn-coral-outline:hover{
+   background-color: var(--color-coral2);
+  border-color : var(--color-coral2);
+  color:white
+}
 .btn.btn-soft{
   background-color: var(--color-softpink);
   border-color : var(--color-softpink);
@@ -245,11 +241,7 @@ button:hover{
   border-color : var(--color-softpink2);
  color: var(--color-darkgrey);
 }
-.btn.btn-outline {
-  background-color: var(--color-purple);
-  border-color : var(--color-cyan);
-  color: var(--color-cyan);
-}
+
 .btn.btn-disabled{
 
   background-color : #F2A34130 !important; /* semi-transparent golden, not in map */
@@ -266,17 +258,7 @@ button:hover{
   text-shadow:none;
 }
 
-/* .btn-outline{
-  background-color: transparent;
-  color: #F26849;
-  border: 4px solid #F26849;
-  padding: 2rem 4rem;
-  font-size: 2em;
-  border-radius: 0;
-}
-.btn-outline a:hover{
-color:white;
-} */
+/* 
 
 .coral {
   color: var(--color-coral);
@@ -292,7 +274,7 @@ color:white;
 }
 .text-center {
   text-align: center;
-}
+} */
 
 /* #pmpromm_address_fields {
   display: flex !important
@@ -361,3 +343,36 @@ color:white;
   background-color: var(--color-pinkdusk);    
 }
 
+.directory-card-mini .status-tag{
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+
+.status-tag {
+
+  display: inline-block;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.7rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  border-radius: 999px;
+  color: var(--color-white);
+  letter-spacing: 0.5px;
+}
+.pmpro_account-section .status-tag{
+  position: relative;
+}
+
+.status-live {
+  background-color: var(--color-green); /* Green for live */
+}
+
+.status-pending {
+  background-color: var(--color-orange); /* Orange for pending */
+}
+.status-disabled {
+  background-color: var(--color-red); /* Red */
+  color: var(--color-white);
+}

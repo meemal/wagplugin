@@ -60,9 +60,9 @@ function ftd_sb_user_directory_listings_shortcode($atts) {
 
                     <div class="directory-card-buttons ">
                     
-                        <a href="<?php the_permalink(); ?>" class="btn btn-small text-white">View Listing</a>
+                        <a href="<?php the_permalink(); ?>" class="btn btn-small btn-coral">View Listing</a>
                         <?php if ($entry_id) : ?>
-                            <a href="/your-directory-listing/?frm_action=edit&entry=<?php echo esc_attr($entry_id); ?>" class="btn btn-small btn-secondary coral">Edit Listing</a>
+                            <a href="/your-directory-listing/?frm_action=edit&entry=<?php echo esc_attr($entry_id); ?>" class="btn btn-small btn-coral-outline">Edit Listing</a>
                         <?php endif; ?>
                     </div>
                   

@@ -33,9 +33,9 @@ $delete_url = add_query_arg([
         <h4><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h4>
 
         <div class="directory-card-buttons">
-            <a href="<?php the_permalink(); ?>" class="btn btn-small ftd-view-button" data-post-id="<?= $the_id ?>">View Listing</a>
+            <a href="<?php the_permalink(); ?>" class="btn btn-small btn-coral" data-post-id="<?= $the_id ?>">View Listing</a>
             <?php if ($entry_id) : ?>
-                <a href="/your-directory-listing/?frm_action=edit&entry=<?php echo esc_attr($entry_id); ?>" class="btn btn-small edit-btn">Edit Listing</a>
+                <a href="/your-directory-listing/?frm_action=edit&entry=<?php echo esc_attr($entry_id); ?>" class="btn btn-small edit-btn btn-coral-outline">Edit Listing</a>
             <?php endif; ?>
         </div>
     </div>

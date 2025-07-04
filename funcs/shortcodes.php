@@ -135,8 +135,8 @@ function geniuses_bottom_buttons_shortcode() {
     ?>
     <div class='bottom-buttons text-center'>
         <span class="divider"></span>
-        <a href="<?php echo esc_url( home_url( '/genius-directory/' ) ); ?>" class="btn btn-light">Genius Directory</a>
-        <a href="<?php echo esc_url( home_url( '/genius-map/' ) ); ?>" class="btn btn-light">Genius Map</a>
+        <a href="<?php echo esc_url( home_url( '/genius-directory/' ) ); ?>" class="btn " style="margin-right:1rem;">Genius Directory</a>
+        <a href="<?php echo esc_url( home_url( '/genius-map/' ) ); ?>" class="btn t">Genius Map</a>
     </div>
     <?php
     return ob_get_clean();
