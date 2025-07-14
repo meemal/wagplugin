@@ -30,6 +30,7 @@
 .text-red { color: var(--color-red); }
 .text-white { color: var(--color-white); }
 .text-midgrey { color: var(--color-midgrey); }
+.std-border-radius { border-radius:6px; }
 
 .join-btn .menu-item-text {
   background-color: var(--color-coral);

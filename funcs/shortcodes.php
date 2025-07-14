@@ -94,7 +94,7 @@ function ftd_genius_cta_shortcode($atts) {
             <p class="cta-price"><?php echo wp_kses_post($price); ?></p>
         <?php endif; ?>
         <?php if ($button_link): ?>
-            <a href="<?php echo $button_link; ?>" class="<?php echo esc_attr($button_class); ?> btn-secondary"><?php echo esc_html($button_text); ?></a>
+            <a href="<?php echo $button_link; ?>" class="<?php echo esc_attr($button_class); ?>"><?php echo esc_html($button_text); ?></a>
         <?php else: ?>
             <span class="btn disabled"><?php echo esc_html($button_text); ?></span>
         <?php endif; ?>
@@ -142,4 +142,50 @@ function geniuses_bottom_buttons_shortcode() {
     return ob_get_clean();
 }
 add_shortcode( 'directory_map_btns', 'geniuses_bottom_buttons_shortcode' );
+
+function ftd_map_signup_cta_shortcode($atts) {
+    $heading       = get_field('map_cta_heading', 'option') ?: 'Ready to Be Seen?';
+    $body          = get_field('map_cta_body', 'option') ?: 'Claim your profile in just 2 minutes and start sharing your genius with the world.';
+    $button_label  = get_field('map_cta_button_label', 'option') ?: 'Claim Your Profile';
+    $link = get_field('map_cta_button_url', 'option');
+    $button_url = is_array($link) && isset($link['url']) ? $link['url'] : '/join-we-are-geniuses/';
+
+    $login_url     = wp_login_url();
+
+    // Show only if not logged in or logged in and at Level 1
+    $show_cta = false;
+
+    if (!is_user_logged_in()) {
+        $show_cta = true;
+    } else {
+        $level = pmpro_getMembershipLevelForUser(get_current_user_id());
+        if ($level && (int)$level->id === 1) {
+            $show_cta = true;
+        }
+    }
+
+    if (!$show_cta) {
+        return ''; // Don't show for Level 2+ or others
+    }
+
+    $subtext = !is_user_logged_in()
+        ? sprintf('<p style="margin-top:1rem; color:#555;">Already a member? <a href="%s">Sign in</a></p>', esc_url($login_url))
+        : '';
+
+    return sprintf(
+        '<div class="card" style="max-width:600px;text-align:center;margin-left:auto;margin-right:auto;">
+            <h2 style="margin-bottom:1rem;">%s</h2>
+            <div style="margin-bottom:1.5rem;">%s</div>
+            <a href="%s" class="btn" text-decoration:none;">%s</a>
+            %s
+        </div>',
+        esc_html($heading),
+        wp_kses_post($body),
+        esc_url($button_url),
+        esc_html($button_label),
+        $subtext
+    );
+}
+add_shortcode('map_signup_cta_box', 'ftd_map_signup_cta_shortcode');
+
 
