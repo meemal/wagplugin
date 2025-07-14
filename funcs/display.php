@@ -4,66 +4,73 @@ add_filter('pmpro_no_access_message_html', function($html, $level_ids) {
     $bg = get_field('no_access_background_image', 'option');
     $bg_url = $bg ? esc_url($bg['url']) : '';
 
+    // Not logged in
     if (!is_user_logged_in()) {
-        $html_out = render_cta_block($bg_url, 'encourage_sign_up_heading_map', 'encourage_sign_up_body');
+        $html_out = render_map_cta_block($bg_url, 'encourage_sign_up_heading_map', 'encourage_signup_body_map_');
         $html_out .= render_example_profile();
         $html_out .= do_shortcode('[map_signup_cta_box]');
         return $html_out;
     }
 
-    $user_id    = get_current_user_id();
-    $user_level = pmpro_getMembershipLevelForUser($user_id);
-    $order      = (function() use ($user_id) {
-        $o = new MemberOrder();
-        $o->getLastMemberOrder($user_id);
-        return $o;
-    })();
+    // Logged in user
+    $user_id = get_current_user_id();
+    $membership = pmpro_getMembershipLevelForUser($user_id);
 
-    if ($user_level && (int)$user_level->id >= 2) {
-        return $html;
-    }
-
- echo $order->status. " = order status";
-
-if ($order && $order->status === 'pending' && (int)$order->membership_id >= 2) {
-
-        $html_out  = render_notice_block(
-            get_field('waiting_for_verification_heading', 'option'),
-            get_field('waiting_for_verification_body', 'option')
-        );
+    // Check for pending approval using PMPro Approvals Add-On method
+    
+    if (!is_user_logged_in()) {
+        $html_out = render_map_cta_block($bg_url, 'encourage_sign_up_heading_map', 'encourage_sign_up_body_', true);
         $html_out .= render_example_profile();
         $html_out .= do_shortcode('[map_signup_cta_box]');
         return $html_out;
     }
 
-    $html_out = render_cta_block($bg_url, 'encourage_sign_up_heading_map', 'encourage_signup_body_map_');
+    if (ftd_user_is_pending_approval($user_id)) {
+        $html_out = render_map_cta_block($bg_url, 'wait_for_approval_map_heading', 'wait_for_approval_map_body', false);
+        $html_out .= render_example_profile();
+        $html_out .= do_shortcode('[map_signup_cta_box]');
+        return $html_out;
+    }
+
+
+    // Active membership but not eligible (e.g., level < 2)
+    if ($membership && (int) $membership->id >= 2) {
+        return $html; // show default content
+    }
+
+    // Logged in but not high enough level
+    $html_out = render_map_cta_block($bg_url, 'encourage_sign_up_heading_map', 'encourage_signup_body_map_');
     $html_out .= render_example_profile();
     $html_out .= do_shortcode('[map_signup_cta_box]');
-     $html_out .= "sdfdsfsd";
     return $html_out;
-
 }, 10, 2);
 
 
 // 👉 Helpers
 
-function render_cta_block($bg_url, $heading_field, $body_field) {
+function render_map_cta_block($bg_url, $heading_field, $body_field, $show_button = true) {
     $h = get_field($heading_field, 'option') ?: '';
-    $b = get_field("encourage_signup_body_map_", 'option');
+    $b = get_field($body_field, 'option') ?: '';
+
+    $button_html = $show_button
+        ? '<a href="/join-we-are-geniuses/" class="btn">Unlock The Map</a>
+           <p class="text-midgrey" style="margin-top:16px;">Already level 2+? <a href="/login/">Login</a></p>'
+        : '';
 
     return sprintf(
         '<div class="card" style="position:relative; background-image:url(%1$s); background-size:cover; background-position:center; padding:64px; margin:2rem auto; text-align:center;">
-            <div style="background:rgba(255,255,255,0.95); padding:32px; max-width:600px; margin:auto;">
-                <h2 style="color:#673f69;">'.$h.'</h2>
-                <p style="color:#333;">'.$b.'</p>
-                <a href="/join-we-are-geniuses/" class="btn">Unlock The Map</a>
-                <p style="color:#666; margin-top:16px;">Already level 2+? <a href="/login/">Login</a></p>
+            <div class="card" style="max-width:600px; margin:auto;">
+                <h2 class="text-purple">%2$s</h2>
+                <p class="text-midgrey">%3$s</p>
+                %4$s
             </div>
         </div>',
-        esc_url($bg_url), esc_html($h), esc_html($b)
+        esc_url($bg_url),
+        esc_html($h),
+        wp_kses_post($b),
+        $button_html
     );
 }
-
 
 function render_notice_block($heading, $body) {
     return sprintf(
@@ -72,7 +79,7 @@ function render_notice_block($heading, $body) {
             <p>%2$s</p>
         </div>',
         esc_html($heading ?: 'Your membership is pending approval'),
-        esc_html($body ?: 'Please allow time for manual verification. You’ll gain access once approved.')
+        wp_kses_post($body ?: 'Please allow time for manual verification. You’ll gain access once approved.')
     );
 }
 
@@ -97,5 +104,3 @@ function render_example_profile() {
         esc_attr($img['alt'] ?? 'Example Profile')
     );
 }
-
-

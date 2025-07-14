@@ -41,3 +41,25 @@ function ftd_get_directory_usage_message( $used, $allowed ) {
         $allowed
     );
 }
+
+function ftd_user_is_pending_approval( $user_id = null ) {
+    if ( empty( $user_id ) ) {
+        if ( ! is_user_logged_in() ) {
+            return false;
+        }
+        $user_id = get_current_user_id();
+    }
+
+    $levels = pmpro_getMembershipLevelsForUser( $user_id );
+    if ( empty( $levels ) ) {
+        return false;
+    }
+
+    foreach ( $levels as $level ) {
+        $status = PMPro_Approvals::getUserApprovalStatus( $user_id, $level->id );
+        if ( strtolower( $status ) === 'pending' ) {
+            return true;
+        }
+    }
+    return false;
+}
