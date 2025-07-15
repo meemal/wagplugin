@@ -84,7 +84,13 @@ add_shortcode('user_directory_listings', 'ftd_sb_user_directory_listings_shortco
 
 // 2. Display user's own directory listings as list with editing quick links
 function my_directory_listings_account_page_shortcode() {
+    $user_id = get_current_user_id();
+
+    if ( function_exists('ftd_user_is_pending_approval') && ftd_user_is_pending_approval($user_id) ) {
+        return;
+    }
     ob_start();
+
 
     ?>
     <div class="pmpro">

@@ -14,6 +14,11 @@ add_filter('pmpro_no_access_message_html', function($html, $level_ids) {
         default:
             // Not logged in
             if (!is_user_logged_in()) {
+                  echo ftd_alert_box([
+    'heading' => 'Access Restricted',
+    'body' => 'You must be a member to view this page. Already a member? <a href="/login/">Login</a>.',
+    'type' => 'danger'
+    ]);
                 $html_out = render_map_cta_block($bg_url, 'encourage_sign_up_heading_map', 'encourage_signup_body_map_');
                 $html_out .= render_example_profile();
                 $html_out .= do_shortcode('[map_signup_cta_box]');
@@ -21,6 +26,11 @@ add_filter('pmpro_no_access_message_html', function($html, $level_ids) {
             }
 
             if (ftd_user_is_pending_approval($user_id)) {
+                   echo ftd_alert_box([
+      'heading' => 'Access Pending Approval',
+      'body' => 'We’re reviewing your membership application. You’ll receive an email as soon as you’re approved.',
+      'type' => 'info'
+      ]);
                 $html_out = render_map_cta_block($bg_url, 'wait_for_approval_map_heading', 'wait_for_approval_map_body', false);
                 $html_out .= render_example_profile();
                 $html_out .= do_shortcode('[map_signup_cta_box]');

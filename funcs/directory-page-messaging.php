@@ -28,7 +28,7 @@ function directory_page_top_messaging(){
           echo ftd_alert_box([
       'heading' => 'Access Pending Approval',
       'body' => 'We’re reviewing your membership application. You’ll receive an email as soon as you’re approved.',
-      'type' => 'danger'
+      'type' => 'info'
       ]);
 
       echo '<div class="wp-block-column">';

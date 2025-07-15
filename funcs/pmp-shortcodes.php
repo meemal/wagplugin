@@ -1,11 +1,14 @@
 <?php
 // Shortcode: [member_map_settings_form]
 add_shortcode('member_map_settings_form', function () {
-  if (!is_user_logged_in()) {
-      return '<p>Please <a href="' . wp_login_url() . '">log in</a> to manage your map settings.</p>';
-  }
 
   $user_id = get_current_user_id();
+
+    if ( function_exists('ftd_user_is_pending_approval') && ftd_user_is_pending_approval($user_id) ) {
+        return;
+    }
+
+
   $pin = get_user_meta($user_id, 'pmpromm_pin_location', true) ?: [];
 
   $map_enabled = !empty($pin['optin']);
