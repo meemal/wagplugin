@@ -238,18 +238,7 @@ function display_directory_listing_usage($atts) {
 
     $membership_id = $membership_level->id;
 
-    // Get the membership level allowances from ACF options
-    $allowances = get_field( 'membership_level_allowance', 'option' );
-    $allowed_listings = 0;
-
-    if ( $allowances ) {
-        foreach ( $allowances as $allowance ) {
-            if ( isset( $allowance['membership_id'] ) && $allowance['membership_id'] == $membership_id ) {
-                $allowed_listings = isset( $allowance['number_of_allowed_directory_listings'] ) ? intval( $allowance['number_of_allowed_directory_listings'] ) : 0;
-                break;
-            }
-        }
-    }
+    $allowed_listings = get_allowed_listings($membership_id);
     if ($atts['title'] != '') {
         echo '<h3 class="pmpro_card_title text-center">' . esc_html( $atts['title'] ) . '</h3>';
     }
@@ -295,7 +284,38 @@ function display_directory_listing_usage($atts) {
 }
 add_shortcode( 'directory_listing_usage', 'display_directory_listing_usage' );
 
+    function get_allowed_listings($membership_id) {
+        // Get the membership level allowances from ACF options
+        $allowances = get_field('membership_level_allowance', 'option');
+        $allowed_listings = 0;
 
+        if ($allowances) {
+            foreach ($allowances as $allowance) {
+                if (isset($allowance['membership_id']) && $allowance['membership_id'] == $membership_id) {
+                    $allowed_listings = isset($allowance['number_of_allowed_directory_listings']) ? intval($allowance['number_of_allowed_directory_listings']) : 0;
+                    break;
+                }
+            }
+        }
+        return $allowed_listings;
+    }
+
+    function get_first_allowed_membership_level() {
+        // Get the membership level allowances from ACF options
+        $allowances = get_field('membership_level_allowance', 'option');
+
+        if ($allowances) {
+            foreach ($allowances as $allowance) {
+                if (
+                    isset($allowance['number_of_allowed_directory_listings']) &&
+                    intval($allowance['number_of_allowed_directory_listings']) > 0
+                ) {
+                    return isset($allowance['membership_id']) ? intval($allowance['membership_id']) : null;
+                }
+            }
+        }
+        return null; // No allowed level found
+    }
 
 
 add_action('template_redirect', function() {

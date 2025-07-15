@@ -63,3 +63,45 @@ function ftd_user_is_pending_approval( $user_id = null ) {
     }
     return false;
 }
+
+function ftd_alert_box($args = []) {
+    $defaults = [
+        'heading' => '',
+        'body'    => '',
+        'type'    => 'info', // info, success, warning, danger
+        'icon'    => '',      // optional SVG or emoji/icon class
+        'dismissible' => true
+    ];
+    $args = wp_parse_args($args, $defaults);
+
+    if (empty($args['body']) && empty($args['heading'])) return;
+
+    $types = [
+        'info'    => ['#e7f3fe', '#31708f', 'ℹ️'],
+        'success' => ['#dff0d8', '#3c763d', '✅'],
+        'warning' => ['#fcf8e3', '#8a6d3b', '⚠️'],
+        'danger'  => ['#f2dede', '#a94442', '⛔'],
+    ];
+
+    [$bg, $color, $default_icon] = $types[$args['type']] ?? $types['info'];
+    $icon = $args['icon'] ?: $default_icon;
+
+    ob_start(); ?>
+    <div class="ftd-alert-box" style="background:<?= esc_attr($bg); ?>; color:<?= esc_attr($color); ?>; border-left: 5px solid <?= esc_attr($color); ?>; padding:1rem 1.5rem; margin:1rem 0; border-radius:4px; position:relative; max-width:600px; margin-left:auto; margin-right:auto; margin-bottom:64px;">
+        <?php if ($args['dismissible']) : ?>
+            <button onclick="this.parentElement.style.display='none';" style="position:absolute; top:8px; right:12px; background:none; border:none; font-size:18px; color:<?= esc_attr($color); ?>;">×</button>
+        <?php endif; ?>
+        <div style="display:flex; align-items:flex-start; gap:1rem;">
+            <div style="font-size:24px; line-height:1;"><?= esc_html($icon); ?></div>
+            <div>
+                <?php if ($args['heading']) : ?>
+                    <strong style="display:block; margin-bottom:0.25rem;"><?= esc_html($args['heading']); ?></strong>
+                <?php endif; ?>
+                <div><?= wp_kses_post($args['body']); ?></div>
+            </div>
+        </div>
+    </div>
+    <?php
+    return ob_get_clean();
+}
+
