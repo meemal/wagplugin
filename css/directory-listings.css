@@ -377,3 +377,20 @@ button:hover{
   background-color: var(--color-red); /* Red */
   color: var(--color-white);
 }
+#directory-filter-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  width: 100%;
+}
+#directory-filter-form input[type="text"],
+#directory-filter-form select{
+      border: 3px solid purple;
+    border-radius: 8px;
+    padding: 1.2em;
+}
+
+#directory-filter-form input[type="text"]{
+  flex: 1 1 auto;
+  min-width: 200px;
+}

@@ -1,49 +1,44 @@
 <?php 
 
 add_filter('pmpro_no_access_message_html', function($html, $level_ids) {
+   
     $bg = get_field('no_access_background_image', 'option');
     $bg_url = $bg ? esc_url($bg['url']) : '';
-
-    // Not logged in
-    if (!is_user_logged_in()) {
-        $html_out = render_map_cta_block($bg_url, 'encourage_sign_up_heading_map', 'encourage_signup_body_map_');
-        $html_out .= render_example_profile();
-        $html_out .= do_shortcode('[map_signup_cta_box]');
-        return $html_out;
-    }
-
-    // Logged in user
     $user_id = get_current_user_id();
-    $membership = pmpro_getMembershipLevelForUser($user_id);
+    // Handle based on context
+    switch (true) {
+        case is_post_type_archive('directory_listing'):
+            return  "IS DIRECTORY PAGE";
 
-    // Check for pending approval using PMPro Approvals Add-On method
-    
-    if (!is_user_logged_in()) {
-        $html_out = render_map_cta_block($bg_url, 'encourage_sign_up_heading_map', 'encourage_sign_up_body_', true);
-        $html_out .= render_example_profile();
-        $html_out .= do_shortcode('[map_signup_cta_box]');
-        return $html_out;
+        case is_page('genius-map'):
+        default:
+            // Not logged in
+            if (!is_user_logged_in()) {
+                $html_out = render_map_cta_block($bg_url, 'encourage_sign_up_heading_map', 'encourage_signup_body_map_');
+                $html_out .= render_example_profile();
+                $html_out .= do_shortcode('[map_signup_cta_box]');
+                return $html_out;
+            }
+
+            if (ftd_user_is_pending_approval($user_id)) {
+                $html_out = render_map_cta_block($bg_url, 'wait_for_approval_map_heading', 'wait_for_approval_map_body', false);
+                $html_out .= render_example_profile();
+                $html_out .= do_shortcode('[map_signup_cta_box]');
+                return $html_out;
+            }
+
+            $membership = pmpro_getMembershipLevelForUser($user_id);
+            if ($membership && (int) $membership->id >= 2) {
+                return $html;
+            }
+
+            $html_out = render_map_cta_block($bg_url, 'encourage_sign_up_heading_map', 'encourage_signup_body_map_');
+            $html_out .= render_example_profile();
+            $html_out .= do_shortcode('[map_signup_cta_box]');
+            return $html_out;
     }
-
-    if (ftd_user_is_pending_approval($user_id)) {
-        $html_out = render_map_cta_block($bg_url, 'wait_for_approval_map_heading', 'wait_for_approval_map_body', false);
-        $html_out .= render_example_profile();
-        $html_out .= do_shortcode('[map_signup_cta_box]');
-        return $html_out;
-    }
-
-
-    // Active membership but not eligible (e.g., level < 2)
-    if ($membership && (int) $membership->id >= 2) {
-        return $html; // show default content
-    }
-
-    // Logged in but not high enough level
-    $html_out = render_map_cta_block($bg_url, 'encourage_sign_up_heading_map', 'encourage_signup_body_map_');
-    $html_out .= render_example_profile();
-    $html_out .= do_shortcode('[map_signup_cta_box]');
-    return $html_out;
 }, 10, 2);
+
 
 
 // 👉 Helpers
