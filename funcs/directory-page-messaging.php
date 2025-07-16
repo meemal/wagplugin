@@ -6,11 +6,7 @@ function directory_page_top_messaging(){
 
   if ( ! is_user_logged_in() ) {
   
-    echo ftd_alert_box([
-    'heading' => 'Access Restricted',
-    'body' => 'You must be a member to view this page. Already a member? <a href="/login/">Login</a>.',
-    'type' => 'danger'
-    ]);
+    echo  ftd_alert_box([], 'logged_out');
     echo '<div class="wp-block-columns alignwide is-layout-flex wp-block-columns has-global-padding">';
     echo '<div class="wp-block-column">';
     ftd_render_directory_cta_by_context('view directory');
@@ -21,21 +17,15 @@ function directory_page_top_messaging(){
     echo '</div>';
 
     return false;
-    exit;
 }
 
   if ( function_exists('ftd_user_is_pending_approval') && ftd_user_is_pending_approval($user_id) ) {
-          echo ftd_alert_box([
-      'heading' => 'Access Pending Approval',
-      'body' => 'We’re reviewing your membership application. You’ll receive an email as soon as you’re approved.',
-      'type' => 'info'
-      ]);
+      echo  ftd_alert_box([], 'pending');
 
       echo '<div class="wp-block-column">';
       ftd_render_directory_cta_by_context('awaiting approval');
       echo '</div>';
       return false;
-      exit;
   }
   return true;
 }

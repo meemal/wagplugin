@@ -1,7 +1,13 @@
 <?php 
 
 add_filter('pmpro_no_access_message_html', function($html, $level_ids) {
-   
+ 
+    // No access message for map or directory pages
+    $html = '<div class="card" style="max-width:600px; margin:2rem auto; padding:2rem; background:#fffbe6; border:1px solid #ffd700; border-radius:8px; text-align:center;">
+                <h2 style="color:#b48b00;">Access Restricted</h2>
+                <p>You must be a member to view this page. Already a member? <a href="/login/">Login</a>.</p>
+            </div>';
+    
     $bg = get_field('no_access_background_image', 'option');
     $bg_url = $bg ? esc_url($bg['url']) : '';
     $user_id = get_current_user_id();
@@ -9,29 +15,21 @@ add_filter('pmpro_no_access_message_html', function($html, $level_ids) {
     switch (true) {
         case is_post_type_archive('directory_listing'):
             return  "IS DIRECTORY PAGE";
-
+        
         case is_page('genius-map'):
-        default:
+       
             // Not logged in
             if (!is_user_logged_in()) {
-                  echo ftd_alert_box([
-    'heading' => 'Access Restricted',
-    'body' => 'You must be a member to view this page. Already a member? <a href="/login/">Login</a>.',
-    'type' => 'danger'
-    ]);
-                $html_out = render_map_cta_block($bg_url, 'encourage_sign_up_heading_map', 'encourage_signup_body_map_');
+                $html_out =  ftd_alert_box([], 'logged_out');
+                $html_out .= render_map_cta_block($bg_url, 'encourage_sign_up_heading_map', 'encourage_signup_body_map_');
                 $html_out .= render_example_profile();
                 $html_out .= do_shortcode('[map_signup_cta_box]');
                 return $html_out;
             }
 
             if (ftd_user_is_pending_approval($user_id)) {
-                   echo ftd_alert_box([
-      'heading' => 'Access Pending Approval',
-      'body' => 'We’re reviewing your membership application. You’ll receive an email as soon as you’re approved.',
-      'type' => 'info'
-      ]);
-                $html_out = render_map_cta_block($bg_url, 'wait_for_approval_map_heading', 'wait_for_approval_map_body', false);
+                $html_out =  ftd_alert_box([], 'pending');
+                $html_out .= render_map_cta_block($bg_url, 'wait_for_approval_map_heading', 'wait_for_approval_map_body', false);
                 $html_out .= render_example_profile();
                 $html_out .= do_shortcode('[map_signup_cta_box]');
                 return $html_out;
@@ -46,7 +44,20 @@ add_filter('pmpro_no_access_message_html', function($html, $level_ids) {
             $html_out .= render_example_profile();
             $html_out .= do_shortcode('[map_signup_cta_box]');
             return $html_out;
-    }
+            
+        default:
+         if (!is_user_logged_in()) {
+            return ftd_alert_box([], 'logged_out');
+         };
+        if (ftd_user_is_pending_approval($user_id)) {
+            return ftd_alert_box([], 'pending');
+        };
+        
+        }
+    
+    
+
+
 }, 10, 2);
 
 

@@ -1,8 +1,10 @@
 <?php 
 function user_directory_listings_shortcode( $atts ) {
-  if ( ! is_user_logged_in() ) {
-      return '<p>Please log in to view your directory listings.</p>';
-  }
+ $user_id = get_current_user_id();
+
+    if ( function_exists('ftd_user_is_pending_approval') && ftd_user_is_pending_approval($user_id) ) {
+        return;
+    }
 
   $atts = shortcode_atts( array(
       'form_id' => '', // Formidable Form ID

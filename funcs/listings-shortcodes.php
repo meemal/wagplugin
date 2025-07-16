@@ -16,6 +16,12 @@
 //
 // 1. Display user's own directory listings as small cards on sidebar - [user_directory_listings]
 function ftd_sb_user_directory_listings_shortcode($atts) {
+      $user_id = get_current_user_id();
+
+    if ( function_exists('ftd_user_is_pending_approval') && ftd_user_is_pending_approval($user_id) ) {
+        return;
+    }
+
     ob_start();
 
     $current_user_id = get_current_user_id();

@@ -63,18 +63,34 @@ function ftd_user_is_pending_approval( $user_id = null ) {
     }
     return false;
 }
-
-function ftd_alert_box($args = []) {
+function ftd_alert_box($args = [], $context = '') {
     $defaults = [
-        'heading' => '',
-        'body'    => '',
-        'type'    => 'info', // info, success, warning, danger
-        'icon'    => '',      // optional SVG or emoji/icon class
+        'heading'     => '',
+        'body'        => '',
+        'type'        => '', // Will be filled from ACF if context provided
+        'icon'        => '',
         'dismissible' => true
     ];
+
+    // Load ACF values if context is set
+    if (!empty($context)) {
+        $acf_heading = get_field("alert_heading_{$context}", 'option') ?? '';
+        $acf_body    = get_field("alert_body_{$context}", 'option') ?? '';
+        $acf_type    = get_field("alert_type_{$context}", 'option') ?? '';
+
+        if (empty($args['heading'])) $args['heading'] = $acf_heading;
+        if (empty($args['body']))    $args['body']    = $acf_body;
+        if (empty($args['type']))    $args['type']    = $acf_type;
+    }
+
     $args = wp_parse_args($args, $defaults);
 
-    if (empty($args['body']) && empty($args['heading'])) return;
+    // Ensure string values to avoid null deprecation errors
+    $heading = (string) ($args['heading'] ?? '');
+    $body    = (string) ($args['body'] ?? '');
+    $type    = (string) ($args['type'] ?? '');
+
+    if ($heading === '' && $body === '') return;
 
     $types = [
         'info'    => ['#e7f3fe', '#31708f', 'ℹ️'],
@@ -83,25 +99,24 @@ function ftd_alert_box($args = []) {
         'danger'  => ['#f2dede', '#a94442', '⛔'],
     ];
 
-    [$bg, $color, $default_icon] = $types[$args['type']] ?? $types['info'];
+    [$bg, $color, $default_icon] = $types[$type] ?? $types['info'];
     $icon = $args['icon'] ?: $default_icon;
 
     ob_start(); ?>
     <div class="ftd-alert-box" style="background:<?= esc_attr($bg); ?>; color:<?= esc_attr($color); ?>; border-left: 5px solid <?= esc_attr($color); ?>; padding:1rem 1.5rem; margin:1rem 0; border-radius:4px; position:relative; max-width:600px; margin-left:auto; margin-right:auto; margin-bottom:64px;">
-        <?php if ($args['dismissible']) : ?>
+        <?php if (!empty($args['dismissible'])) : ?>
             <button onclick="this.parentElement.style.display='none';" style="position:absolute; top:8px; right:12px; background:none; border:none; font-size:18px; color:<?= esc_attr($color); ?>;">×</button>
         <?php endif; ?>
         <div style="display:flex; align-items:flex-start; gap:1rem;">
             <div style="font-size:24px; line-height:1;"><?= esc_html($icon); ?></div>
             <div>
-                <?php if ($args['heading']) : ?>
-                    <strong style="display:block; margin-bottom:0.25rem;"><?= esc_html($args['heading']); ?></strong>
+                <?php if (!empty($heading)) : ?>
+                    <strong style="display:block; margin-bottom:0.25rem;"><?= esc_html($heading); ?></strong>
                 <?php endif; ?>
-                <div><?= wp_kses_post($args['body']); ?></div>
+                <div><?= wp_kses_post($body); ?></div>
             </div>
         </div>
     </div>
     <?php
     return ob_get_clean();
 }
-
