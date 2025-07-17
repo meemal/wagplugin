@@ -19,7 +19,7 @@ function ftd_sb_user_directory_listings_shortcode($atts) {
       $user_id = get_current_user_id();
 
     if ( function_exists('ftd_user_is_pending_approval') && ftd_user_is_pending_approval($user_id) ) {
-        return;
+        return '';
     }
 
     ob_start();
@@ -79,8 +79,7 @@ function ftd_sb_user_directory_listings_shortcode($atts) {
 
         echo '</div>'; // .wp-block-group
         wp_reset_postdata();
-    } else {
-        echo '<p class="has-text-align-center">You have no directory listings yet. <a href="/add-directory-listing/" class="btn btn-small">Add Your First Listing</a></p>';
+
     }
 
     return ob_get_clean();
@@ -238,22 +237,20 @@ function display_directory_listing_usage($atts) {
     );
     // Get current user ID
     $user_id = get_current_user_id();
-    if ( ! $user_id ) {
-        return '<p>Please log in to view your directory listing usage.</p>';
+    if ( ! $user_id || ( function_exists('ftd_user_is_pending_approval') && ftd_user_is_pending_approval($user_id) ))  {
+        return '';
     }
 
     // Get user's membership level
     $membership_level = pmpro_getMembershipLevelForUser( $user_id );
     if ( ! $membership_level ) {
-        return '<p>No membership level found for your account.</p>';
+        return;
     }
 
-    $membership_id = $membership_level->id;
+
+    $membership_id = $membership_level->id; //level person is on
 
     $allowed_listings = get_allowed_listings($membership_id);
-    if ($atts['title'] != '') {
-        echo '<h3 class="pmpro_card_title text-center">' . esc_html( $atts['title'] ) . '</h3>';
-    }
     // Count the number of directory listings created by the user
     $args = array(
         'post_type'      => 'directory_listing',
@@ -264,36 +261,47 @@ function display_directory_listing_usage($atts) {
     );
     $user_listings = get_posts( $args );
     $used_listings = count( $user_listings );
+    $upgradebtn = '<a href="join-we-are-geniuses/" class="btn btn-small">Upgrade Your Membership</a>';
+    $addlistingbtn = '<a class="btn" href="/add-directory-listing/" class="btn btn-small">Add New Listing</a>';
+    $contactbtn = '<a class="btn" href="/contact" class="btn btn-small">Contact</a>';
 
 
-  // Conditional messages
-  if ( $allowed_listings === 0 ) {
-    echo '<div class="directory-listing-usage card text-center"><h3 class="pmpro_card_title pmpro_font-large">Upgrade your plan to create an offer,
-    <strong> the community is here for you!</strong></p>
-    <p><a href="/membership-levels/" class="btn btn-small">Upgrade Your Membership</a></p></div>';
-    return;
-    }
-    // Display the usage information
-    $output  = '<div class="directory-listing-usage card text-center">';
-  
-    $output  .= '<p>' . ftd_get_directory_usage_message( $used_listings, $allowed_listings ) . '</p>';
+    switch (true){
+        case ($allowed_listings === 0):
+            //On lowest level, no listings allowed
+            echo ftd_render_directory_cta_by_context('upgrade required');
+            
+            break;
+        case ( $used_listings < $allowed_listings ):
+            //echo "ADD LISTING MESSAGE";
+            $heading = get_field('add_listing_header', 'option') ?: 'Directory Listings Limit Reached';
+            $body = 'You have used ' . $used_listings . ' of your ' . $allowed_listings . ' allowed listings.';
+            $btn = $addlistingbtn;
+            ftd_render_simple_card($heading, $body, $btn);
+            break;
+        case ( $used_listings >= $allowed_listings ):
+            if ($membership_id == get_top_level_membership_id()) { 
+                //user exceeded top
+                $heading = get_field('directory_amount_exceeded_header', 'option') ?: 'Directory Listings Limit Reached';
+                $body = get_field('directory_amount_exceeded', 'option') ?: 'You have reached your limit of directory listings. Please remove a listing to add a new one.';
+                $btn = $contactbtn;
+               ftd_render_simple_card($heading, $body, $btn);
+            }else{
+                //user exceeded level
+                 $heading = get_field('directory_level_topped_header', 'option') ?: 'Ready to share more genius?';
+                $body = get_field('directory_level_topped_body', 'option') ?: 'To add multidimensional offerings to the genius, upgrade your membership!';
+                $btn = $upgradebtn ;
+               ftd_render_simple_card($heading, $body, $btn);
+            }
+            break;
+        }
+
+    // if ($atts['title'] != '') {
+    //     echo '<h3 class="pmpro_card_title text-center">' . esc_html( $atts['title'] ) . '</h3>';
+    // }
     
-  if ( $used_listings >= $allowed_listings ) {
-        $output .= "<p><strong>You have reached your directory listing limit.</strong> </p>
-        <p>You really are multidimentional! Let us know if you require more directory listings.</p>
-        <p><a href='/contact/' class='btn btn-small'>Contact</a></p>";
-    } else {
-        $remaining = $allowed_listings - $used_listings;
-        $output .= '<p>You can add <strong>' . esc_html( $remaining ) . '</strong> more directory listing(s).</p>';
-
-        // Add New Listing Button (conditionally shown)
-        $output .= '<p><a class="btn" href="/add-directory-listing/" class="btn btn-small">Add New Listing</a></p>';
-    }
-
-    $output .= '</div>';
-
-    return $output;
 }
+
 add_shortcode( 'directory_listing_usage', 'display_directory_listing_usage' );
 
     function get_allowed_listings($membership_id) {
@@ -328,6 +336,28 @@ add_shortcode( 'directory_listing_usage', 'display_directory_listing_usage' );
         }
         return null; // No allowed level found
     }
+function get_top_level_membership_id() {
+    $allowances = get_field('membership_level_allowance', 'option');
+
+    if ($allowances && is_array($allowances)) {
+        $top_level_id = null;
+        $max_listings = -1;
+
+        foreach ($allowances as $allowance) {
+            if (isset($allowance['membership_id'], $allowance['number_of_allowed_directory_listings'])) {
+                $listings = intval($allowance['number_of_allowed_directory_listings']);
+                if ($listings > $max_listings) {
+                    $max_listings = $listings;
+                    $top_level_id = $allowance['membership_id'];
+                }
+            }
+        }
+
+        return $top_level_id;
+    }
+
+    return null;
+}
 
 
 add_action('template_redirect', function() {
