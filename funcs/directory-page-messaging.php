@@ -34,12 +34,15 @@ function ftd_directory_upgrade_msg(){
   $user_id = get_current_user_id();
   $membership = pmpro_getMembershipLevelForUser($user_id);
   $leveltoadd = get_first_allowed_membership_level();
-  if ( ! $membership || (int)$membership->id < (int)$leveltoadd ) {
+
+  if ( $membership ) {
+  if ((int)$membership->id < (int)$leveltoadd ) {
 
     echo '<div class="wp-block-column">';
     ftd_render_directory_cta_by_context('upgrade required',   'image-left');
     echo '</div>';
   }
+}
 }
 
 
