@@ -14,7 +14,7 @@ if (!is_user_logged_in()) {
 }
 
 // Get post data
-$profile = get_field('profile_picture');
+$profile = get_user_profile_pic($postid);
 $headline = get_field('headline');
 $entry_id = get_field('associated_ff_post_id');
 $status = get_post_status();

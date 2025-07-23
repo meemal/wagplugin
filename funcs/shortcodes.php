@@ -169,7 +169,7 @@ function ftd_map_signup_cta_shortcode($atts) {
     }
 
     $subtext = !is_user_logged_in()
-        ? sprintf('<p style="margin-top:1rem; color:#555;">Already a member? <a href="%s">Sign in</a></p>', esc_url($login_url))
+        ? sprintf('<p style="margin-top:1rem; color:#555;"><em>Already a member? <a href="%s">Sign in</a></em></p>', esc_url($login_url))
         : '';
 
     return sprintf(

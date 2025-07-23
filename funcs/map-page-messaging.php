@@ -17,43 +17,58 @@ add_filter('pmpro_no_access_message_html', function($html, $level_ids) {
             return  "IS DIRECTORY PAGE";
         
         case is_page('genius-map'):
-       
-            // Not logged in
-            if (!is_user_logged_in()) {
-                $html_out =  ftd_alert_box([], 'logged_out');
-                $html_out .= render_map_cta_block($bg_url, 'encourage_sign_up_heading_map', 'encourage_signup_body_map_');
-                $html_out .= render_example_profile();
-                $html_out .= do_shortcode('[map_signup_cta_box]');
-                return $html_out;
-            }
-
-            if (ftd_user_is_pending_approval($user_id)) {
-                $html_out =  ftd_alert_box([], 'pending');
-                $html_out .= render_map_cta_block($bg_url, 'wait_for_approval_map_heading', 'wait_for_approval_map_body', false);
-                $html_out .= render_example_profile();
-                $html_out .= do_shortcode('[map_signup_cta_box]');
-                return $html_out;
-            }
-
             $membership = pmpro_getMembershipLevelForUser($user_id);
-            if ($membership && (int) $membership->id >= 2) {
-                return $html;
-            }
-
-            $html_out = render_map_cta_block($bg_url, 'encourage_sign_up_heading_map', 'encourage_signup_body_map_');
-            $html_out .= render_example_profile();
-            $html_out .= do_shortcode('[map_signup_cta_box]');
-            return $html_out;
             
-        default:
-         if (!is_user_logged_in()) {
+
+
+            switch (true):
+                case (!is_user_logged_in()):  //user logged out -- show upgrade message
+                    $html_out =  ftd_alert_box([], 'logged_out');
+                    $html_out .= render_map_cta_block($bg_url, 'encourage_sign_up_heading_map', 'encourage_signup_body_map_', true);
+                    $html_out .= render_example_profile();
+                    $html_out .= do_shortcode('[map_signup_cta_box]');
+                    return $html_out;
+        
+
+                case (ftd_user_is_pending_approval($user_id)): //user pending approval
+                    // --level 1 - show pending approval message & upgrade message
+                    if ($membership && (int) $membership->id < 2) {
+                        $html_out =  ftd_alert_box([], 'pending');
+                        $html_out .= render_map_cta_block($bg_url, 'encourage_sign_up_heading_map', 'encourage_signup_body_map_', true);
+                        $html_out .= render_example_profile();
+                        $html_out .= do_shortcode('[map_signup_cta_box]');
+                    } else { // --level 2+ - show pending approval message & access soon message
+                        $html_out =  ftd_alert_box([], 'pending');
+                        $html_out .= render_map_cta_block($bg_url, 'wait_for_approval_map_heading', 'wait_for_approval_map_body', false);
+                        // $html_out .= render_example_profile();
+                        $html_out .= do_shortcode('[map_signup_cta_box]');
+                    }
+                    return $html_out;
+               
+                case ($membership && (int) $membership->id === 1): //level 1 - show upgrade message
+                    $html_out =  ftd_alert_box([], 'level_1');
+                    $html_out .= render_map_cta_block($bg_url, 'upgrade_to_level_2_heading', 'upgrade_to_level_2_body', false);
+                    $html_out .= render_example_profile();
+                    $html_out .= do_shortcode('[map_signup_cta_box]');
+                    return $html_out;
+                default:
+            endswitch;
+
+
+        // $html_out = render_map_cta_block($bg_url, 'encourage_sign_up_heading_map', 'encourage_signup_body_map_');
+        // $html_out .= render_example_profile();
+        // $html_out .= do_shortcode('[map_signup_cta_box]');
+        // return $html_out;
+        
+        default: //unknown page
+        if (!is_user_logged_in()) {
             return ftd_alert_box([], 'logged_out');
-         };
+        };
         if (ftd_user_is_pending_approval($user_id)) {
             return ftd_alert_box([], 'pending');
         };
-        
-        }
+    
+    }
     
     
 
@@ -70,7 +85,7 @@ function render_map_cta_block($bg_url, $heading_field, $body_field, $show_button
 
     $button_html = $show_button
         ? '<a href="/join-we-are-geniuses/" class="btn">Unlock The Map</a>
-           <p class="text-midgrey" style="margin-top:16px;">Already level 2+? <a href="/login/">Login</a></p>'
+           <p class="text-midgrey" style="margin-top:16px;"><em>Already level 2+? <a href="/login/">Login</a></em></p>'
         : '';
 
     return sprintf(
@@ -114,7 +129,7 @@ function render_example_profile() {
             %s
             <img class="std-border-radius" src="%s" alt="%s" style="max-width:100%%; height:auto; border-radius:8px;" />
         </div>',
-        $heading ? '<h3 style="margin-bottom:0.5rem;margin-top:1rem;">' . esc_html($heading) . '</h3>' : '',
+        $heading ? '<h2 style="margin-bottom:0.5rem;margin-top:1rem;">' . esc_html($heading) . '</h2>' : '',
         $body ? '<div style="margin-bottom:2rem;max-width:600px;margin-left:auto;margin-right:auto;">' . wp_kses_post($body) . '</div>' : '',
         esc_url($img['url']),
         esc_attr($img['alt'] ?? 'Example Profile')

@@ -50,7 +50,7 @@ function ftd_sb_user_directory_listings_shortcode($atts) {
         }
         while ($query->have_posts()) {
             $query->the_post();
-            $profile = get_field('profile_picture');
+            $profile = get_user_profile_pic($current_user_id);
             $headline = get_field('headline');
             $entry_id = get_field('associated_ff_post_id');
             $status = get_post_status();

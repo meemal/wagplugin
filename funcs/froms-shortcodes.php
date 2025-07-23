@@ -38,7 +38,7 @@ function user_directory_listings_shortcode( $atts ) {
   foreach ( $listings as $listing ) {
       $title    = get_the_title( $listing->ID );
       $headline = get_field( 'headline', $listing->ID );
-      $profile  = get_field( 'profile_picture', $listing->ID );
+      $profile  = get_user_profile_pic($listing->ID);
       $profile_url = is_array( $profile ) && ! empty( $profile['url'] ) ? $profile['url'] : '';
 
       // Formidable Entry ID from Post Meta
