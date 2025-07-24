@@ -19,7 +19,7 @@ $user_email = $user->user_email;
     <div class="wp-block-columns">
 
         <div class="wp-block-column">
-            <div class="profile-pic-container"><?php echo $avatar; ?></div>
+            <div class="profile-pic-container"><?= $avatar ?></div>
         </div>
         <div class="wp-block-column is-vertically-aligned-center">
             <h1 class="listing-title"><?= esc_html($display_name); ?></h1>

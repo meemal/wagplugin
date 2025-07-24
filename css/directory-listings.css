@@ -116,7 +116,7 @@
 .pmpro_actions_nav a:hover{
   color: var(--color-golden);
 }
-#sidebar a.btn{
+#sidebar .directory-card-buttons  a.btn{
   color: var(--color-white);
 }
 #sidebar a.btn.btn-coral-outline{
