@@ -50,7 +50,10 @@ function ftd_sb_user_directory_listings_shortcode($atts) {
         }
         while ($query->have_posts()) {
             $query->the_post();
-            $profile = get_user_profile_pic($current_user_id);
+            $post_id = get_the_ID();
+            $profile = get_user_profile_pic($post_id);
+    
+            
             $headline = get_field('headline');
             $entry_id = get_field('associated_ff_post_id');
             $status = get_post_status();
@@ -60,7 +63,7 @@ function ftd_sb_user_directory_listings_shortcode($atts) {
 
                 <div class="directory-card-content has-text-align-center">
                     <?php if ($profile) : ?>
-                        <img src="<?php echo esc_url($profile['url']); ?>" alt="Profile Picture" class="profile-pic profile-pic-mini">
+                        <img src="<?php echo esc_url($profile['url']); ?>" alt="<?= the_title() ?> Profile Picture" class="profile-pic profile-pic-mini">
                     <?php endif; ?>
                     <h4><a class='text-purple' href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h4>
 
