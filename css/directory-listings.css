@@ -35,8 +35,15 @@
 .join-btn .menu-item-text {
   background-color: var(--color-coral);
   padding: 8px 12px;
-    color: var(--color-white) ;
+  color: var(--color-white) ;
 }
+/* .main-nav .join-btn.act .menu-item-text { */
+  .main-nav > li.join-btn.act:not(.wpml-ls-item) > a .menu-text, .main-nav > li.act:not(.wpml-ls-item) > a .subtitle-text{
+
+  color: var(--color-white) ;
+}
+
+
 .join-btn a:hover .menu-item-text {
   background-color: var(--color-pinkcoral);
 }
