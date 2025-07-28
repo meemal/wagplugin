@@ -42,7 +42,7 @@
 
   color: var(--color-white) ;
 }
-
+.sidebar-content  
 
 .join-btn a:hover .menu-item-text {
   background-color: var(--color-pinkcoral);
@@ -125,6 +125,9 @@
 }
 #sidebar .directory-card-buttons  a.btn{
   color: var(--color-white);
+}
+#sidebar a.btn{
+  color: var(--color-darkgrey);
 }
 #sidebar a.btn.btn-coral-outline{
   color: var(--color-coral);
