@@ -58,6 +58,8 @@ blockquote.user-card-quote {
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  background: var(--color-pinkcoral);
+  background: linear-gradient(0deg,var(--color-pinkcoral) 9%, var(--color-pinkcoral2) 38%, var(--color-golden) 100%);
 }
 
 .avatar {

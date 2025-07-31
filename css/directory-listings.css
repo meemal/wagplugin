@@ -38,11 +38,12 @@
   color: var(--color-white) ;
 }
 /* .main-nav .join-btn.act .menu-item-text { */
-  .main-nav > li.join-btn.act:not(.wpml-ls-item) > a .menu-text, .main-nav > li.act:not(.wpml-ls-item) > a .subtitle-text{
+  .main-nav > li.join-btn.act:not(.wpml-ls-item) > a .menu-text, .main-nav > li.act:not(.wpml-ls-item) > a .subtitle-text,
+  .show-phantom .main-nav > li.join-btn.act:not(.wpml-ls-item) > a .menu-text, .main-nav > li.act:not(.wpml-ls-item) > a .subtitle-text{
 
   color: var(--color-white) ;
 }
-.sidebar-content  
+
 
 .join-btn a:hover .menu-item-text {
   background-color: var(--color-pinkcoral);
@@ -205,6 +206,7 @@ button{
 .pmpro_btn:hover, 
 button:hover{
   background-color: var(--color-cyan2);
+  border: 2px solid var(--color-cyan);
   color: var(--color-darkgrey);
   border-color: var(--color-cyan2);
   text-decoration:none;
