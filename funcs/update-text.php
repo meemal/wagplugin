@@ -7,7 +7,8 @@ function fdt_change_translate_text_multiple( $translated ) {
 		' membership level.'=>'.',
     'You selected the'=>'You selected',
 		'Your current membership level of '=>'',
-		'Click here to enter your discount code'=>'Enter your discount code',
+		'Click here to enter your discount code'=>'Enter code',
+		'Do you have a discount code?'=> 'Discount code?',
 	);
 	$translated = str_ireplace(  array_keys($text),  $text,  $translated );
 	return $translated;

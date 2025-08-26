@@ -53,23 +53,31 @@ add_shortcode('custom_member_profile', function () {
   return ob_get_clean();
 });
 
-
-// function pmpro_custom_profile_update_message() {
-//     if (
-//         is_page(get_option('pmpro_member_profile_edit_page_id')) &&
-//         isset($_REQUEST['update']) &&
-//         $_REQUEST['update'] == '1'
-//     ) {
-//         $account_url = pmpro_url('account');
-//         $profile_url = home_url('/profile');
-
-//         echo '<div class="pmpro_message pmpro_success">';
-//         echo '<p>Your profile has been updated.</p>';
-//         echo '<p><a href="' . esc_url($account_url) . '">View your membership account</a> | ';
-//         echo '<a href="' . esc_url($profile_url) . '">View your profile</a></p>';
-//         echo '</div>';
-//     }
-// }
-// add_action('pmpro_after_profile_fields', 'pmpro_custom_profile_update_message');
+add_action( 'pmpro_member_links_bottom', 'ftd_add_directory_link' );
+function ftd_add_directory_link() {
+    echo '<li><a href="' . esc_url( home_url('/profile/') ) . '">View Profile</a></li>';
+}
 
 
+/**
+ * Add a “Business Directory” button to the Profile actions.
+ */
+add_filter( 'pmpro_account_profile_action_links', 'ftd_add_directory_action_link' );
+function ftd_add_directory_action_link( $links ) {
+    $user_id = get_current_user_id();
+    $levels = pmpro_getMembershipLevelsForUser( $user_id );
+    if ($levels[0]->id == 1) {
+        return $links; // Only add link for non-free members
+    }
+    $directory_link  = sprintf(
+        '<a id="ftd-directory-link"  href="%s" title="%s">%s</a>',
+        esc_url( home_url( '/profile/' ) ),
+        esc_attr__( 'View Profile', 'your-text-domain' ),
+        esc_html__( 'View Profile', 'your-text-domain' )
+    );
+
+    // Append it to the end
+     array_unshift( $links, $directory_link );
+
+    return $links;
+}
