@@ -7,8 +7,8 @@ add_filter('pmpro_no_access_message_html', function($html, $level_ids) {
                 <h2 style="color:#b48b00;">Access Restricted</h2>
                 <p>You must be a member to view this page. Already a member? <a href="/login/">Login</a>.</p>
             </div>';
-    
-    $bg = get_field('no_access_background_image', 'option');
+
+    $bg = get_field('no_access_background_image', 'option');  
     $bg_url = $bg ? esc_url($bg['url']) : '';
     $user_id = get_current_user_id();
     // Handle based on context
@@ -117,7 +117,7 @@ function render_notice_block($heading, $body) {
 function render_example_profile() {
     $heading = get_field('example_profile_heading', 'option') ?: '';
     $body    = get_field('example_profile_body', 'option') ?: '';
-    $img     = get_field('example_profile_image', 'option');
+    $img     = get_field('example_profile_image', 'option')?: '';
 
     if (!$img || empty($img['url'])) {
         return '';

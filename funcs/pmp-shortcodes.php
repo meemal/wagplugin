@@ -9,14 +9,38 @@ add_shortcode('member_map_settings_form', function () {
     }
 
 
-  $pin = get_user_meta($user_id, 'pmpromm_pin_location', true) ?: [];
+// 1) Primary: the add-on's consolidated array (used by newer versions)
+$pin = get_user_meta($user_id, 'pmpromm_pin_location', true);
+$pin = is_array($pin) ? $pin : [];
 
-  $map_enabled = !empty($pin['optin']);
-  $street      = $pin['street']  ?? '';
-  $city        = $pin['city']    ?? '';
-  $state       = $pin['state']   ?? '';
-  $zip         = $pin['zip']     ?? '';
-  $country     = $pin['country'] ?? '';
+// 2) Secondary: individual map fields (sometimes saved during checkout/profile)
+$pin = wp_parse_args($pin, [
+  'street'  => get_user_meta($user_id, 'pmpromm_street_name', true),
+  'city'    => get_user_meta($user_id, 'pmpromm_city', true),
+  'state'   => get_user_meta($user_id, 'pmpromm_state', true),
+  'zip'     => get_user_meta($user_id, 'pmpromm_zip', true),
+  'country' => get_user_meta($user_id, 'pmpromm_country', true),
+  // Some sites store opt-in as a separate key.
+  'optin'   => (bool) get_user_meta($user_id, 'pmpromm_optin', true),
+]);
+
+// 3) Final fallback: PMPro Billing Address from checkout (default geocoded by the add-on)
+if (empty($pin['street']) && empty($pin['city'])) {
+  $pin = wp_parse_args($pin, [
+    'street'  => get_user_meta($user_id, 'pmpro_baddress1', true),
+    'city'    => get_user_meta($user_id, 'pmpro_bcity', true),
+    'state'   => get_user_meta($user_id, 'pmpro_bstate', true),
+    'zip'     => get_user_meta($user_id, 'pmpro_bzipcode', true),
+    'country' => get_user_meta($user_id, 'pmpro_bcountry', true),
+  ]);
+}
+
+$map_enabled = !empty($pin['optin']);
+$street  = $pin['street']  ?: '';
+$city    = $pin['city']    ?: '';
+$state   = $pin['state']   ?: '';
+$zip     = $pin['zip']     ?: '';
+$country = $pin['country'] ?: '';
 
   ob_start(); ?>
 <div id="pmpro_form_fieldset-map-settings" class="pmpro">
