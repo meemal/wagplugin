@@ -8,6 +8,7 @@ if (!isset($user)) {
 $display_name = $user->display_name;
 $avatar = get_avatar($user->ID, 260, '', $display_name);
 $your_story = get_user_meta($user->ID, 'your_story', true);
+$open_to = get_user_meta($user->ID, 'open_to', true);
 $events_attended = get_user_meta($user->ID, 'events_attended', true);
 $favourite_quote = get_user_meta($user->ID, 'favourite_dr_joe_quote', true);
 $favourite_meditation = get_user_meta($user->ID, 'favourite_meditation', true);
@@ -37,8 +38,16 @@ $user_email = $user->user_email;
             <?php endif; ?>
        
         </div>
+              
        
     </div>
+     <div class="description description-open-to"> 
+            <?php if ($open_to): ?>
+                <h3>Open to</h3>
+                <p><?php echo nl2br(esc_html($open_to)); ?></p>
+            <?php endif; ?>
+       
+        </div>
     <div class="wp-block-columns">
         <div class="description">
             <?php if ($favourite_quote): ?>
