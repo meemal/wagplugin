@@ -35,18 +35,25 @@ function ftd_genius_buttons_shortcode() {
 }
 add_shortcode('genius_buttons', 'ftd_genius_buttons_shortcode');
 
-function ftd_welcome_genius_shortcode() {
-  if (!is_user_logged_in()) {
-      return ''; // Show nothing to non-logged-in users
-  }
-
-  $user = wp_get_current_user();
-  $first_name = $user->first_name ? esc_html($user->first_name) : esc_html($user->display_name);
-
-  return "<h3 style='text-align:center;'>Welcome <span class='golden'>{$first_name}</span>, great to have you here!</h3>";
-}
-add_shortcode('welcome_genius', 'ftd_welcome_genius_shortcode');
-
+// add_shortcode('welcome_genius_logged_in', 'ftd_welcome_genius_logged_in_shortcode');
+// function ftd_welcome_genius_logged_in_shortcode() {
+//     // Check if user is logged in
+//     if (!is_user_logged_in()) {
+//         return 'Already a member?'; // Return nothing if not logged in
+//     }
+    
+//     // Get current user ID
+//     $user_id = get_current_user_id();
+    
+//     // Get first and last name from PMPro
+//     $first_name = pmpro_get_member_field_value($user_id, 'first_name');
+//     $last_name = pmpro_get_member_field_value($user_id, 'last_name');
+    
+//     // Build the welcome message
+//     $welcome = 'Welcome Genius<strong> ' . esc_html($first_name) . ' ' . esc_html($last_name) . '</strong>';
+    
+//     return $welcome;
+// }
 
 function ftd_genius_cta_shortcode($atts) {
     $atts = shortcode_atts([
@@ -187,5 +194,16 @@ function ftd_map_signup_cta_shortcode($atts) {
     );
 }
 add_shortcode('map_signup_cta_box', 'ftd_map_signup_cta_shortcode');
+
+add_shortcode('login_prompt_not_logged_in', 'ftd_login_prompt_not_logged_in_shortcode');
+function ftd_login_prompt_not_logged_in_shortcode() {
+    // Check if user is logged in
+    if (is_user_logged_in()) {
+        return ''; // Return nothing if already logged in
+    }
+    
+    // Return the login prompt HTML
+    return '<p style="text-align: right;"><span style="color: white; text-align:right;">Already a member? <a style="color: white;text-decoration:underline;" href="/login/">Login</a></span></p>';
+}
 
 

@@ -13,6 +13,7 @@
   --color-purple: #673f69;
   --color-green: #247556;
   --color-white: #fff;
+    --color-lightgrey: #6b6b6b;
   --color-midgrey: #4b4b4b;
   --color-darkgrey: #111;
   --color-cyan: #00E6E6;
@@ -30,6 +31,7 @@
 .text-red { color: var(--color-red); }
 .text-white { color: var(--color-white); }
 .text-midgrey { color: var(--color-midgrey); }
+.text-lightgrey { color: var(--color-lightgrey); }
 .std-border-radius { border-radius:6px; }
 
 .join-btn .menu-item-text {
@@ -44,7 +46,16 @@
   color: var(--color-white) ;
 }
 
-
+.info-dim {
+  color: var(--color-lightgrey);
+  font-size: 0.9rem;
+  font-style: italic;
+}
+.required {
+  color: #d00;
+  font-weight: bold;
+  margin-left: 2px;
+}
 .join-btn a:hover .menu-item-text {
   background-color: var(--color-pinkcoral);
 }

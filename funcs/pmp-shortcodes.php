@@ -48,37 +48,38 @@ $country = $pin['country'] ?: '';
   <div class="pmpro_card">
     <div class="pmpro_account-section">
       <div class="pmpro_card_content">   
-        <form id="map-settings-form" class="pmpro_form" style="max-width:600px;">
+        <form id="map-settings-form" class="pmpro_form">
           <?php wp_nonce_field('save_map_settings', 'map_settings_nonce'); ?>
 
-          <div class="pmpro_form_field pmpro_form_field-checkbox">
+          <div style="margin-top:32px;" class="pmpro_form_field pmpro_form_field-checkbox">
             <label class="pmpro_form_label pmpro_form_label-inline pmpro_clickable">
               <input type="checkbox" name="pmpromm_optin" class="pmpro_form_input pmpro_form_input-checkbox" <?php checked($map_enabled); ?>>
               Show on Membership Map
             </label>
+            <span class="info-dim"><em>(We ask for your street address only to help place the map marker in the right spot. Don’t worry — your exact location won’t be visible to others.)</em>
           </div>
 
           <br>
-          <div id="pmpromm_address_fields" class="pmpro_form_fields " style="display: block !important;">
+          <div id="pmpromm_address_fields" class="pmpro_form_fields " style="display: grid;">
             <div class="pmpro_form_field pmpro_form_field-text pmpro_form_field-pmpromm_street_name">
               <label for="pmpromm_street_name">Street Address</label>
-              <input type="text" id="pmpromm_street_name" name="pmpromm_street_name" class="pmpro_form_input pmpro_form_input-text" value="<?php echo esc_attr($street); ?>">
+              <input type="text" id="pmpromm_street_name" name="pmpromm_street_name" class="pmpro_form_input pmpro_form_input-text" value="<?php echo esc_attr($street); ?>" required>
             </div>
             <div class="pmpro_form_field pmpro_form_field-text pmpro_form_field-pmpromm_city">
               <label for="pmpromm_city">City</label>
-              <input type="text" id="pmpromm_city" name="pmpromm_city" class="pmpro_form_input pmpro_form_input-text" value="<?php echo esc_attr($city); ?>">
+              <input type="text" id="pmpromm_city" name="pmpromm_city" class="pmpro_form_input pmpro_form_input-text" value="<?php echo esc_attr($city); ?>" required>
             </div>
             <div class="pmpro_form_field pmpro_form_field-text pmpro_form_field-pmpromm_state">
               <label for="pmpromm_state">State / County</label>
-              <input type="text" id="pmpromm_state" name="pmpromm_state" class="pmpro_form_input pmpro_form_input-text" value="<?php echo esc_attr($state); ?>">
+              <input type="text" id="pmpromm_state" name="pmpromm_state" class="pmpro_form_input pmpro_form_input-text" value="<?php echo esc_attr($state); ?>" required>
             </div>
             <div class="pmpro_form_field pmpro_form_field-text pmpro_form_field-pmpromm_zip">
               <label for="pmpromm_zip">Zip / Post Code</label>
-              <input type="text" id="pmpromm_zip" name="pmpromm_zip" class="pmpro_form_input pmpro_form_input-text" value="<?php echo esc_attr($zip); ?>">
+              <input type="text" id="pmpromm_zip" name="pmpromm_zip" class="pmpro_form_input pmpro_form_input-text" value="<?php echo esc_attr($zip); ?>" required>
             </div>
             <div class="pmpro_form_field pmpro_form_field-select pmpro_form_field-pmpromm_country">
               <label for="pmpromm_country">Country</label>
-              <select name="pmpromm_country" id="pmpromm_country" class="pmpro_form_input pmpro_form_input-select">
+              <select name="pmpromm_country" id="pmpromm_country" class="pmpro_form_input pmpro_form_input-select" required>
                 <?php
                 global $pmpro_countries, $pmpro_default_country;
                 if (!$country) $country = $pmpro_default_country;
@@ -107,6 +108,15 @@ add_action('wp_ajax_save_map_settings', function () {
     wp_send_json_error(['message' => 'Security check failed']);
   }
   $user_id = get_current_user_id();
+  if (
+    empty($_POST['pmpromm_street_name']) ||
+    empty($_POST['pmpromm_city']) ||
+    empty($_POST['pmpromm_state']) ||
+    empty($_POST['pmpromm_zip']) ||
+    empty($_POST['pmpromm_country'])
+  ) {
+    wp_send_json_error(['message' => 'Please fill in all required fields.']);
+  }
   $new_pin = [
     'optin'   => isset($_POST['pmpromm_optin']) ? true : false,
     'street'  => sanitize_text_field($_POST['pmpromm_street_name']),
