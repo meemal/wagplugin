@@ -925,3 +925,65 @@ function ftd_register_custom_pmpro_affiliates_report_shortcode() {
 	add_shortcode('pmpro_affiliates_report', 'ftd_custom_affiliates_report_shortcode');
 }
 add_action('init', 'ftd_register_custom_pmpro_affiliates_report_shortcode', 1000);
+
+/**
+ * Sidebar-friendly affiliate share card for logged-in users.
+ * Usage: [ftd_affiliate_sidebar]
+ */
+function ftd_affiliate_sidebar_shortcode($atts = []) {
+	// Only show to logged-in users; return nothing for guests.
+	if (!is_user_logged_in()) {
+		return '';
+	}
+	
+	// Resolve user's primary affiliate code using existing add-on if available, else fallback to user meta.
+	$pmpro_affiliates = function_exists('pmpro_affiliates_getAffiliatesForUser')
+		? pmpro_affiliates_getAffiliatesForUser()
+		: array();
+	$primary_code = '';
+	if (!empty($pmpro_affiliates)) {
+		$primary_code = trim((string) $pmpro_affiliates[0]->code);
+	}
+	if ($primary_code === '') {
+		$user_id = get_current_user_id();
+		$meta_code = get_user_meta($user_id, 'pmpro_affiliate_code', true);
+		if (is_string($meta_code) && $meta_code !== '') {
+			$primary_code = $meta_code;
+		}
+	}
+	// If still no code, keep UI minimal.
+	if ($primary_code === '') {
+		return '<div class="pmpro pmpro_card"><div class="pmpro_card_content"><p>You don\'t have an affiliate code yet.</p></div></div>';
+	}
+	
+	// Build share link
+	$base_url = site_url('/');
+	$link = trailingslashit($base_url) . '?pa=' . rawurlencode($primary_code);
+	
+	// Determine referrals page URL, allow override via filter
+	$default_referrals_url = home_url('/affiliates/');
+	$referrals_url = home_url('/my-referrals/');
+	
+	// Unique ID for input field (avoid collisions if shortcode appears multiple times)
+	$uid = function_exists('wp_generate_uuid4') ? wp_generate_uuid4() : (string) mt_rand(1000, 999999);
+	$input_id = 'ftd_aff_link_' . $uid;
+	
+	ob_start();
+	?>
+	<div class="pmpro" style="max-width: 100%;">
+		<div class="pmpro_card">
+			<div class="pmpro_card_content">
+				<h4 class="has-text-align-center" style="margin-top: 24px;margin-bottom: 8px;"><span class="text-purple">Share With Friends</span></h4>
+				<p style="margin-top:0;">Use the your link to share We Are Geniuses with friends and earn rewards.</p>
+				<div class="pmpro_form_field pmpro_form_field-text" style="display:block;">
+					<input type="text" id="<?php echo esc_attr($input_id); ?>" readonly value="<?php echo esc_url($link); ?>" class="pmpro_form_input pmpro_form_input-text" style="font-size:14px; padding:10px; width:100%; background:#f8f9fa; border:2px solid #e9ecef;">
+					<button type="button" class="button button-primary" onclick="navigator.clipboard.writeText(document.getElementById('<?php echo esc_js($input_id); ?>').value)" style="margin-top:8px; width:100%;">Copy Link</button>
+				</div>
+				<a href="<?php echo esc_url($referrals_url); ?>" class="button" style="display:block; width:100%; box-sizing:border-box; text-align:center; margin-top:8px;">View Your Referrals</a>
+			</div>
+		</div>
+	</div>
+	<?php
+	return ob_get_clean();
+}
+add_shortcode('ftd_affiliate_sidebar', 'ftd_affiliate_sidebar_shortcode');
