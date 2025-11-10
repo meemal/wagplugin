@@ -9,6 +9,7 @@ function fdt_change_translate_text_multiple( $translated ) {
 		'Your current membership level of '=>'',
 		'Click here to enter your discount code'=>'Enter code',
 		'Do you have a discount code?'=> 'Discount code?',
+		'Directory and Profile Preferences'=> 'Genius Map Preferences',
 	);
 	$translated = str_ireplace(  array_keys($text),  $text,  $translated );
 	return $translated;
