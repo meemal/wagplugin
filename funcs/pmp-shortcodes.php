@@ -48,7 +48,7 @@ add_shortcode('member_map_settings_form', function () {
                             </label>
                             <span class="info-dim">
                                 <em>(We ask for your street address only to help place the map marker in the right spot. 
-                                Don't worry — your exact location won't be visible to others.)</em>
+                                Don't worry, your exact location won't be visible to others because the map won't zoom in close.)</em>
                             </span>
                         </div>
 
