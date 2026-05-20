@@ -1,0 +1,411 @@
+/* [wag_social_share] — Share the gathering (mockup-aligned) */
+.ftd-sc--social-share {
+	--ftd-ss-plum: #2d132c;
+	--ftd-ss-accent: #c94b63;
+	--ftd-ss-accent-soft: #d94e81;
+	--ftd-ss-cyan: var(--color-cyan, #00e6e6);
+	--ftd-ss-border: #ebe7ee;
+	--ftd-ss-muted: #9a939f;
+	--ftd-ss-body: #2f2a33;
+	--ftd-ss-gold: #c9b8a8;
+	display: block;
+	width: 100%;
+	max-width: 100%;
+	min-width: 0;
+	box-sizing: border-box;
+}
+
+.ftd-social-share-notice {
+	text-align: center;
+	color: var(--ftd-ss-muted);
+}
+
+/* Modal */
+.ftd-sc--social-share-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 100000;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	padding: 1rem;
+	box-sizing: border-box;
+}
+
+.ftd-sc--social-share-modal:not(.is-open) {
+	display: none;
+}
+
+.ftd-sc--social-share-modal .ftd-ss-backdrop {
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(145deg, rgba(45, 19, 44, 0.62) 0%, rgba(120, 48, 72, 0.45) 55%, rgba(200, 110, 70, 0.35) 100%);
+	backdrop-filter: blur(8px);
+}
+
+.ftd-sc--social-share-modal .ftd-ss-card {
+	position: relative;
+	z-index: 1;
+	width: 100%;
+	max-width: 100%;
+	max-height: calc(100vh - 2rem);
+	overflow-y: auto;
+	-webkit-overflow-scrolling: touch;
+}
+
+/* Card */
+.ftd-sc--social-share .ftd-ss-card {
+	position: relative;
+	width: 100%;
+	max-width: 100%;
+	margin: 0;
+	padding: 2.35rem 2.5rem 2rem;
+	background: #fff;
+	color: var(--ftd-ss-plum);
+	border-radius: 20px;
+	box-shadow: 0 24px 60px rgba(45, 19, 44, 0.22);
+	box-sizing: border-box;
+	font: inherit;
+	overflow-x: hidden;
+}
+
+.ftd-sc--social-share .ftd-ss-close {
+	position: absolute;
+	top: 1.1rem;
+	right: 1.15rem;
+	width: 1.75rem;
+	height: 1.75rem;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	color: #b5aeb8;
+	font-size: 1.25rem;
+	line-height: 1;
+	cursor: pointer;
+	transition: color 0.2s ease;
+}
+
+.ftd-sc--social-share .ftd-ss-close:hover {
+	color: var(--ftd-ss-plum);
+}
+
+.ftd-sc--social-share:not(.ftd-sc--social-share-modal) .ftd-ss-close {
+	display: none;
+}
+
+/* Ornament */
+.ftd-sc--social-share .ftd-ss-ornament {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.75rem;
+	margin: 0 0 1rem;
+}
+
+.ftd-sc--social-share .ftd-ss-ornament-line {
+	display: block;
+	width: 3.25rem;
+	height: 1px;
+	background: var(--ftd-ss-gold);
+}
+
+.ftd-sc--social-share .ftd-ss-ornament-diamond {
+	display: block;
+	width: 6px;
+	height: 6px;
+	background: var(--ftd-ss-accent);
+	transform: rotate(45deg);
+}
+
+/* Header */
+.ftd-sc--social-share .ftd-ss-title {
+	margin: 0 0 0.4rem;
+	text-align: center;
+	color: var(--ftd-ss-plum);
+}
+
+.ftd-sc--social-share .ftd-ss-subtitle {
+	margin: 0 0 2rem;
+	text-align: center;
+	font-style: italic;
+	color: var(--ftd-ss-accent-soft);
+}
+
+/* Voices / tabs */
+.ftd-sc--social-share .ftd-ss-voices {
+	width: 100%;
+	min-width: 0;
+	max-width: 100%;
+	margin-bottom: 0;
+	padding-bottom: 1.1rem;
+	border-bottom: 1px solid var(--ftd-ss-border);
+	overflow: hidden;
+	box-sizing: border-box;
+}
+
+.ftd-sc--social-share .ftd-ss-voices-label {
+	margin: 0 0 0.65rem;
+	font-size: 0.58rem;
+	font-weight: 600;
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	color: var(--ftd-ss-muted);
+}
+
+.ftd-sc--social-share .ftd-ss-tabs {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: 0.5rem 1rem;
+	width: 100%;
+	min-width: 0;
+	max-width: 100%;
+	box-sizing: border-box;
+}
+
+.ftd-sc--social-share .ftd-ss-tab {
+	position: relative;
+	flex: 0 1 auto;
+	max-width: 100%;
+	min-width: 0;
+	padding: 0 0 0.65rem;
+	border: 0;
+	background: transparent;
+	font: inherit;
+	font-size: 0.8rem;
+	line-height: 1.3;
+	color: var(--ftd-ss-muted);
+	cursor: pointer;
+	transition: color 0.2s ease;
+	white-space: normal;
+	text-align: left;
+	box-sizing: border-box;
+}
+
+.ftd-sc--social-share .ftd-ss-tab::after {
+	content: "";
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	height: 1px;
+	background: var(--ftd-ss-accent);
+	transform: scaleX(0);
+	transition: transform 0.2s ease;
+}
+
+.ftd-sc--social-share .ftd-ss-tab:hover {
+	color: var(--ftd-ss-plum);
+}
+
+.ftd-sc--social-share .ftd-ss-tab.is-active {
+	color: var(--ftd-ss-plum);
+	font-weight: 700;
+}
+
+.ftd-sc--social-share .ftd-ss-tab.is-active::after {
+	transform: scaleX(1);
+}
+
+/* Panels */
+.ftd-sc--social-share .ftd-ss-panels {
+	margin-bottom: 0;
+	padding: 1.35rem 0 1.25rem;
+	border-bottom: 1px solid var(--ftd-ss-border);
+	max-height: 14rem;
+	overflow-x: hidden;
+	overflow-y: auto;
+	-webkit-overflow-scrolling: touch;
+	scrollbar-width: thin;
+	scrollbar-color: var(--ftd-ss-muted) transparent;
+}
+
+.ftd-sc--social-share .ftd-ss-panels::-webkit-scrollbar {
+	width: 6px;
+}
+
+.ftd-sc--social-share .ftd-ss-panels::-webkit-scrollbar-thumb {
+	background: var(--ftd-ss-border);
+	border-radius: 3px;
+}
+
+.ftd-sc--social-share .ftd-ss-panel {
+	display: none;
+}
+
+.ftd-sc--social-share .ftd-ss-panel.is-active {
+	display: block;
+}
+
+.ftd-sc--social-share .ftd-ss-message {
+	margin: 0;
+	line-height: 1.75;
+	color: var(--ftd-ss-body);
+	overflow-wrap: anywhere;
+	word-break: break-word;
+}
+
+/* Footer */
+.ftd-sc--social-share .ftd-ss-footer {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: 0.65rem;
+	width: 100%;
+	min-width: 0;
+	max-width: 100%;
+	overflow: hidden;
+	padding-top: 1.2rem;
+}
+
+.ftd-sc--social-share .ftd-ss-social-row {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(min(100%, 9rem), 1fr));
+	gap: 0.5rem;
+	width: 100%;
+	min-width: 0;
+	max-width: 100%;
+}
+
+.ftd-sc--social-share .ftd-ss-pill {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.55rem;
+	width: 100%;
+	min-width: 0;
+	max-width: 100%;
+	padding: 0.5rem 0.75rem;
+	border: 1px solid var(--ftd-ss-border);
+	border-radius: 999px;
+	background: #fff;
+	color: var(--ftd-ss-plum);
+	font: inherit;
+	font-size: 0.7rem;
+	text-decoration: none;
+	cursor: pointer;
+	transition: border-color 0.2s ease, box-shadow 0.2s ease;
+	box-sizing: border-box;
+	white-space: normal;
+	text-align: center;
+}
+
+.ftd-sc--social-share .ftd-ss-pill-label {
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
+
+.ftd-sc--social-share a.ftd-ss-pill:hover {
+	border-color: #d8d2dc;
+	box-shadow: 0 1px 4px rgba(45, 19, 44, 0.06);
+}
+
+.ftd-sc--social-share .ftd-ss-pill-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	width: 1.65rem;
+	height: 1.65rem;
+	border: 1px solid var(--ftd-ss-border);
+	border-radius: 50%;
+	color: var(--ftd-ss-plum);
+	background: #fff;
+}
+
+.ftd-sc--social-share .ftd-ss-pill-icon svg {
+	width: 12px;
+	height: 12px;
+}
+
+.ftd-sc--social-share .ftd-ss-pill--copy {
+	margin-left: 0;
+	width: 100%;
+	max-width: 100%;
+	padding: 0.55rem 1.25rem;
+	gap: 0.45rem;
+	border-color: transparent;
+	background: var(--ftd-ss-cyan);
+	color: #0a3a3a;
+	font-weight: 600;
+}
+
+.ftd-sc--social-share .ftd-ss-pill--copy .ftd-ss-pill-icon {
+	width: auto;
+	height: auto;
+	border: 0;
+	background: transparent;
+}
+
+.ftd-sc--social-share .ftd-ss-pill--copy:hover {
+	filter: brightness(1.05);
+	box-shadow: none;
+}
+
+.ftd-sc--social-share .ftd-ss-pill--copy.is-copied {
+	background: var(--ftd-ss-plum);
+	color: #fff;
+}
+
+@media (max-width: 720px) {
+	.ftd-sc--social-share-modal {
+		align-items: flex-end;
+		padding: 0;
+	}
+
+	.ftd-sc--social-share-modal .ftd-ss-card {
+		max-height: 92vh;
+		border-radius: 20px 20px 0 0;
+	}
+
+	.ftd-sc--social-share .ftd-ss-card {
+		padding: 1.5rem 1rem 1.25rem;
+		border-radius: 16px;
+	}
+
+	.ftd-sc--social-share .ftd-ss-subtitle {
+		margin-bottom: 1.35rem;
+	}
+
+	.ftd-sc--social-share .ftd-ss-tabs {
+		gap: 0.45rem 0.75rem;
+	}
+
+	.ftd-sc--social-share .ftd-ss-tab {
+		font-size: 0.76rem;
+		padding-bottom: 0.6rem;
+	}
+
+	.ftd-sc--social-share .ftd-ss-panels {
+		max-height: min(38vh, 11rem);
+		padding: 1rem 0 1rem;
+	}
+
+	.ftd-sc--social-share .ftd-ss-message {
+		line-height: 1.65;
+	}
+
+	.ftd-sc--social-share .ftd-ss-pill {
+		min-height: 2.75rem;
+		padding: 0.55rem 0.65rem;
+		font-size: 0.68rem;
+	}
+
+	.ftd-sc--social-share .ftd-ss-pill--copy {
+		min-height: 3rem;
+		padding: 0.6rem 1rem;
+		font-size: 0.8rem;
+	}
+}
+
+@media (max-width: 480px) {
+	.ftd-sc--social-share .ftd-ss-social-row {
+		grid-template-columns: 1fr;
+	}
+
+	.ftd-sc--social-share .ftd-ss-title {
+		padding-right: 1.5rem;
+		padding-left: 1.5rem;
+	}
+}

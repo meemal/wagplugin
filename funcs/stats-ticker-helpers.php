@@ -202,3 +202,118 @@ function ftd_get_stats_ticker_slides() {
 
 	return $slides;
 }
+
+/**
+ * Marquee items for sitewide banner (founding offer + live stats).
+ *
+ * @param array<string, mixed>|null $settings Founding banner settings.
+ * @param array<string, mixed>|null $tokens   Founding tokens (remaining, total, code, used).
+ * @param string                    $stats_eyebrow Eyebrow label for stat items.
+ * @return array<int, array<string, mixed>>
+ */
+function ftd_get_banner_marquee_items( $settings = null, $tokens = null, $stats_eyebrow = 'SO FAR' ) {
+	$items = array();
+
+	if ( is_array( $settings ) && is_array( $tokens ) ) {
+		$remaining = (int) ( $tokens['remaining'] ?? 0 );
+		$total     = (int) ( $tokens['total'] ?? 0 );
+		$code      = (string) ( $tokens['code'] ?? '' );
+
+		$code_label = trim( (string) ( $settings['code_label'] ?? __( 'use code', 'ftd-directory-listings' ) ) );
+
+		$items[] = array(
+			'eyebrow'    => __( 'OFFER', 'ftd-directory-listings' ),
+			'value'      => $remaining,
+			'label'      => sprintf(
+				/* translators: %d: total founding spots */
+				__( 'of %d founding spots left', 'ftd-directory-listings' ),
+				$total
+			),
+			'code_label' => $code_label,
+			'code'       => $code,
+			'type'       => 'founding',
+		);
+	}
+
+	$eyebrow = $stats_eyebrow ?: 'SO FAR';
+
+	foreach ( ftd_get_stats_ticker_slides() as $slide ) {
+		$items[] = array(
+			'eyebrow' => $eyebrow,
+			'value'   => $slide['value'] ?? '',
+			'label'   => $slide['label'] ?? '',
+			'tagline' => $slide['tagline'] ?? '',
+			'type'    => $slide['type'] ?? 'number',
+		);
+	}
+
+	return apply_filters( 'ftd_banner_marquee_items', $items, $settings, $tokens );
+}
+
+/**
+ * Render one marquee item.
+ *
+ * @param array<string, mixed> $item Item data.
+ * @return void
+ */
+function ftd_render_banner_marquee_item( $item ) {
+	$eyebrow = trim( (string) ( $item['eyebrow'] ?? '' ) );
+	$value   = $item['value'] ?? '';
+	$label   = trim( (string) ( $item['label'] ?? '' ) );
+	$tagline = trim( (string) ( $item['tagline'] ?? '' ) );
+	$type    = $item['type'] ?? 'number';
+	$is_text = ( 'text' === $type );
+	$is_founding = ( 'founding' === $type );
+	?>
+	<span class="fsb-marquee-item<?php echo $is_founding ? ' fsb-marquee-item--founding' : ''; ?>">
+		<?php if ( $eyebrow ) : ?>
+			<span class="fsb-item-eyebrow"><?php echo esc_html( $eyebrow ); ?></span>
+		<?php endif; ?>
+		<span class="fsb-item-value<?php echo $is_text ? ' fsb-item-value--text' : ''; ?>">
+			<?php echo esc_html( (string) $value ); ?>
+		</span>
+		<?php if ( $label ) : ?>
+			<span class="fsb-item-label"><?php echo esc_html( $label ); ?></span>
+		<?php endif; ?>
+		<?php if ( $is_founding && ! empty( $item['code'] ) ) : ?>
+			<span class="fsb-item-sep" aria-hidden="true">—</span>
+			<span class="fsb-code-pill">
+				<?php if ( ! empty( $item['code_label'] ) ) : ?>
+					<span class="fsb-code-label"><?php echo esc_html( $item['code_label'] ); ?></span>
+				<?php endif; ?>
+				<strong class="fsb-code-value"><?php echo esc_html( (string) $item['code'] ); ?></strong>
+			</span>
+		<?php elseif ( $tagline ) : ?>
+			<span class="fsb-item-sep" aria-hidden="true">—</span>
+			<span class="fsb-item-tagline"><?php echo esc_html( $tagline ); ?></span>
+		<?php endif; ?>
+	</span>
+	<?php
+}
+
+/**
+ * Render duplicated marquee track for infinite scroll.
+ *
+ * @param array<int, array<string, mixed>> $items Marquee items.
+ * @return void
+ */
+function ftd_render_banner_marquee_track( $items ) {
+	if ( empty( $items ) ) {
+		return;
+	}
+
+	$sets = array( $items, $items );
+	?>
+	<div class="fsb-marquee-viewport" aria-hidden="true">
+		<div class="fsb-marquee-track">
+			<?php foreach ( $sets as $set ) : ?>
+				<span class="fsb-marquee-group">
+					<?php foreach ( $set as $item ) : ?>
+						<?php ftd_render_banner_marquee_item( $item ); ?>
+					<?php endforeach; ?>
+				</span>
+			<?php endforeach; ?>
+		</div>
+	</div>
+	<?php
+}

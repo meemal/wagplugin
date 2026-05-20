@@ -1,4 +1,14 @@
-/* Sitewide founding spots bar */
+/* Sitewide founding-spots banner + scrolling stats marquee */
+.ftd-sc--founding-spots-banner {
+	--fsb-plum: #2d132c;
+	--fsb-plum-track: rgba(255, 255, 255, 0.12);
+	--fsb-accent: var(--color-pinkcoral, #d13d60);
+	--fsb-accent-soft: var(--color-pinkdusk, #d94e81);
+	--fsb-code: var(--color-cyan, #00e6e6);
+	--fsb-coral: #e8785a;
+	--fsb-muted: rgba(255, 255, 255, 0.35);
+}
+
 .ftd-founding-spots-banner--sitewide {
 	width: 100%;
 	position: relative;
@@ -6,99 +16,230 @@
 }
 
 .ftd-sc--founding-spots-banner .fsb-banner {
-	background: linear-gradient(90deg, #c93d7a 0%, #e85d4a 55%, #f07850 100%);
+	background: var(--fsb-plum);
 	border-radius: 0;
-	padding: 0.85rem 0 0.75rem;
+	padding: 0.75rem 0 0.65rem;
 	color: #fff;
 	box-sizing: border-box;
 }
 
-.ftd-sc--founding-spots-banner .fsb-container {
-	max-width: 1200px;
-	margin: 0 auto;
-	padding: 0 1.25rem;
+.ftd-sc--founding-spots-banner .fsb-row {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	padding: 0 0 0 0.5rem;
 	box-sizing: border-box;
 }
 
-.ftd-sc--founding-spots-banner .fsb-inner {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	justify-content: center;
-	gap: 0.5rem 1.25rem;
-	text-align: center;
+/* Infinite horizontal marquee */
+.ftd-sc--founding-spots-banner .fsb-marquee-viewport {
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	mask-image: linear-gradient(90deg, transparent 0%, #000 3%, #000 97%, transparent 100%);
+	-webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 3%, #000 97%, transparent 100%);
 }
 
-.ftd-sc--founding-spots-banner .fsb-dot {
-	display: inline-block;
-	width: 0.45rem;
-	height: 0.45rem;
-	border-radius: 50%;
-	background: #fff;
+.ftd-sc--founding-spots-banner .fsb-marquee-track {
+	display: flex;
+	width: max-content;
+	animation: fsb-marquee-scroll 55s linear infinite;
+	will-change: transform;
+}
+
+.ftd-sc--founding-spots-banner .fsb-marquee-track:hover {
+	animation-play-state: paused;
+}
+
+@keyframes fsb-marquee-scroll {
+	0% {
+		transform: translateX(0);
+	}
+	100% {
+		transform: translateX(-50%);
+	}
+}
+
+.ftd-sc--founding-spots-banner .fsb-marquee-group {
+	display: inline-flex;
+	align-items: center;
 	flex-shrink: 0;
 }
 
-.ftd-sc--founding-spots-banner .fsb-status {
-	margin: 0;
-	font-size: 0.95rem;
-	line-height: 1.4;
-	color: #fff;
-}
-
-.ftd-sc--founding-spots-banner .fsb-status strong {
-	font-weight: 700;
-}
-
-.ftd-sc--founding-spots-banner .fsb-link {
-	font-size: 0.95rem;
-	font-weight: 600;
-	color: #fff;
-	text-decoration: underline;
-	text-underline-offset: 2px;
+.ftd-sc--founding-spots-banner .fsb-marquee-item {
+	display: inline-flex;
+	align-items: baseline;
+	flex-wrap: nowrap;
+	gap: 0.35rem 0.5rem;
+	padding: 0 2rem;
 	white-space: nowrap;
 }
 
-.ftd-sc--founding-spots-banner .fsb-link:hover {
-	color: #fff;
-	opacity: 0.92;
+.ftd-sc--founding-spots-banner .fsb-item-eyebrow {
+	font-size: 0.62rem;
+	font-weight: 700;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--fsb-accent);
 }
 
+.ftd-sc--founding-spots-banner .fsb-item-value {
+	font-size: 1.5rem;
+	font-weight: 700;
+	line-height: 1;
+	color: #fff;
+}
+
+.ftd-sc--founding-spots-banner .fsb-item-value--text {
+	font-size: 1.15rem;
+}
+
+.ftd-sc--founding-spots-banner .fsb-item-label {
+	font-size: 0.9rem;
+	font-weight: 500;
+	color: #fff;
+}
+
+.ftd-sc--founding-spots-banner .fsb-item-sep {
+	color: var(--fsb-coral);
+	font-weight: 300;
+}
+
+.ftd-sc--founding-spots-banner .fsb-item-tagline {
+	font-family: Georgia, "Times New Roman", serif;
+	font-style: italic;
+	font-size: 0.9rem;
+	color: var(--fsb-accent-soft);
+}
+
+/* Dashed code pill — matches [founding_genius_banner] */
+.ftd-sc--founding-spots-banner .fsb-code-pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.45rem;
+	flex-wrap: nowrap;
+	padding: 0.4rem 0.95rem;
+	border: 1.5px dashed rgba(255, 255, 255, 0.45);
+	border-radius: 999px;
+	vertical-align: baseline;
+}
+
+.ftd-sc--founding-spots-banner .fsb-code-label {
+	font-size: 0.8rem;
+	color: #fff;
+	font-weight: 400;
+	text-transform: lowercase;
+}
+
+.ftd-sc--founding-spots-banner .fsb-code-value {
+	font-size: 0.85rem;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	color: var(--fsb-code);
+	text-transform: uppercase;
+	line-height: 1;
+}
+
+.ftd-sc--founding-spots-banner .fsb-marquee-item--founding .fsb-item-eyebrow {
+	color: var(--fsb-accent);
+}
+
+/* Sign up now */
+.ftd-sc--founding-spots-banner .fsb-signup-btn {
+	flex-shrink: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	margin-right: 0.75rem;
+	padding: 0.45rem 0.95rem;
+	background: var(--fsb-code);
+	color: #1a0a1c;
+	border-radius: 999px;
+	font-size: 0.72rem;
+	font-weight: 700;
+	text-decoration: none;
+	line-height: 1.2;
+	white-space: nowrap;
+	transition: filter 0.2s ease, transform 0.2s ease;
+}
+
+.ftd-sc--founding-spots-banner .fsb-signup-btn:hover {
+	filter: brightness(1.08);
+	transform: translateY(-1px);
+	color: #1a0a1c;
+}
+
+/* Progress bar — matches founding genius banner */
 .ftd-sc--founding-spots-banner .fsb-progress {
-	margin-top: 0.65rem;
+	margin-top: 0.55rem;
+	padding: 0 0.75rem;
+	box-sizing: border-box;
 }
 
 .ftd-sc--founding-spots-banner .fsb-track {
-	height: 4px;
-	border-radius: 0;
-	background: rgba(255, 255, 255, 0.35);
+	height: 6px;
+	border-radius: 999px;
+	background: var(--fsb-plum-track);
 	overflow: hidden;
 }
 
 .ftd-sc--founding-spots-banner .fsb-fill {
 	height: 100%;
-	border-radius: 0;
-	background: #fff;
+	border-radius: 999px;
+	background: linear-gradient(90deg, var(--color-coral, #f26849) 0%, var(--fsb-accent-soft) 100%);
 	transition: width 0.35s ease;
 }
 
-@media (min-width: 720px) {
-	.ftd-sc--founding-spots-banner .fsb-inner {
-		flex-wrap: nowrap;
-		justify-content: flex-start;
-		text-align: left;
+@media (prefers-reduced-motion: reduce) {
+	.ftd-sc--founding-spots-banner .fsb-marquee-track {
+		animation: none;
+		flex-wrap: wrap;
+		width: 100%;
+		justify-content: center;
 	}
 
-	.ftd-sc--founding-spots-banner .fsb-status {
-		flex: 0 1 auto;
+	.ftd-sc--founding-spots-banner .fsb-marquee-viewport {
+		mask-image: none;
+		-webkit-mask-image: none;
 	}
 
-	.ftd-sc--founding-spots-banner .fsb-link {
-		margin-left: auto;
+	.ftd-sc--founding-spots-banner .fsb-marquee-group + .fsb-marquee-group {
+		display: none;
+	}
+
+	.ftd-sc--founding-spots-banner .fsb-marquee-item {
+		white-space: normal;
+		flex-wrap: wrap;
+		justify-content: center;
+		padding: 0.35rem 1rem;
 	}
 }
 
 @media (max-width: 719px) {
-	.ftd-sc--founding-spots-banner .fsb-link {
-		white-space: normal;
+	.ftd-sc--founding-spots-banner .fsb-row {
+		flex-wrap: wrap;
+		padding: 0 0.5rem;
+	}
+
+	.ftd-sc--founding-spots-banner .fsb-marquee-viewport {
+		flex: 1 1 100%;
+		order: 1;
+	}
+
+	.ftd-sc--founding-spots-banner .fsb-signup-btn {
+		order: 2;
+		margin: 0 auto 0.15rem;
+	}
+
+	.ftd-sc--founding-spots-banner .fsb-item-value {
+		font-size: 1.25rem;
+	}
+
+	.ftd-sc--founding-spots-banner .fsb-code-pill {
+		padding: 0.35rem 0.75rem;
+	}
+
+	.ftd-sc--founding-spots-banner .fsb-code-value {
+		font-size: 0.75rem;
 	}
 }

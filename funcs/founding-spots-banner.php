@@ -2,6 +2,7 @@
 /**
  * Sitewide founding-spots banner (top of every front-end page).
  *
+ * Infinite horizontal marquee: founding offer + live stats + Sign up now.
  * Settings: Genius Directory Settings → Banner (ACF).
  */
 
@@ -14,12 +15,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function ftd_get_founding_spots_banner_settings() {
 	$defaults = array(
-		'total_spots'       => 111,
-		'discount_code'     => 'originalgenius111',
-		'status_text'       => 'Only {remaining} of {total} founding spots left.',
-		'link_text'         => 'Claim a free lifetime membership with {code} →',
-		'link_url'          => home_url( '/join-we-are-geniuses/' ),
-		'show_progress_bar' => true,
+		'total_spots'          => 111,
+		'discount_code'        => 'originalgenius111',
+		'stats_eyebrow'        => 'SO FAR',
+		'code_label'           => 'use code',
+		'link_url'             => home_url( '/join-we-are-geniuses/' ),
+		'signup_button_label'  => 'Sign up now',
+		'show_progress_bar'    => true,
 	);
 
 	$enabled = true;
@@ -39,9 +41,9 @@ function ftd_get_founding_spots_banner_settings() {
 		}
 	}
 
-	$defaults['enabled']           = $enabled;
-	$defaults['total_spots']       = max( 1, (int) $defaults['total_spots'] );
-	$defaults['discount_code']     = sanitize_text_field( strtolower( (string) $defaults['discount_code'] ) );
+	$defaults['enabled']          = $enabled;
+	$defaults['total_spots']      = max( 1, (int) $defaults['total_spots'] );
+	$defaults['discount_code']    = sanitize_text_field( strtolower( (string) $defaults['discount_code'] ) );
 	$defaults['show_progress_bar'] = ! empty( $defaults['show_progress_bar'] );
 
 	if ( is_string( $defaults['link_url'] ) && 0 === strpos( $defaults['link_url'], '/' ) ) {
@@ -87,30 +89,14 @@ function ftd_founding_spots_replace_tokens( $text, $tokens ) {
 }
 
 /**
- * Build status HTML with bold remaining/total pair.
- *
- * @param string               $template Status template.
- * @param array<string, mixed> $tokens   Token values.
- * @return string
- */
-function ftd_founding_spots_format_status_html( $template, $tokens ) {
-	$text = ftd_founding_spots_replace_tokens( $template, $tokens );
-	$pair = $tokens['remaining'] . ' of ' . $tokens['total'];
-	$bold = '<strong>' . esc_html( $tokens['remaining'] ) . ' of ' . esc_html( $tokens['total'] ) . '</strong>';
-
-	if ( false !== strpos( $text, $pair ) ) {
-		$parts = explode( $pair, $text, 2 );
-		return esc_html( $parts[0] ) . $bold . esc_html( $parts[1] ?? '' );
-	}
-
-	return esc_html( $text );
-}
-
-/**
  * @return string Banner HTML or empty string.
  */
 function ftd_get_founding_spots_banner_html() {
 	if ( ! ftd_should_show_founding_spots_banner() ) {
+		return '';
+	}
+
+	if ( ! function_exists( 'ftd_get_banner_marquee_items' ) ) {
 		return '';
 	}
 
@@ -132,9 +118,18 @@ function ftd_get_founding_spots_banner_html() {
 		'code'      => strtoupper( $code ),
 	);
 
-	$status_html = ftd_founding_spots_format_status_html( $settings['status_text'], $tokens );
-	$link_text   = esc_html( ftd_founding_spots_replace_tokens( $settings['link_text'], $tokens ) );
-	$link_url    = esc_url( $settings['link_url'] );
+	$marquee_items = ftd_get_banner_marquee_items(
+		$settings,
+		$tokens,
+		$settings['stats_eyebrow'] ?? 'SO FAR'
+	);
+
+	if ( empty( $marquee_items ) ) {
+		return '';
+	}
+
+	$signup_url   = esc_url( $settings['link_url'] );
+	$signup_label = esc_html( $settings['signup_button_label'] ?: __( 'Sign up now', 'ftd-directory-listings' ) );
 
 	$progress_aria = sprintf(
 		/* translators: 1: used count, 2: total spots */
@@ -146,31 +141,31 @@ function ftd_get_founding_spots_banner_html() {
 	ob_start();
 	?>
 	<div id="ftd-founding-spots-banner" class="ftd-sc ftd-sc--founding-spots-banner ftd-founding-spots-banner--sitewide">
-		<div class="fsb-banner" role="region" aria-label="<?php esc_attr_e( 'Founding membership offer', 'ftd-directory-listings' ); ?>">
-			<div class="fsb-container">
-				<div class="fsb-inner">
-					<span class="fsb-dot" aria-hidden="true"></span>
-					<p class="fsb-status"><?php echo $status_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built with esc_html + strong. ?></p>
-					<?php if ( $link_url ) : ?>
-						<a class="fsb-link" href="<?php echo $link_url; ?>"><?php echo $link_text; ?></a>
-					<?php endif; ?>
-				</div>
+		<div class="fsb-banner" role="region" aria-label="<?php esc_attr_e( 'Founding membership offer and community stats', 'ftd-directory-listings' ); ?>">
+			<div class="fsb-row">
+				<?php ftd_render_banner_marquee_track( $marquee_items ); ?>
 
-				<?php if ( ! empty( $settings['show_progress_bar'] ) && $remaining > 0 ) : ?>
-					<div
-						class="fsb-progress"
-						role="progressbar"
-						aria-valuenow="<?php echo esc_attr( $used ); ?>"
-						aria-valuemin="0"
-						aria-valuemax="<?php echo esc_attr( $total ); ?>"
-						aria-label="<?php echo esc_attr( $progress_aria ); ?>"
-					>
-						<div class="fsb-track">
-							<div class="fsb-fill" style="width:<?php echo esc_attr( $percent ); ?>%;"></div>
-						</div>
-					</div>
+				<?php if ( $signup_url ) : ?>
+					<a class="fsb-signup-btn" href="<?php echo $signup_url; ?>">
+						<?php echo $signup_label; ?>
+					</a>
 				<?php endif; ?>
 			</div>
+
+			<?php if ( ! empty( $settings['show_progress_bar'] ) && $remaining > 0 ) : ?>
+				<div
+					class="fsb-progress"
+					role="progressbar"
+					aria-valuenow="<?php echo esc_attr( $used ); ?>"
+					aria-valuemin="0"
+					aria-valuemax="<?php echo esc_attr( $total ); ?>"
+					aria-label="<?php echo esc_attr( $progress_aria ); ?>"
+				>
+					<div class="fsb-track">
+						<div class="fsb-fill" style="width:<?php echo esc_attr( $percent ); ?>%;"></div>
+					</div>
+				</div>
+			<?php endif; ?>
 		</div>
 	</div>
 	<?php
