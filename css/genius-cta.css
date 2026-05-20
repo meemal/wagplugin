@@ -1,4 +1,4 @@
-.genius-cta {
+.ftd-sc--genius-cta .genius-cta {
   background: rgba(255, 255, 255, 0.4);
   padding: 2rem;
   text-align: center;
@@ -7,7 +7,7 @@
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-.cta-badge {
+.ftd-sc--genius-cta .cta-badge {
   font-size: 1.75rem;
   font-weight: bold;
   background: var(--color-white);
@@ -19,34 +19,40 @@
   margin: 0 auto 1rem;
 }
 
-.cta-title {
+.ftd-sc--genius-cta .cta-title {
   font-size: 2rem;
   margin: 0.5rem 0;
   font-weight:bold;
   line-height:1.2;
 }
 
-.cta-subtitle {
+.ftd-sc--genius-cta .cta-subtitle {
   display: block;
   font-weight: 600;
   margin-bottom: 1rem;
 }
 
-.cta-body {
+.ftd-sc--genius-cta .cta-body {
   margin-bottom: 1.5rem;
 }
 
-.cta-price {
+.ftd-sc--genius-cta .cta-price {
   font-weight: bold;
   margin-bottom: 2.5rem;
   color: var(--color-white);
   font-size: 2rem;
 }
-.genius-cta .btn {
+.ftd-sc--genius-cta .genius-cta .btn {
   margin-bottom:1rem;
   width:80%;
 }
-.genius-cta .cta-compare {
+.ftd-sc--genius-cta .genius-cta .cta-compare {
   color: var(--color-purple);
 }
 
+
+.ftd-sc--genius-cta .cta-title,
+.ftd-sc--genius-cta .cta-body,
+.ftd-sc--genius-cta .cta-price {
+	margin-top: 0;
+}

@@ -92,6 +92,7 @@ function ftd_genius_cta_shortcode($atts) {
 
     ob_start();
     ?>
+    <div class="ftd-sc ftd-sc--genius-cta">
     <div class="genius-cta">
         <div class="cta-badge"><?php echo esc_html($level_id); ?></div>
         <h2 class="cta-title text-pinkcoral"><?php echo esc_html($atts['title']); ?></h2>
@@ -106,6 +107,7 @@ function ftd_genius_cta_shortcode($atts) {
             <span class="btn disabled"><?php echo esc_html($button_text); ?></span>
         <?php endif; ?>
         <p><a class="cta-compare" href='/join-we-are-geniuses/'><em>Compare features</em></a></p>
+    </div>
     </div>
     <?php
     return ob_get_clean();

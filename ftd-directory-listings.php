@@ -10,6 +10,11 @@
 // Exit if accessed directly
 if ( ! defined( 'ABSPATH' ) ) exit;
 
+define( 'FTD_DIRECTORY_LISTINGS_FILE', __FILE__ );
+define( 'FTD_DIRECTORY_LISTINGS_VERSION', '1.0.1' );
+
+require_once plugin_dir_path( __FILE__ ) . 'includes/shortcode-assets.php';
+
 // Include all files in the funcs folder
 $funcs_dir = plugin_dir_path( __FILE__ ) . 'funcs/';
 if ( is_dir( $funcs_dir ) ) {
@@ -19,51 +24,24 @@ if ( is_dir( $funcs_dir ) ) {
 }
 
 add_action('wp_enqueue_scripts', function() {
-    global $post;
-
-    // Always enqueue core directory styles
     wp_enqueue_style(
         'directory-listings-style',
-        plugin_dir_url(__FILE__) . 'css/directory-listings.css'
+        plugin_dir_url(__FILE__) . 'css/directory-listings.css',
+        array(),
+        FTD_DIRECTORY_LISTINGS_VERSION
     );
 
-    // Only enqueue toggle CSS if the shortcode is used on the page
-    if ( is_a($post, 'WP_Post') && has_shortcode($post->post_content, 'my_directory_listings_account_page') ) {
-        wp_enqueue_style(
-            'directory-toggle-style',
-            plugin_dir_url(__FILE__) . 'css/directory-toggle.css'
-        );
-    }
-        // Only enqueue toggle CSS if the shortcode is used on the page
-        if ( is_a($post, 'WP_Post') && has_shortcode($post->post_content, 'custom_member_profile') ) {
-            wp_enqueue_style(
-                'user-profile-style',
-                plugin_dir_url(__FILE__) . 'css/user-profile.css'
-            );
-        }
-    // Only enqueue toggle CSS if the shortcode is used on the page
-    if ( is_a($post, 'WP_Post') && has_shortcode($post->post_content, 'genius_levels_cta') ) {
-        wp_enqueue_style(
-            'genius-cta-style',
-            plugin_dir_url(__FILE__) . 'css/genius-cta.css'
-        );
-    }
-    if ( is_a( $post, 'WP_Post' ) && has_shortcode( $post->post_content, 'founding_genius_banner' ) ) {
-        wp_enqueue_style(
-            'ftd-founding-genius-banner',
-            plugin_dir_url( __FILE__ ) . 'css/founding-genius-banner.css',
-            array(),
-            '1.0.0'
-        );
-    }
-    // Enqueue genius-map CSS if we are on the /genius-map/ page
+    ftd_enqueue_shortcode_styles();
+    ftd_enqueue_directory_single_styles();
+
     if ( is_page('genius-map') ) {
         wp_enqueue_style(
             'genius-map-style',
-            plugin_dir_url(__FILE__) . 'css/genius-map.css'
+            plugin_dir_url(__FILE__) . 'css/genius-map.css',
+            array( 'directory-listings-style' ),
+            FTD_DIRECTORY_LISTINGS_VERSION
         );
     }
-   
 });
 
 add_action('wp', function () {
@@ -72,7 +50,7 @@ add_action('wp', function () {
         if (
             has_shortcode($post->post_content, 'user_directory_listings') ||
             has_shortcode($post->post_content, 'custom_member_profile') ||
-            is_post_type_archive('directory_listing') // For archive template part
+            is_post_type_archive('directory_listing')
         ) {
             add_action('wp_enqueue_scripts', 'ftd_enqueue_view_counter_script');
         }
@@ -85,7 +63,7 @@ function ftd_enqueue_view_counter_script() {
         'ftd-view-counter',
         plugin_dir_url(__FILE__) . 'js/view-counter.js',
         ['jquery'],
-        null,
+        FTD_DIRECTORY_LISTINGS_VERSION,
         true
     );
 
@@ -96,7 +74,6 @@ function ftd_enqueue_view_counter_script() {
 }
 
 
-// Flush rewrite rules on activation/deactivation
 register_activation_hook(__FILE__, function() {
     flush_rewrite_rules();
 });
@@ -114,7 +91,7 @@ add_action('wp_enqueue_scripts', function() {
         'directory-ajax-filter',
         plugin_dir_url(__FILE__) . 'js/directory-ajax-filter.js',
         ['jquery'],
-        null,
+        FTD_DIRECTORY_LISTINGS_VERSION,
         true
     );
 
@@ -123,12 +100,12 @@ add_action('wp_enqueue_scripts', function() {
         'nonce'    => wp_create_nonce('directory_ajax_nonce')
     ]);
 
-    if (is_page('membership-account')) {  // OR use is_page(123)
+    if (is_page('membership-account')) {
         wp_enqueue_script(
             'map-settings-ajax',
             plugin_dir_url(__FILE__) .  '/js/map-settings.js',
             ['jquery'],
-            null,
+            FTD_DIRECTORY_LISTINGS_VERSION,
             true
           );
           wp_localize_script('map-settings-ajax', 'directory_ajax_obj', [
@@ -136,13 +113,7 @@ add_action('wp_enqueue_scripts', function() {
             'nonce'    => wp_create_nonce('directory_ajax_nonce'),
           ]);
     }
-
-
 });
-
-
-
-  
 
 
 function ftd_get_plugin_template( $template_name, $args = array() ) {
@@ -157,11 +128,10 @@ function ftd_get_plugin_template( $template_name, $args = array() ) {
 
 add_action('wp_logout', 'ftd_redirect_after_logout');
 function ftd_redirect_after_logout() {
-    wp_redirect(home_url('/login/')); // Change '/login/' to your actual front-end login page slug
+    wp_redirect(home_url('/login/'));
     exit;
 }
 
 add_filter('frm_protected_file_readonly_permission', function($perm) {
-    return 0644; // Standard readable/writable for owner, readable for group & public
+    return 0644;
 });
-// This ensures uploaded files adopt 0644, making them accessible for copying and syncing while still respecting protection limits .

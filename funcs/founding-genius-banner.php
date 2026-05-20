@@ -102,6 +102,7 @@ function ftd_founding_genius_banner_shortcode( $atts ) {
 
 	ob_start();
 	?>
+	<div class="ftd-sc ftd-sc--founding-genius">
 	<div class="fg-banner" role="region" aria-label="<?php echo esc_attr( $badge ); ?>">
 
 		<div class="fg-stamp" aria-hidden="true">
@@ -152,6 +153,7 @@ function ftd_founding_genius_banner_shortcode( $atts ) {
 			<?php endif; ?>
 
 		</div>
+	</div>
 	</div>
 	<?php
 	return ob_get_clean();
