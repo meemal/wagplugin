@@ -65,11 +65,18 @@ function ftd_get_user_affiliate_link( $user_id = null ) {
 
 /**
  * @param string $url Full URL.
- * @return string Display-friendly link (no protocol or query).
+ * @return string Display-friendly link (no protocol; keeps ?pa= for affiliate tracking).
  */
 function ftd_social_share_display_link( $url ) {
-	$display = preg_replace( '#^https?://#i', '', $url );
+	$display = preg_replace( '#^https?://#i', '', (string) $url );
+
+	if ( preg_match( '#\?pa=([^&\s]+)#i', $display, $matches ) ) {
+		$path = preg_replace( '#\?.*$#', '', $display );
+
+		return untrailingslashit( $path ) . '?pa=' . $matches[1];
+	}
+
 	$display = preg_replace( '#\?.*$#', '', $display );
 
-	return rtrim( $display, '/' );
+	return untrailingslashit( $display );
 }

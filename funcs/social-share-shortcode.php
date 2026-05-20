@@ -33,6 +33,20 @@ function ftd_get_social_share_ui_settings() {
 }
 
 /**
+ * Convert ACF textarea line breaks (<br> tags) to plain newlines.
+ *
+ * @param string $message Raw message from ACF or defaults.
+ * @return string
+ */
+function ftd_normalize_share_message_text( $message ) {
+	$message = (string) $message;
+	$message = preg_replace( '#<br\s*/?>#i', "\n", $message );
+	$message = wp_strip_all_tags( $message );
+
+	return str_replace( array( "\r\n", "\r" ), "\n", $message );
+}
+
+/**
  * Personalize share copy with the member's affiliate link.
  *
  * @param string $message       Raw message.
@@ -40,11 +54,26 @@ function ftd_get_social_share_ui_settings() {
  * @return string
  */
 function ftd_personalize_share_message( $message, $affiliate_url ) {
+	if ( '' === trim( (string) $affiliate_url ) ) {
+		return $message;
+	}
+
 	$display = ftd_social_share_display_link( $affiliate_url );
 
-	$message = str_replace( '{{affiliate_link}}', $display, $message );
-	$message = str_replace( 'wearegeniuses.com', $display, $message );
-	$message = str_replace( 'wearegeniuses.co', $display, $message );
+	// Longest placeholders first; bare domain must not match inside an already-inserted join URL.
+	$patterns = array(
+		'/\{\{affiliate_link\}\}/i',
+		'#https?://wearegeniuses\.com/join-we-are-geniuses/?#i',
+		'#https?://wearegeniuses\.co/join-we-are-geniuses/?#i',
+		'#wearegeniuses\.com/join-we-are-geniuses/?#i',
+		'#wearegeniuses\.co/join-we-are-geniuses/?#i',
+		'#wearegeniuses\.com(?!/join-we-are-geniuses)#i',
+		'#wearegeniuses\.co(?!/join-we-are-geniuses)#i',
+	);
+
+	foreach ( $patterns as $pattern ) {
+		$message = preg_replace( $pattern, $display, $message );
+	}
 
 	return $message;
 }
@@ -137,7 +166,9 @@ function ftd_social_share_shortcode( $atts ) {
 			__( 'Voice %d', 'ftd-directory-listings' ),
 			$index + 1
 		);
-		$text = ftd_personalize_share_message( $item['message'], $affiliate_url );
+		$text = ftd_normalize_share_message_text(
+			ftd_personalize_share_message( $item['message'], $affiliate_url )
+		);
 
 		$prepared[] = array(
 			'label' => $label,
