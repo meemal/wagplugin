@@ -1,0 +1,104 @@
+/* Sitewide founding spots bar */
+.ftd-founding-spots-banner--sitewide {
+	width: 100%;
+	position: relative;
+	z-index: 99990;
+}
+
+.ftd-sc--founding-spots-banner .fsb-banner {
+	background: linear-gradient(90deg, #c93d7a 0%, #e85d4a 55%, #f07850 100%);
+	border-radius: 0;
+	padding: 0.85rem 0 0.75rem;
+	color: #fff;
+	box-sizing: border-box;
+}
+
+.ftd-sc--founding-spots-banner .fsb-container {
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: 0 1.25rem;
+	box-sizing: border-box;
+}
+
+.ftd-sc--founding-spots-banner .fsb-inner {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem 1.25rem;
+	text-align: center;
+}
+
+.ftd-sc--founding-spots-banner .fsb-dot {
+	display: inline-block;
+	width: 0.45rem;
+	height: 0.45rem;
+	border-radius: 50%;
+	background: #fff;
+	flex-shrink: 0;
+}
+
+.ftd-sc--founding-spots-banner .fsb-status {
+	margin: 0;
+	font-size: 0.95rem;
+	line-height: 1.4;
+	color: #fff;
+}
+
+.ftd-sc--founding-spots-banner .fsb-status strong {
+	font-weight: 700;
+}
+
+.ftd-sc--founding-spots-banner .fsb-link {
+	font-size: 0.95rem;
+	font-weight: 600;
+	color: #fff;
+	text-decoration: underline;
+	text-underline-offset: 2px;
+	white-space: nowrap;
+}
+
+.ftd-sc--founding-spots-banner .fsb-link:hover {
+	color: #fff;
+	opacity: 0.92;
+}
+
+.ftd-sc--founding-spots-banner .fsb-progress {
+	margin-top: 0.65rem;
+}
+
+.ftd-sc--founding-spots-banner .fsb-track {
+	height: 4px;
+	border-radius: 0;
+	background: rgba(255, 255, 255, 0.35);
+	overflow: hidden;
+}
+
+.ftd-sc--founding-spots-banner .fsb-fill {
+	height: 100%;
+	border-radius: 0;
+	background: #fff;
+	transition: width 0.35s ease;
+}
+
+@media (min-width: 720px) {
+	.ftd-sc--founding-spots-banner .fsb-inner {
+		flex-wrap: nowrap;
+		justify-content: flex-start;
+		text-align: left;
+	}
+
+	.ftd-sc--founding-spots-banner .fsb-status {
+		flex: 0 1 auto;
+	}
+
+	.ftd-sc--founding-spots-banner .fsb-link {
+		margin-left: auto;
+	}
+}
+
+@media (max-width: 719px) {
+	.ftd-sc--founding-spots-banner .fsb-link {
+		white-space: normal;
+	}
+}

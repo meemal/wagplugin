@@ -39,37 +39,9 @@ function ftd_founding_genius_banner_shortcode( $atts ) {
 	$total       = intval( $atts['total'] );
 	$coupon_code = sanitize_text_field( strtolower( $atts['code'] ) );
 
-	$used = 0;
-
-	if ( function_exists( 'pmpro_getDiscountCode' ) ) {
-		global $wpdb;
-
-		$discount = $wpdb->get_row(
-			$wpdb->prepare(
-				"SELECT id
-				 FROM {$wpdb->prefix}pmpro_discount_codes
-				 WHERE LOWER(code) = %s
-				 LIMIT 1",
-				$coupon_code
-			)
-		);
-
-		if ( $discount ) {
-			$used = intval(
-				$wpdb->get_var(
-					$wpdb->prepare(
-						"SELECT COUNT(*)
-						 FROM {$wpdb->prefix}pmpro_discount_codes_uses dcu
-						 INNER JOIN {$wpdb->prefix}pmpro_membership_orders mo
-							 ON dcu.order_id = mo.id
-						 WHERE dcu.code_id = %d
-						   AND mo.status IN ('success', 'pending')",
-						$discount->id
-					)
-				)
-			);
-		}
-	}
+	$used = function_exists( 'ftd_get_pmpro_discount_code_uses' )
+		? ftd_get_pmpro_discount_code_uses( $coupon_code )
+		: 0;
 
 	$remaining = max( 0, $total - $used );
 	$percent   = $total > 0 ? min( 100, round( ( $used / $total ) * 100 ) ) : 0;
