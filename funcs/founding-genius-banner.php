@@ -21,18 +21,16 @@ function ftd_founding_genius_banner_shortcode( $atts ) {
 
 	$atts = shortcode_atts(
 		array(
-			'total'          => 111,
-			'code'           => 'originalgenius111',
-			'stamp_line1'    => 'Founding',
-			'stamp_line2'    => 'Geniuses',
-			'badge'          => 'Founding offer',
-			'eyebrow'        => 'Limited to the first {total} members',
-			'headline'       => 'Lifetime directory listing &mdash; completely free',
-			'subtext'        => 'Be part of the founding community. The first {total} Geniuses who join get a permanent directory listing with no subscription, ever.',
-			'code_label'     => 'Use code',
-			'spots_text'     => '{used} of {total} spots claimed',
-			'all_claimed'    => 'All {total} founding spots have been claimed',
-			'claimed_notice' => 'The founding offer has now closed. Join now to access our standard plans.',
+			'total'           => 111,
+			'code'            => 'originalgenius111',
+			'badge'           => 'Founding genius offer',
+			'headline'        => 'Free lifetime listing &mdash; forever',
+			'subtext'         => 'be one of the original {total},',
+			'code_label'      => 'use code',
+			'joined_text'     => '{used} joined',
+			'remaining_text'  => '{remaining} left',
+			'all_claimed'     => 'All {total} founding spots have been claimed',
+			'claimed_notice'  => 'The founding offer has now closed. Join now to access our standard plans.',
 		),
 		$atts,
 		'founding_genius_banner'
@@ -88,72 +86,75 @@ function ftd_founding_genius_banner_shortcode( $atts ) {
 	};
 
 	$badge          = esc_html( $replace( $atts['badge'] ) );
-	$eyebrow        = esc_html( $replace( $atts['eyebrow'] ) );
 	$headline       = wp_kses_post( $replace( $atts['headline'] ) );
 	$subtext        = esc_html( $replace( $atts['subtext'] ) );
 	$code_label     = esc_html( $replace( $atts['code_label'] ) );
-	$stamp_line1    = esc_html( $replace( $atts['stamp_line1'] ) );
-	$stamp_line2    = esc_html( $replace( $atts['stamp_line2'] ) );
+	$joined_label   = esc_html( $replace( $atts['joined_text'] ) );
+	$remaining_label = esc_html( $replace( $atts['remaining_text'] ) );
 	$claimed_notice = esc_html( $replace( $atts['claimed_notice'] ) );
+	$all_claimed    = esc_html( $replace( $atts['all_claimed'] ) );
 
-	$spots_label = $remaining > 0
-		? esc_html( $replace( $atts['spots_text'] ) )
-		: esc_html( $replace( $atts['all_claimed'] ) );
+	$counter_aria = sprintf(
+		/* translators: 1: spots remaining, 2: total spots */
+		__( '%1$d of %2$d spots remaining', 'ftd-directory-listings' ),
+		$remaining,
+		$total
+	);
 
 	ob_start();
 	?>
 	<div class="ftd-sc ftd-sc--founding-genius">
-	<div class="fg-banner" role="region" aria-label="<?php echo esc_attr( $badge ); ?>">
-
-		<div class="fg-stamp" aria-hidden="true">
-			<span class="fg-stamp-num"><?php echo esc_html( $total ); ?></span>
-			<span class="fg-stamp-label"><?php echo $stamp_line1; ?></span>
-			<?php if ( $stamp_line2 ) : ?>
-				<span class="fg-stamp-label"><?php echo $stamp_line2; ?></span>
-			<?php endif; ?>
-		</div>
-
-		<div class="fg-body">
+		<div class="fg-banner" role="region" aria-label="<?php echo esc_attr( $badge ); ?>">
 
 			<?php if ( $badge ) : ?>
-				<span class="fg-pill"><?php echo $badge; ?></span>
-			<?php endif; ?>
-
-			<?php if ( $eyebrow ) : ?>
-				<p class="fg-eyebrow"><?php echo $eyebrow; ?></p>
+				<p class="fg-label"><?php echo $badge; ?></p>
 			<?php endif; ?>
 
 			<?php if ( $headline ) : ?>
 				<h2 class="fg-headline"><?php echo $headline; ?></h2>
 			<?php endif; ?>
 
-			<?php if ( $subtext || $code_label ) : ?>
-				<p class="fg-sub">
-					<?php echo $subtext; ?>
-					<?php if ( $code_label ) : ?>
-						<?php echo ' ' . $code_label; ?>
-						<strong><?php echo esc_html( strtoupper( $coupon_code ) ); ?></strong>.
-					<?php endif; ?>
-				</p>
+			<?php if ( $subtext ) : ?>
+				<p class="fg-subtext"><?php echo $subtext; ?></p>
 			<?php endif; ?>
 
-			<div class="fg-spots-row" aria-label="<?php echo esc_attr( $spots_label ); ?>">
-				<div class="fg-track"
-					 role="progressbar"
-					 aria-valuenow="<?php echo esc_attr( $used ); ?>"
-					 aria-valuemin="0"
-					 aria-valuemax="<?php echo esc_attr( $total ); ?>">
-					<div class="fg-fill" style="width:<?php echo esc_attr( $percent ); ?>%;"></div>
+			<?php if ( $remaining > 0 ) : ?>
+				<div class="fg-counter" aria-label="<?php echo esc_attr( $counter_aria ); ?>">
+					<span class="fg-counter-num"><?php echo esc_html( $remaining ); ?></span>
+					<span class="fg-counter-of">of</span>
+					<span class="fg-counter-total"><?php echo esc_html( $total ); ?></span>
 				</div>
-				<span class="fg-spots-text"><?php echo $spots_label; ?></span>
-			</div>
 
-			<?php if ( $remaining <= 0 && $claimed_notice ) : ?>
-				<p class="fg-claimed-notice"><?php echo $claimed_notice; ?></p>
+				<div class="fg-progress">
+					<div class="fg-track"
+						 role="progressbar"
+						 aria-valuenow="<?php echo esc_attr( $used ); ?>"
+						 aria-valuemin="0"
+						 aria-valuemax="<?php echo esc_attr( $total ); ?>"
+						 aria-label="<?php echo esc_attr( $joined_label . ', ' . $remaining_label ); ?>">
+						<div class="fg-fill" style="width:<?php echo esc_attr( $percent ); ?>%;"></div>
+					</div>
+					<div class="fg-progress-labels">
+						<span class="fg-joined"><?php echo $joined_label; ?></span>
+						<span class="fg-left"><?php echo $remaining_label; ?></span>
+					</div>
+				</div>
+
+				<?php if ( $code_label ) : ?>
+					<div class="fg-code-pill">
+						<span class="fg-code-label"><?php echo $code_label; ?></span>
+						<strong class="fg-code-value"><?php echo esc_html( strtoupper( $coupon_code ) ); ?></strong>
+					</div>
+				<?php endif; ?>
+
+			<?php else : ?>
+				<p class="fg-all-claimed"><?php echo $all_claimed; ?></p>
+				<?php if ( $claimed_notice ) : ?>
+					<p class="fg-claimed-notice"><?php echo $claimed_notice; ?></p>
+				<?php endif; ?>
 			<?php endif; ?>
 
 		</div>
-	</div>
 	</div>
 	<?php
 	return ob_get_clean();
