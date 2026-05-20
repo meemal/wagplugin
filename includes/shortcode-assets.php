@@ -16,6 +16,8 @@ function ftd_get_shortcode_styles() {
 	return array(
 		'founding_genius_banner'             => 'css/founding-genius-banner.css',
 		'genius_levels_cta'                  => 'css/genius-cta.css',
+		'WAG_Features_CTAS'                  => 'css/wag-features-ctas.css',
+		'genius_calls'                       => 'css/wag-features-ctas.css',
 		'custom_member_profile'              => 'css/user-profile.css',
 		'my_directory_listings_account_page' => 'css/directory-toggle.css',
 	);
@@ -31,15 +33,21 @@ function ftd_enqueue_shortcode_styles() {
 		return;
 	}
 
-	$base_handle = 'directory-listings-style';
-	$plugin_url  = plugin_dir_url( FTD_DIRECTORY_LISTINGS_FILE );
+	$base_handle    = 'directory-listings-style';
+	$plugin_url     = plugin_dir_url( FTD_DIRECTORY_LISTINGS_FILE );
+	$enqueued_files = array();
 
 	foreach ( ftd_get_shortcode_styles() as $tag => $relative_path ) {
 		if ( ! has_shortcode( $post->post_content, $tag ) ) {
 			continue;
 		}
 
-		$handle = 'ftd-sc-' . sanitize_title( $tag );
+		if ( in_array( $relative_path, $enqueued_files, true ) ) {
+			continue;
+		}
+		$enqueued_files[] = $relative_path;
+
+		$handle = 'ftd-sc-' . sanitize_title( basename( $relative_path, '.css' ) );
 		wp_enqueue_style(
 			$handle,
 			$plugin_url . $relative_path,
