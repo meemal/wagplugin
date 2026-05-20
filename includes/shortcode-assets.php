@@ -18,6 +18,8 @@ function ftd_get_shortcode_styles() {
 		'genius_levels_cta'                  => 'css/genius-cta.css',
 		'WAG_Features_CTAS'                  => 'css/wag-features-ctas.css',
 		'genius_calls'                       => 'css/wag-features-ctas.css',
+		'wag_stats_ticker'                   => 'css/stats-ticker.css',
+		'ftd_stats_ticker'                   => 'css/stats-ticker.css',
 		'custom_member_profile'              => 'css/user-profile.css',
 		'my_directory_listings_account_page' => 'css/directory-toggle.css',
 	);
