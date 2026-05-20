@@ -898,6 +898,12 @@ function ftd_custom_affiliates_report_shortcode($atts, $content = null, $code = 
 
 	$base_url = site_url('/');
 	$link = trailingslashit($base_url) . '?pa=' . rawurlencode($primary_code);
+	
+	// Build WhatsApp share message
+	$site_name = get_bloginfo('name');
+	$default_message = sprintf('Join %s with my link: %s', $site_name, $link);
+	$whatsapp_message = apply_filters('ftd_affiliate_whatsapp_message', $default_message, $primary_code, $link);
+	$whatsapp_url = 'https://api.whatsapp.com/send?text=' . rawurlencode($whatsapp_message);
 
 	ob_start();
 	?>
@@ -905,11 +911,19 @@ function ftd_custom_affiliates_report_shortcode($atts, $content = null, $code = 
 		<div class="pmpro_card">
 			<div class="pmpro_card_content">
 				<h2 class="pmpro_card_title pmpro_font-large" style="margin-bottom: 12px;">Share With Geniuses</h2>
-				<p>Use this link to share your affiliate link with others to earn rewards.</p>
+				<p>Use this link to share your We Are Geniuses with others to earn rewards.</p>
 				<div class="pmpro_form_field pmpro_form_field-text" style="display:block;">
 					<input type="text" id="ftd_aff_link" readonly value="<?php echo esc_url($link); ?>" class="pmpro_form_input pmpro_form_input-text" style="font-size:16px; padding:10px; width:100%; background:#f8f9fa; border:2px solid #e9ecef;">
 					<button type="button" class="button button-primary" onclick="navigator.clipboard.writeText(document.getElementById('ftd_aff_link').value)" style="margin-top:8px; width:100%;">Copy Link</button>
-				</div>`
+				</div>
+				<div style="margin-top: 12px; display: flex; gap: 8px;">
+					<a href="<?php echo esc_url($whatsapp_url); ?>" target="_blank" rel="noopener" class="button" style="flex: 1; text-align: center; background-color: #25D366; color: white; border-color: #25D366; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+						<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="vertical-align: middle;">
+							<path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+						</svg>
+						Share on WhatsApp
+					</a>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -960,6 +974,12 @@ function ftd_affiliate_sidebar_shortcode($atts = []) {
 	$base_url = site_url('/');
 	$link = trailingslashit($base_url) . '?pa=' . rawurlencode($primary_code);
 	
+	// Build WhatsApp share message
+	$site_name = get_bloginfo('name');
+	$default_message = sprintf('Join %s with my link: %s', $site_name, $link);
+	$whatsapp_message = apply_filters('ftd_affiliate_whatsapp_message', $default_message, $primary_code, $link);
+	$whatsapp_url = 'https://api.whatsapp.com/send?text=' . rawurlencode($whatsapp_message);
+	
 	// Determine referrals page URL, allow override via filter
 	$default_referrals_url = home_url('/affiliates/');
 	$referrals_url = home_url('/my-referrals/');
@@ -974,11 +994,17 @@ function ftd_affiliate_sidebar_shortcode($atts = []) {
 		<div class="pmpro_card">
 			<div class="pmpro_card_content">
 				<h4 class="has-text-align-center" style="margin-top: 24px;margin-bottom: 8px;"><span class="text-purple">Share With Friends</span></h4>
-				<p style="margin-top:0;">Use the your link to share We Are Geniuses with friends and earn rewards.</p>
+				<p style="margin-top:0;">Use the your link to share We Are Geniuses with friends, earn rewards & grow our network!</p>
 				<div class="pmpro_form_field pmpro_form_field-text" style="display:block;">
 					<input type="text" id="<?php echo esc_attr($input_id); ?>" readonly value="<?php echo esc_url($link); ?>" class="pmpro_form_input pmpro_form_input-text" style="font-size:14px; padding:10px; width:100%; background:#f8f9fa; border:2px solid #e9ecef;">
 					<button type="button" class="button button-primary" onclick="navigator.clipboard.writeText(document.getElementById('<?php echo esc_js($input_id); ?>').value)" style="margin-top:8px; width:100%;">Copy Link</button>
 				</div>
+				<a href="<?php echo esc_url($whatsapp_url); ?>" target="_blank" rel="noopener" class="button" style="display:flex; width:100%; box-sizing:border-box; text-align:center; margin-top:8px; background-color: #25D366; color: white; border-color: #25D366; align-items: center; justify-content: center; gap: 8px;">
+					<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="vertical-align: middle;">
+						<path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+					</svg>
+					Share on WhatsApp
+				</a>
 				<a href="<?php echo esc_url($referrals_url); ?>" class="button" style="display:block; width:100%; box-sizing:border-box; text-align:center; margin-top:8px;">View Your Referrals</a>
 			</div>
 		</div>

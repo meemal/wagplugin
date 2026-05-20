@@ -48,6 +48,14 @@ add_action('wp_enqueue_scripts', function() {
             plugin_dir_url(__FILE__) . 'css/genius-cta.css'
         );
     }
+    if ( is_a( $post, 'WP_Post' ) && has_shortcode( $post->post_content, 'founding_genius_banner' ) ) {
+        wp_enqueue_style(
+            'ftd-founding-genius-banner',
+            plugin_dir_url( __FILE__ ) . 'css/founding-genius-banner.css',
+            array(),
+            '1.0.0'
+        );
+    }
     // Enqueue genius-map CSS if we are on the /genius-map/ page
     if ( is_page('genius-map') ) {
         wp_enqueue_style(
