@@ -18,6 +18,13 @@ function ftd_stats_get_quantum_level_id() {
 }
 
 /**
+ * @return int Creator Genius PMPro level ID.
+ */
+function ftd_stats_get_creator_level_id() {
+	return (int) apply_filters( 'ftd_stats_ticker_creator_level_id', 2 );
+}
+
+/**
  * @return void
  */
 function ftd_stats_ticker_clear_cache() {
@@ -64,6 +71,27 @@ function ftd_stats_count_on_map() {
 			AND um.meta_key = 'pmpromd_pin_location'
 			AND um.meta_value != ''
 			AND um.meta_value IS NOT NULL"
+	);
+}
+
+/**
+ * Active members on Creator Genius level.
+ *
+ * @return int
+ */
+function ftd_stats_count_creator_geniuses() {
+	global $wpdb;
+
+	$level_id = ftd_stats_get_creator_level_id();
+
+	return (int) $wpdb->get_var(
+		$wpdb->prepare(
+			"SELECT COUNT( DISTINCT user_id )
+			 FROM {$wpdb->pmpro_memberships_users}
+			 WHERE status = 'active'
+			   AND membership_id = %d",
+			$level_id
+		)
 	);
 }
 
@@ -180,6 +208,12 @@ function ftd_get_stats_ticker_slides() {
 			'value'   => ftd_stats_count_on_map(),
 			'label'   => __( 'on the genius map', 'ftd-directory-listings' ),
 			'tagline' => __( 'sharing their genius,', 'ftd-directory-listings' ),
+			'type'    => 'number',
+		),
+		array(
+			'value'   => ftd_stats_count_creator_geniuses(),
+			'label'   => __( 'creator geniuses', 'ftd-directory-listings' ),
+			'tagline' => __( 'building the directory,', 'ftd-directory-listings' ),
 			'type'    => 'number',
 		),
 		array(

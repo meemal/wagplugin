@@ -36,12 +36,16 @@ function ftd_founding_genius_banner_shortcode( $atts ) {
 		'founding_genius_banner'
 	);
 
-	$total       = intval( $atts['total'] );
+	$total       = function_exists( 'ftd_get_founding_spots_total' )
+		? ftd_get_founding_spots_total()
+		: intval( $atts['total'] );
 	$coupon_code = sanitize_text_field( strtolower( $atts['code'] ) );
 
-	$used = function_exists( 'ftd_get_pmpro_discount_code_uses' )
-		? ftd_get_pmpro_discount_code_uses( $coupon_code )
-		: 0;
+	$used = function_exists( 'ftd_get_founding_spots_used' )
+		? ftd_get_founding_spots_used()
+		: ( function_exists( 'ftd_get_pmpro_discount_code_uses' )
+			? ftd_get_pmpro_discount_code_uses( $coupon_code )
+			: 0 );
 
 	$remaining = max( 0, $total - $used );
 	$percent   = $total > 0 ? min( 100, round( ( $used / $total ) * 100 ) ) : 0;

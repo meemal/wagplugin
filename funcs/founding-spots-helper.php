@@ -48,3 +48,43 @@ function ftd_get_pmpro_discount_code_uses( $coupon_code ) {
 		)
 	);
 }
+
+/**
+ * Discount codes that count toward founding-genius spot usage.
+ *
+ * @return string[]
+ */
+function ftd_get_founding_spots_discount_codes() {
+	return apply_filters(
+		'ftd_founding_spots_discount_codes',
+		array(
+			'originalgenius111',
+			'loveyougive',
+			'geniushelpers555',
+		)
+	);
+}
+
+/**
+ * Total founding spots in the originalgenius111 pool (display cap).
+ *
+ * @return int
+ */
+function ftd_get_founding_spots_total() {
+	return (int) apply_filters( 'ftd_founding_spots_total', 111 );
+}
+
+/**
+ * Combined uses across all founding-genius discount codes.
+ *
+ * @return int
+ */
+function ftd_get_founding_spots_used() {
+	$used = 0;
+
+	foreach ( ftd_get_founding_spots_discount_codes() as $code ) {
+		$used += ftd_get_pmpro_discount_code_uses( $code );
+	}
+
+	return $used;
+}

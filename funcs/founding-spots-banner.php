@@ -102,11 +102,15 @@ function ftd_get_founding_spots_banner_html() {
 
 	$settings = ftd_get_founding_spots_banner_settings();
 
-	$total = (int) $settings['total_spots'];
+	$total = function_exists( 'ftd_get_founding_spots_total' )
+		? ftd_get_founding_spots_total()
+		: (int) $settings['total_spots'];
 	$code  = $settings['discount_code'];
-	$used  = function_exists( 'ftd_get_pmpro_discount_code_uses' )
-		? ftd_get_pmpro_discount_code_uses( $code )
-		: 0;
+	$used  = function_exists( 'ftd_get_founding_spots_used' )
+		? ftd_get_founding_spots_used()
+		: ( function_exists( 'ftd_get_pmpro_discount_code_uses' )
+			? ftd_get_pmpro_discount_code_uses( $code )
+			: 0 );
 
 	$remaining = max( 0, $total - $used );
 	$percent   = $total > 0 ? min( 100, round( ( $used / $total ) * 100 ) ) : 0;

@@ -292,16 +292,6 @@ function ftd_render_wag_features_cta_panel( $panel ) {
 						<span class="wagfc-btn-text"><?php echo esc_html( $panel['link_label'] ?: $panel['button_label'] ); ?></span>
 					</a>
 				<?php endif; ?>
-
-				<?php if ( ! empty( $panel['feature_url'] ) && ! empty( $panel['feature_label'] ) ) : ?>
-					<a
-						class="wagfc-panel-feature-link"
-						href="<?php echo esc_url( $panel['feature_url'] ); ?>"
-						<?php echo $feature_target_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-					>
-						<?php echo esc_html( $panel['feature_label'] ); ?>
-					</a>
-				<?php endif; ?>
 			</div>
 		</div>
 	</article>
