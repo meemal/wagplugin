@@ -22,6 +22,8 @@ function ftd_get_shortcode_styles() {
 		'ftd_stats_ticker'                   => 'css/founding-spots-banner.css',
 		'wag_social_share'                   => 'css/social-share.css',
 		'ftd_social_share'                   => 'css/social-share.css',
+		'wag_favourite_quotes'               => 'css/favourite-quotes.css',
+		'ftd_favourite_quotes'               => 'css/favourite-quotes.css',
 		'custom_member_profile'              => 'css/user-profile.css',
 		'my_directory_listings_account_page' => 'css/directory-toggle.css',
 	);

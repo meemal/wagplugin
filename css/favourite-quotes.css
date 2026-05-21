@@ -1,0 +1,129 @@
+/* [wag_favourite_quotes] — member favourite quote carousel */
+.ftd-sc--favourite-quotes {
+	--ftd-fq-plum: #512851;
+	--ftd-fq-accent: var(--color-pinkcoral, #e07a5f);
+	--ftd-fq-accent-soft: var(--color-pinkdusk, #d94e81);
+	width: 100%;
+	max-width: 100%;
+	box-sizing: border-box;
+}
+
+.ftd-sc--favourite-quotes .ftd-fq-track {
+	position: relative;
+	background: var(--ftd-fq-plum);
+	border-radius: 12px;
+	padding: 2.75rem 2rem 2.25rem;
+	text-align: center;
+	overflow: hidden;
+	box-sizing: border-box;
+}
+
+.ftd-sc--favourite-quotes .ftd-fq-slide {
+	margin: 0;
+	padding: 0;
+	display: none;
+	animation: ftd-fq-fade 0.45s ease;
+}
+
+.ftd-sc--favourite-quotes .ftd-fq-slide.is-active {
+	display: block;
+}
+
+.ftd-sc--favourite-quotes .ftd-fq-mark {
+	margin: 0 0 0.85rem;
+	font-size: 2rem;
+	line-height: 1;
+	color: var(--ftd-fq-accent);
+	font-family: Georgia, "Times New Roman", serif;
+}
+
+.ftd-sc--favourite-quotes blockquote.ftd-fq-quote,
+.ftd-sc--favourite-quotes blockquote.ftd-fq-quote p {
+	background: transparent !important;
+	box-shadow: none !important;
+	border: 0 !important;
+}
+
+.ftd-sc--favourite-quotes .ftd-fq-quote {
+	margin: 0 auto 1.35rem;
+	padding: 0 !important;
+	border: 0;
+	max-width: 34rem;
+}
+
+.ftd-sc--favourite-quotes .ftd-fq-quote::before,
+.ftd-sc--favourite-quotes .ftd-fq-quote::after {
+	content: none !important;
+	display: none !important;
+}
+
+.ftd-sc--favourite-quotes .ftd-fq-quote p {
+	margin: 0;
+	font-family: Georgia, "Times New Roman", serif;
+	font-size: clamp(1.15rem, 2.6vw, 1.55rem);
+	font-style: italic;
+	font-weight: 400;
+	line-height: 1.55;
+	color: #fff;
+}
+
+.ftd-sc--favourite-quotes .ftd-fq-meta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: center;
+	gap: 0.55rem 0.65rem;
+	margin: 0;
+	font-size: 0.92rem;
+	line-height: 1.4;
+}
+
+.ftd-sc--favourite-quotes .ftd-fq-initials {
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	color: #fff;
+}
+
+.ftd-sc--favourite-quotes .ftd-fq-meta-sep {
+	width: 0.35rem;
+	height: 0.35rem;
+	border-radius: 50%;
+	background: var(--ftd-fq-accent);
+	flex-shrink: 0;
+}
+
+.ftd-sc--favourite-quotes .ftd-fq-source {
+	font-family: Georgia, "Times New Roman", serif;
+	font-style: italic;
+	color: var(--ftd-fq-accent-soft);
+}
+
+@keyframes ftd-fq-fade {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@media (max-width: 720px) {
+	.ftd-sc--favourite-quotes .ftd-fq-track {
+		padding: 2.25rem 1.25rem 1.85rem;
+	}
+
+	.ftd-sc--favourite-quotes .ftd-fq-quote {
+		margin-bottom: 1.1rem;
+	}
+
+	.ftd-sc--favourite-quotes .ftd-fq-meta {
+		flex-direction: column;
+		gap: 0.4rem;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.ftd-sc--favourite-quotes .ftd-fq-slide {
+		animation: none;
+	}
+}
