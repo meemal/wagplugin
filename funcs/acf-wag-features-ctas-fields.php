@@ -333,11 +333,13 @@ function ftd_feature_cta_group_fields( $card ) {
 				'placeholder'   => 'Read more',
 			),
 			array(
-				'key'           => "field_ftd_fcta_{$n}_secondary_link",
-				'label'         => 'Secondary link (optional)',
-				'name'          => 'secondary_link',
+				'key'           => "field_ftd_fcta_{$n}_feature_link",
+				'label'         => 'Feature link',
+				'name'          => 'feature_link',
 				'type'          => 'link',
-				'instructions'  => $card['secondary'] ? 'e.g. ' . $card['secondary'] : 'Optional second link below the button.',
+				'instructions'  => $card['secondary']
+					? 'Links the feature image and title. e.g. ' . $card['secondary']
+					: 'Links the feature image and title.',
 			),
 		),
 	);

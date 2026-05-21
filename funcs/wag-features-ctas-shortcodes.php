@@ -139,7 +139,7 @@ function ftd_wag_features_get_feature_cta_group( $number ) {
 			'title'          => $legacy['heading'] ?? $legacy['event_title'] ?? '',
 			'description'    => $legacy['subtext'] ?? $legacy['description'] ?? '',
 			'link'           => $legacy['link'] ?? null,
-			'secondary_link' => null,
+			'feature_link'   => null,
 			'style'          => '',
 			'button_label'   => '',
 		);
@@ -160,7 +160,7 @@ function ftd_wag_features_get_feature_cta( $number ) {
 
 	$image   = ftd_wag_features_normalize_image( $group['image'] ?? null );
 	$link    = ftd_wag_features_normalize_link( $group['link'] ?? null );
-	$secondary = ftd_wag_features_normalize_link( $group['secondary_link'] ?? null );
+	$feature = ftd_wag_features_normalize_link( $group['feature_link'] ?? $group['secondary_link'] ?? null );
 
 	$style = trim( (string) ( $group['style'] ?? '' ) );
 	if ( '' === $style || ! array_key_exists( $style, ftd_feature_cta_style_choices() ) ) {
@@ -182,9 +182,9 @@ function ftd_wag_features_get_feature_cta( $number ) {
 		$button_label = __( 'Read more', 'ftd-directory-listings' );
 	}
 
-	$secondary_label = $secondary['label'];
-	if ( '' === $secondary_label && ( 1 === $number || 2 === $number ) ) {
-		$secondary_label = __( 'Levels & Prices', 'ftd-directory-listings' );
+	$feature_label = $feature['label'];
+	if ( '' === $feature_label && ( 1 === $number || 2 === $number ) ) {
+		$feature_label = __( 'Levels & Prices', 'ftd-directory-listings' );
 	}
 
 	return array(
@@ -199,9 +199,9 @@ function ftd_wag_features_get_feature_cta( $number ) {
 		'link_label'        => $link['label'] ?: $button_label,
 		'link_target'       => $link['target'],
 		'button_label'      => $button_label,
-		'secondary_url'     => $secondary['url'],
-		'secondary_label'   => $secondary_label,
-		'secondary_target'  => $secondary['target'],
+		'feature_url'       => $feature['url'],
+		'feature_label'     => $feature_label,
+		'feature_target'    => $feature['target'],
 	);
 }
 
@@ -224,9 +224,21 @@ function ftd_get_wag_features_cta_panels() {
  */
 function ftd_render_wag_features_cta_panel( $panel ) {
 	$style = esc_attr( $panel['style'] ?? 'magenta' );
+
+	$feature_target_attr = ! empty( $panel['feature_target'] )
+		? ' target="' . esc_attr( $panel['feature_target'] ) . '" rel="noopener noreferrer"'
+		: '';
 	?>
 	<article class="wagfc-panel wagfc-panel--style-<?php echo $style; ?>">
 		<div class="wagfc-panel-media">
+			<?php if ( ! empty( $panel['feature_url'] ) ) : ?>
+				<a
+					class="wagfc-panel-media-link"
+					href="<?php echo esc_url( $panel['feature_url'] ); ?>"
+					<?php echo $feature_target_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				>
+			<?php endif; ?>
+
 			<?php if ( ! empty( $panel['image_url'] ) ) : ?>
 				<img
 					class="wagfc-panel-image"
@@ -239,6 +251,10 @@ function ftd_render_wag_features_cta_panel( $panel ) {
 				<div class="wagfc-panel-visual" aria-hidden="true"></div>
 			<?php endif; ?>
 
+			<?php if ( ! empty( $panel['feature_url'] ) ) : ?>
+				</a>
+			<?php endif; ?>
+
 			<?php if ( ! empty( $panel['small_label'] ) ) : ?>
 				<span class="wagfc-badge"><?php echo esc_html( $panel['small_label'] ); ?></span>
 			<?php endif; ?>
@@ -246,7 +262,19 @@ function ftd_render_wag_features_cta_panel( $panel ) {
 
 		<div class="wagfc-panel-body">
 			<?php if ( ! empty( $panel['title'] ) ) : ?>
-				<h3 class="wagfc-panel-title"><?php echo esc_html( $panel['title'] ); ?></h3>
+				<h3 class="wagfc-panel-title">
+					<?php if ( ! empty( $panel['feature_url'] ) ) : ?>
+						<a
+							class="wagfc-panel-title-link"
+							href="<?php echo esc_url( $panel['feature_url'] ); ?>"
+							<?php echo $feature_target_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						>
+							<?php echo esc_html( $panel['title'] ); ?>
+						</a>
+					<?php else : ?>
+						<?php echo esc_html( $panel['title'] ); ?>
+					<?php endif; ?>
+				</h3>
 			<?php endif; ?>
 
 			<?php if ( ! empty( $panel['description'] ) ) : ?>
@@ -265,13 +293,13 @@ function ftd_render_wag_features_cta_panel( $panel ) {
 					</a>
 				<?php endif; ?>
 
-				<?php if ( ! empty( $panel['secondary_url'] ) ) : ?>
+				<?php if ( ! empty( $panel['feature_url'] ) && ! empty( $panel['feature_label'] ) ) : ?>
 					<a
-						class="wagfc-panel-secondary"
-						href="<?php echo esc_url( $panel['secondary_url'] ); ?>"
-						<?php echo ! empty( $panel['secondary_target'] ) ? ' target="' . esc_attr( $panel['secondary_target'] ) . '" rel="noopener noreferrer"' : ''; ?>
+						class="wagfc-panel-feature-link"
+						href="<?php echo esc_url( $panel['feature_url'] ); ?>"
+						<?php echo $feature_target_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 					>
-						<?php echo esc_html( $panel['secondary_label'] ); ?>
+						<?php echo esc_html( $panel['feature_label'] ); ?>
 					</a>
 				<?php endif; ?>
 			</div>
