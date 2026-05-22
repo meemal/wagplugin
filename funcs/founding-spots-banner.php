@@ -11,6 +11,49 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Normalize a banner link for output (relative or absolute).
+ *
+ * @param string $url Raw URL from ACF.
+ * @return string Safe absolute URL, or empty string if invalid.
+ */
+function ftd_normalize_banner_link_url( $url ) {
+	$url = trim( (string) $url );
+
+	if ( '' === $url ) {
+		return '';
+	}
+
+	// Site-relative path: /join-we-are-geniuses/
+	if ( 0 === strpos( $url, '/' ) && 0 !== strpos( $url, '//' ) ) {
+		return home_url( $url );
+	}
+
+	// Protocol-relative: //example.com/path
+	if ( 0 === strpos( $url, '//' ) ) {
+		$url = set_url_scheme( 'https:' . $url );
+	}
+
+	// Bare path without leading slash: join-we-are-geniuses/
+	if ( ! preg_match( '#^https?://#i', $url ) && 0 !== strpos( $url, 'mailto:' ) && 0 !== strpos( $url, 'tel:' ) ) {
+		if ( 0 === strpos( $url, '#' ) || 0 === strpos( $url, '?' ) ) {
+			return home_url( '/' ) . ltrim( $url, '/' );
+		}
+
+		if ( false === strpos( $url, '.' ) && false === strpos( $url, '://' ) ) {
+			return home_url( '/' . ltrim( $url, '/' ) );
+		}
+
+		if ( ! preg_match( '#^https?://#i', $url ) ) {
+			$url = 'https://' . ltrim( $url, '/' );
+		}
+	}
+
+	$sanitized = esc_url_raw( $url );
+
+	return $sanitized ? $sanitized : '';
+}
+
+/**
  * @return array<string, mixed>
  */
 function ftd_get_founding_spots_banner_settings() {
@@ -19,7 +62,7 @@ function ftd_get_founding_spots_banner_settings() {
 		'discount_code'        => 'originalgenius111',
 		'stats_eyebrow'        => 'SO FAR',
 		'code_label'           => 'use code',
-		'link_url'             => home_url( '/join-we-are-geniuses/' ),
+		'link_url'             => '/join-we-are-geniuses/',
 		'signup_button_label'  => 'Sign up now',
 		'show_progress_bar'    => true,
 	);
@@ -45,10 +88,7 @@ function ftd_get_founding_spots_banner_settings() {
 	$defaults['total_spots']      = max( 1, (int) $defaults['total_spots'] );
 	$defaults['discount_code']    = sanitize_text_field( strtolower( (string) $defaults['discount_code'] ) );
 	$defaults['show_progress_bar'] = ! empty( $defaults['show_progress_bar'] );
-
-	if ( is_string( $defaults['link_url'] ) && 0 === strpos( $defaults['link_url'], '/' ) ) {
-		$defaults['link_url'] = home_url( $defaults['link_url'] );
-	}
+	$defaults['link_url']         = ftd_normalize_banner_link_url( $defaults['link_url'] );
 
 	return $defaults;
 }
@@ -106,11 +146,9 @@ function ftd_get_founding_spots_banner_html() {
 		? ftd_get_founding_spots_total()
 		: (int) $settings['total_spots'];
 	$code  = $settings['discount_code'];
-	$used  = function_exists( 'ftd_get_founding_spots_used' )
+	$used = function_exists( 'ftd_get_founding_spots_used' )
 		? ftd_get_founding_spots_used()
-		: ( function_exists( 'ftd_get_pmpro_discount_code_uses' )
-			? ftd_get_pmpro_discount_code_uses( $code )
-			: 0 );
+		: 0;
 
 	$remaining = max( 0, $total - $used );
 	$percent   = $total > 0 ? min( 100, round( ( $used / $total ) * 100 ) ) : 0;

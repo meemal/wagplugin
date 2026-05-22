@@ -11,7 +11,7 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 define( 'FTD_DIRECTORY_LISTINGS_FILE', __FILE__ );
-define( 'FTD_DIRECTORY_LISTINGS_VERSION', '1.0.36' );
+define( 'FTD_DIRECTORY_LISTINGS_VERSION', '1.0.39' );
 
 require_once plugin_dir_path( __FILE__ ) . 'includes/shortcode-assets.php';
 

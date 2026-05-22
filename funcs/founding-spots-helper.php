@@ -75,16 +75,17 @@ function ftd_get_founding_spots_total() {
 }
 
 /**
- * Combined uses across all founding-genius discount codes.
+ * Combined founding spots claimed (Creator + Quantum Genius members).
  *
  * @return int
  */
 function ftd_get_founding_spots_used() {
-	$used = 0;
+	$creator = function_exists( 'ftd_stats_count_creator_geniuses' )
+		? ftd_stats_count_creator_geniuses()
+		: 0;
+	$quantum = function_exists( 'ftd_stats_count_quantum_geniuses' )
+		? ftd_stats_count_quantum_geniuses()
+		: 0;
 
-	foreach ( ftd_get_founding_spots_discount_codes() as $code ) {
-		$used += ftd_get_pmpro_discount_code_uses( $code );
-	}
-
-	return $used;
+	return (int) apply_filters( 'ftd_founding_spots_used', $creator + $quantum );
 }

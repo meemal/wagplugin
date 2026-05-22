@@ -139,6 +139,142 @@ function ftd_genius_directory_banner_get_field( $field ) {
 }
 
 /**
+ * Default stats ticker copy.
+ *
+ * @return array<string, string>
+ */
+function ftd_get_stats_ticker_text_defaults() {
+	return array(
+		'offer_eyebrow'         => 'OFFER',
+		'founding_spots_label'  => 'of {total} founding spots left',
+		'members_label'         => 'members',
+		'members_tagline'       => 'the community grows,',
+		'map_label'             => 'on the genius map',
+		'map_tagline'           => 'sharing their genius,',
+		'listings_label'        => 'directory listings',
+		'listings_tagline'      => 'sharing their gifts,',
+		'creator_label'         => 'creator geniuses',
+		'creator_tagline'       => 'building the directory,',
+		'quantum_label'         => 'quantum geniuses',
+		'quantum_tagline'       => 'leading the way,',
+		'last_signup_label'     => 'last sign-up from',
+		'last_signup_tagline'   => 'the threshold opens,',
+	);
+}
+
+/**
+ * ACF subfields for stats ticker text.
+ *
+ * @return array<int, array<string, mixed>>
+ */
+function ftd_stats_ticker_acf_text_fields() {
+	$defaults = ftd_get_stats_ticker_text_defaults();
+	$fields   = array(
+		array(
+			'key'   => 'field_ftd_stt_offer_eyebrow',
+			'label' => 'Founding offer eyebrow',
+			'name'  => 'offer_eyebrow',
+		),
+		array(
+			'key'           => 'field_ftd_stt_founding_label',
+			'label'         => 'Founding spots label',
+			'name'          => 'founding_spots_label',
+			'instructions'  => 'Use {total} for the spot cap (111). Example: of {total} founding spots left',
+		),
+		array(
+			'key'   => 'field_ftd_stt_members_label',
+			'label' => 'Members — label',
+			'name'  => 'members_label',
+		),
+		array(
+			'key'   => 'field_ftd_stt_members_tagline',
+			'label' => 'Members — tagline',
+			'name'  => 'members_tagline',
+		),
+		array(
+			'key'   => 'field_ftd_stt_map_label',
+			'label' => 'Genius map — label',
+			'name'  => 'map_label',
+		),
+		array(
+			'key'   => 'field_ftd_stt_map_tagline',
+			'label' => 'Genius map — tagline',
+			'name'  => 'map_tagline',
+		),
+		array(
+			'key'   => 'field_ftd_stt_listings_label',
+			'label' => 'Directory listings — label',
+			'name'  => 'listings_label',
+		),
+		array(
+			'key'   => 'field_ftd_stt_listings_tagline',
+			'label' => 'Directory listings — tagline',
+			'name'  => 'listings_tagline',
+		),
+		array(
+			'key'   => 'field_ftd_stt_creator_label',
+			'label' => 'Creator geniuses — label',
+			'name'  => 'creator_label',
+		),
+		array(
+			'key'   => 'field_ftd_stt_creator_tagline',
+			'label' => 'Creator geniuses — tagline',
+			'name'  => 'creator_tagline',
+		),
+		array(
+			'key'   => 'field_ftd_stt_quantum_label',
+			'label' => 'Quantum geniuses — label',
+			'name'  => 'quantum_label',
+		),
+		array(
+			'key'   => 'field_ftd_stt_quantum_tagline',
+			'label' => 'Quantum geniuses — tagline',
+			'name'  => 'quantum_tagline',
+		),
+		array(
+			'key'   => 'field_ftd_stt_last_signup_label',
+			'label' => 'Last sign-up — label',
+			'name'  => 'last_signup_label',
+		),
+		array(
+			'key'   => 'field_ftd_stt_last_signup_tagline',
+			'label' => 'Last sign-up — tagline',
+			'name'  => 'last_signup_tagline',
+		),
+	);
+
+	foreach ( $fields as $index => $field ) {
+		$name = $field['name'];
+		$fields[ $index ]['type']          = 'text';
+		$fields[ $index ]['default_value'] = $defaults[ $name ] ?? '';
+	}
+
+	return $fields;
+}
+
+/**
+ * Stats ticker copy from ACF (with defaults).
+ *
+ * @return array<string, string>
+ */
+function ftd_get_stats_ticker_text_settings() {
+	$settings = ftd_get_stats_ticker_text_defaults();
+
+	if ( function_exists( 'ftd_genius_directory_banner_get_field' ) ) {
+		$acf = ftd_genius_directory_banner_get_field( 'stats_ticker_text' );
+		if ( is_array( $acf ) ) {
+			foreach ( array_keys( $settings ) as $key ) {
+				if ( isset( $acf[ $key ] ) && is_string( $acf[ $key ] ) && '' !== trim( $acf[ $key ] ) ) {
+					$settings[ $key ] = trim( $acf[ $key ] );
+				}
+			}
+		}
+	}
+
+	return apply_filters( 'ftd_stats_ticker_text_settings', $settings );
+}
+
+/**
  * Register founding spots banner field group.
  */
 function ftd_register_founding_spots_banner_acf_fields() {
@@ -181,7 +317,7 @@ function ftd_register_founding_spots_banner_acf_fields() {
 							'name'          => 'discount_code',
 							'type'          => 'text',
 							'default_value' => 'originalgenius111',
-							'instructions'  => 'Used to count signups and in the CTA text. Tokens: {code}, {remaining}, {total}, {used}.',
+							'instructions'  => 'Shown in the banner CTA. Tokens: {code}, {remaining}, {total}, {used}. Spots remaining = total minus Creator and Quantum Genius members.',
 						),
 						array(
 							'key'           => 'field_ftd_fsb_stats_eyebrow',
@@ -210,8 +346,10 @@ function ftd_register_founding_spots_banner_acf_fields() {
 							'key'           => 'field_ftd_fsb_link_url',
 							'label'         => 'Sign up button URL',
 							'name'          => 'link_url',
-							'type'          => 'url',
+							'type'          => 'text',
 							'default_value' => '/join-we-are-geniuses/',
+							'instructions'  => 'Relative path (e.g. /join-we-are-geniuses/) or full URL (https://…). Relative paths use this site\'s address.',
+							'placeholder'   => '/join-we-are-geniuses/',
 						),
 						array(
 							'key'           => 'field_ftd_fsb_progress',
@@ -222,6 +360,15 @@ function ftd_register_founding_spots_banner_acf_fields() {
 							'ui'            => 1,
 						),
 					),
+				),
+				array(
+					'key'           => 'field_ftd_fsb_ticker_text',
+					'label'         => 'Stats ticker text',
+					'name'          => 'stats_ticker_text',
+					'type'          => 'group',
+					'layout'        => 'block',
+					'instructions'  => 'Copy for each slide in the scrolling stats ticker and sitewide banner. Use {total} in the founding spots label.',
+					'sub_fields'    => ftd_stats_ticker_acf_text_fields(),
 				),
 			),
 			'location'              => array(

@@ -32,8 +32,22 @@ function ftd_stats_ticker_clear_cache() {
 }
 
 add_action( 'pmpro_after_checkout', 'ftd_stats_ticker_clear_cache', 10, 2 );
+add_action( 'pmpro_after_change_membership_level', 'ftd_stats_ticker_clear_cache', 10, 3 );
 add_action( 'user_register', 'ftd_stats_ticker_clear_cache' );
 add_action( 'profile_update', 'ftd_stats_ticker_clear_cache' );
+add_action( 'save_post_directory_listing', 'ftd_stats_ticker_clear_cache' );
+add_action(
+	'acf/save_post',
+	function ( $post_id ) {
+		if ( ! function_exists( 'ftd_get_genius_directory_banner_post_ids' ) ) {
+			return;
+		}
+
+		if ( in_array( $post_id, ftd_get_genius_directory_banner_post_ids(), true ) ) {
+			ftd_stats_ticker_clear_cache();
+		}
+	}
+);
 
 /**
  * Active PMPro members (distinct users).
@@ -184,11 +198,22 @@ function ftd_stats_get_last_signup_country() {
 }
 
 /**
- * Ticker slides with live values.
+ * Published directory listing posts.
  *
- * @return array<int, array<string, mixed>>
+ * @return int
  */
-function ftd_get_stats_ticker_slides() {
+function ftd_stats_count_directory_listings() {
+	$counts = wp_count_posts( 'directory_listing' );
+
+	return (int) ( $counts->publish ?? 0 );
+}
+
+/**
+ * Live stat values (cached).
+ *
+ * @return array<string, int|string>
+ */
+function ftd_get_stats_ticker_values() {
 	$cached = get_transient( FTD_STATS_TICKER_CACHE_KEY );
 
 	if ( false !== $cached && is_array( $cached ) ) {
@@ -197,44 +222,73 @@ function ftd_get_stats_ticker_slides() {
 
 	$last_country = ftd_stats_get_last_signup_country();
 
+	$values = array(
+		'members'     => ftd_stats_count_members(),
+		'map'         => ftd_stats_count_on_map(),
+		'listings'    => ftd_stats_count_directory_listings(),
+		'creator'     => ftd_stats_count_creator_geniuses(),
+		'quantum'     => ftd_stats_count_quantum_geniuses(),
+		'last_signup' => $last_country ? $last_country : __( 'Unknown', 'ftd-directory-listings' ),
+	);
+
+	$values = apply_filters( 'ftd_stats_ticker_values', $values );
+
+	set_transient( FTD_STATS_TICKER_CACHE_KEY, $values, FTD_STATS_TICKER_CACHE_TTL );
+
+	return $values;
+}
+
+/**
+ * Ticker slides with live values.
+ *
+ * @return array<int, array<string, mixed>>
+ */
+function ftd_get_stats_ticker_slides() {
+	$text   = function_exists( 'ftd_get_stats_ticker_text_settings' )
+		? ftd_get_stats_ticker_text_settings()
+		: ftd_get_stats_ticker_text_defaults();
+	$values = ftd_get_stats_ticker_values();
+
 	$slides = array(
 		array(
-			'value'   => ftd_stats_count_members(),
-			'label'   => __( 'members', 'ftd-directory-listings' ),
-			'tagline' => __( 'the community grows,', 'ftd-directory-listings' ),
+			'value'   => $values['members'],
+			'label'   => $text['members_label'],
+			'tagline' => $text['members_tagline'],
 			'type'    => 'number',
 		),
 		array(
-			'value'   => ftd_stats_count_on_map(),
-			'label'   => __( 'on the genius map', 'ftd-directory-listings' ),
-			'tagline' => __( 'sharing their genius,', 'ftd-directory-listings' ),
+			'value'   => $values['map'],
+			'label'   => $text['map_label'],
+			'tagline' => $text['map_tagline'],
 			'type'    => 'number',
 		),
 		array(
-			'value'   => ftd_stats_count_creator_geniuses(),
-			'label'   => __( 'creator geniuses', 'ftd-directory-listings' ),
-			'tagline' => __( 'building the directory,', 'ftd-directory-listings' ),
+			'value'   => $values['listings'],
+			'label'   => $text['listings_label'],
+			'tagline' => $text['listings_tagline'],
 			'type'    => 'number',
 		),
 		array(
-			'value'   => ftd_stats_count_quantum_geniuses(),
-			'label'   => __( 'quantum geniuses', 'ftd-directory-listings' ),
-			'tagline' => __( 'leading the way,', 'ftd-directory-listings' ),
+			'value'   => $values['creator'],
+			'label'   => $text['creator_label'],
+			'tagline' => $text['creator_tagline'],
 			'type'    => 'number',
 		),
 		array(
-			'value'   => $last_country ? $last_country : __( 'Unknown', 'ftd-directory-listings' ),
-			'label'   => __( 'last sign-up from', 'ftd-directory-listings' ),
-			'tagline' => __( 'the threshold opens,', 'ftd-directory-listings' ),
+			'value'   => $values['quantum'],
+			'label'   => $text['quantum_label'],
+			'tagline' => $text['quantum_tagline'],
+			'type'    => 'number',
+		),
+		array(
+			'value'   => $values['last_signup'],
+			'label'   => $text['last_signup_label'],
+			'tagline' => $text['last_signup_tagline'],
 			'type'    => 'text',
 		),
 	);
 
-	$slides = apply_filters( 'ftd_stats_ticker_slides', $slides );
-
-	set_transient( FTD_STATS_TICKER_CACHE_KEY, $slides, FTD_STATS_TICKER_CACHE_TTL );
-
-	return $slides;
+	return apply_filters( 'ftd_stats_ticker_slides', $slides );
 }
 
 /**
@@ -253,16 +307,17 @@ function ftd_get_banner_marquee_items( $settings = null, $tokens = null, $stats_
 		$total     = (int) ( $tokens['total'] ?? 0 );
 		$code      = (string) ( $tokens['code'] ?? '' );
 
+		$ticker_text = function_exists( 'ftd_get_stats_ticker_text_settings' )
+			? ftd_get_stats_ticker_text_settings()
+			: ftd_get_stats_ticker_text_defaults();
+
 		$code_label = trim( (string) ( $settings['code_label'] ?? __( 'use code', 'ftd-directory-listings' ) ) );
+		$founding_label = str_replace( '{total}', (string) $total, $ticker_text['founding_spots_label'] );
 
 		$items[] = array(
-			'eyebrow'    => __( 'OFFER', 'ftd-directory-listings' ),
+			'eyebrow'    => $ticker_text['offer_eyebrow'],
 			'value'      => $remaining,
-			'label'      => sprintf(
-				/* translators: %d: total founding spots */
-				__( 'of %d founding spots left', 'ftd-directory-listings' ),
-				$total
-			),
+			'label'      => $founding_label,
 			'code_label' => $code_label,
 			'code'       => $code,
 			'type'       => 'founding',
