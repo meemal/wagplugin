@@ -582,7 +582,7 @@ function ftd_render_page_header( $source = null ) {
 			<?php if ( ! empty( $config['cta_enabled'] ) && $config['cta_label'] && $config['cta_url'] ) : ?>
 				<p class="ftd-page-header-cta-wrap">
 					<a class="btn ftd-page-header-cta" href="<?php echo esc_url( $config['cta_url'] ); ?>">
-						<span class="ftd-page-header-cta-icon" aria-hidden="true">▶</span>
+						<span class="ftd-page-header-cta-icon ftd-btn-arrow" aria-hidden="true"></span>
 						<span><?php echo esc_html( $config['cta_label'] ); ?></span>
 					</a>
 				</p>

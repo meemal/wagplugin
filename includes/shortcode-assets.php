@@ -10,6 +10,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Shortcode tag => CSS path relative to plugin root.
  *
+ * Also register new styles in ftd_enqueue_shortcode_showcase_assets() (shortcode-showcase.php)
+ * and add the shortcode to ftd_get_shortcode_showcase_groups().
+ *
  * @return array<string, string>
  */
 function ftd_get_shortcode_styles() {

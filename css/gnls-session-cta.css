@@ -67,7 +67,7 @@
 }
 
 .gnls-cta-brand {
-	margin: 0 0 0.75rem;
+	margin: 0 0 0.85rem;
 }
 
 .gnls-cta-logo {
@@ -75,12 +75,17 @@
 	width: auto;
 	max-width: 100%;
 	height: auto;
-	max-height: clamp(264px, 42vw, 408px);
 }
 
-.gnls-cta--capture .gnls-cta-logo {
-	max-width: 100%;
-	max-height: 480px;
+.gnls-cta-logo--stacked {
+	width: min(100%, 224px);
+	max-width: 224px;
+	object-fit: contain;
+}
+
+.gnls-cta--capture .gnls-cta-logo--stacked {
+	width: 294px;
+	max-width: 294px;
 }
 
 .gnls-cta-presents,
@@ -258,11 +263,6 @@ a.gnls-cta-host:hover {
 	background: var(--color-cyan2, #00cccc);
 	border-color: var(--color-cyan2, #00cccc);
 	color: var(--color-darkgrey, #111);
-}
-
-.gnls-cta-button-icon {
-	font-size: 0.72rem;
-	line-height: 1;
 }
 
 .gnls-cta-footer {

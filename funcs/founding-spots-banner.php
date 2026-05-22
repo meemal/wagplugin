@@ -183,7 +183,7 @@ function ftd_get_founding_spots_banner_html() {
 	ob_start();
 	?>
 	<div id="ftd-founding-spots-banner" class="ftd-sc ftd-sc--founding-spots-banner ftd-founding-spots-banner--sitewide">
-		<div class="fsb-banner" role="region" aria-label="<?php esc_attr_e( 'Founding membership offer and community stats', 'ftd-directory-listings' ); ?>">
+		<div class="fsb-banner" style="background:#2d132c;color:#fff;" role="region" aria-label="<?php esc_attr_e( 'Founding membership offer and community stats', 'ftd-directory-listings' ); ?>">
 			<div class="fsb-row">
 				<?php ftd_render_banner_marquee_track( $marquee_items ); ?>
 
@@ -233,19 +233,28 @@ function ftd_render_founding_spots_banner_sitewide() {
 	echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in template.
 }
 
+add_action( 'wp_body_open', 'ftd_render_founding_spots_banner_sitewide', 5 );
+
 /**
- * Fallback when the theme does not call wp_body_open().
+ * Critical banner styles in head so first paint matches the styled ticker (avoids FOUC).
  */
-function ftd_render_founding_spots_banner_sitewide_fallback() {
-	if ( did_action( 'wp_body_open' ) ) {
+function ftd_print_founding_spots_banner_critical_css() {
+	if ( ! ftd_should_show_founding_spots_banner() ) {
 		return;
 	}
-
-	ftd_render_founding_spots_banner_sitewide();
+	?>
+<style id="ftd-founding-spots-banner-critical">
+#ftd-founding-spots-banner,.ftd-founding-spots-banner--sitewide{width:100%;position:relative;z-index:99990}
+.ftd-sc--founding-spots-banner .fsb-banner{background:#2d132c;color:#fff;box-sizing:border-box;padding:.75rem 0 .65rem}
+.ftd-sc--founding-spots-banner .fsb-row{display:flex;align-items:center;gap:.75rem;padding:0 0 0 .5rem;box-sizing:border-box}
+.ftd-sc--founding-spots-banner .fsb-marquee-viewport{flex:1;min-width:0;overflow:hidden}
+.ftd-sc--founding-spots-banner .fsb-marquee-track{display:flex;width:max-content}
+.ftd-sc--founding-spots-banner .fsb-item-value,.ftd-sc--founding-spots-banner .fsb-item-label{color:#fff}
+</style>
+	<?php
 }
 
-add_action( 'wp_body_open', 'ftd_render_founding_spots_banner_sitewide', 5 );
-add_action( 'get_header', 'ftd_render_founding_spots_banner_sitewide_fallback', 1 );
+add_action( 'wp_head', 'ftd_print_founding_spots_banner_critical_css', 1 );
 
 /**
  * Enqueue banner CSS on front end when the banner is active.

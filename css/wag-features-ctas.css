@@ -181,17 +181,6 @@
 	color: var(--wagfc-btn-text);
 }
 
-.ftd-sc--wag-features-ctas .wagfc-btn-icon {
-	display: inline-block;
-	width: 0;
-	height: 0;
-	border-top: 5px solid transparent;
-	border-bottom: 5px solid transparent;
-	border-left: 8px solid var(--wagfc-btn-text);
-	margin-left: 0.15rem;
-	flex-shrink: 0;
-}
-
 .ftd-sc--wag-features-ctas .wagfc-panel-media-link {
 	display: block;
 	width: 100%;

@@ -1,0 +1,218 @@
+/* Shortcode & style reference page */
+
+.ftd-showcase-page {
+	max-width: 980px;
+	margin: 0 auto;
+	padding: 2rem 1.5rem 4rem;
+}
+
+.ftd-showcase-page__title {
+	margin: 0 0 0.75rem;
+	font-size: clamp(1.85rem, 4vw, 2.5rem);
+}
+
+.ftd-showcase-page__lead {
+	margin: 0 0 2rem;
+	color: var(--color-midgrey, #4b4b4b);
+	line-height: 1.65;
+}
+
+.ftd-showcase-section {
+	margin: 0 0 3rem;
+	padding-top: 2rem;
+	border-top: 1px solid rgba(103, 63, 105, 0.12);
+}
+
+.ftd-showcase-section__title {
+	margin: 0 0 0.75rem;
+	font-size: clamp(1.5rem, 3vw, 2rem);
+}
+
+.ftd-showcase-section__desc,
+.ftd-showcase-note {
+	margin: 0 0 1.25rem;
+	color: var(--color-midgrey, #4b4b4b);
+	line-height: 1.6;
+}
+
+.ftd-showcase-quicklist {
+	margin: 0 0 1rem;
+	padding-left: 1.25rem;
+	line-height: 1.8;
+}
+
+.ftd-showcase-block {
+	margin: 0 0 2rem;
+	border: 1px solid rgba(103, 63, 105, 0.14);
+	border-radius: 0.75rem;
+	overflow: hidden;
+	background: #fff;
+	box-shadow: 0 8px 24px rgba(17, 17, 17, 0.05);
+}
+
+.ftd-showcase-block__header {
+	padding: 1.25rem 1.35rem;
+	background: #f7f3f8;
+	border-bottom: 1px solid rgba(103, 63, 105, 0.1);
+}
+
+.ftd-showcase-block__name {
+	margin: 0 0 0.35rem;
+	font-size: 1.15rem;
+	color: var(--color-purple, #673f69);
+}
+
+.ftd-showcase-block__aliases {
+	margin: 0 0 0.65rem;
+	font-size: 0.88rem;
+	color: var(--color-midgrey, #4b4b4b);
+}
+
+.ftd-showcase-block__aliases code {
+	margin-right: 0.35rem;
+}
+
+.ftd-showcase-copy {
+	margin: 0;
+	padding: 0.85rem 1rem;
+	background: #fff;
+	border: 1px dashed rgba(103, 63, 105, 0.35);
+	border-radius: 0.45rem;
+	font-size: 1rem;
+	line-height: 1.4;
+	color: var(--color-darkgrey, #111);
+	white-space: pre-wrap;
+	word-break: break-word;
+	cursor: copy;
+}
+
+.ftd-showcase-block__notes {
+	margin: 0.65rem 0 0;
+	font-size: 0.88rem;
+	color: var(--color-midgrey, #4b4b4b);
+}
+
+.ftd-showcase-block__preview {
+	padding: 1.5rem;
+	overflow-x: auto;
+}
+
+.ftd-showcase-block__copy-only {
+	margin: 0;
+	padding: 1rem 1.35rem 1.25rem;
+	font-size: 0.9rem;
+	font-style: italic;
+	color: var(--color-lightgrey, #6b6b6b);
+	background: #fafafa;
+}
+
+.ftd-showcase-swatches {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+	gap: 0.85rem;
+	margin-bottom: 1.5rem;
+}
+
+.ftd-showcase-swatch {
+	padding: 0.75rem;
+	border: 1px solid rgba(0, 0, 0, 0.08);
+	border-radius: 0.5rem;
+	background: #fff;
+}
+
+.ftd-showcase-swatch__chip {
+	display: block;
+	width: 100%;
+	height: 3rem;
+	border-radius: 0.35rem;
+	margin-bottom: 0.5rem;
+	border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.ftd-showcase-swatch__label {
+	display: block;
+	font-weight: 600;
+	margin-bottom: 0.25rem;
+}
+
+.ftd-showcase-swatch code {
+	display: block;
+	font-size: 0.75rem;
+	color: var(--color-midgrey, #4b4b4b);
+}
+
+.ftd-showcase-text-samples p {
+	margin: 0 0 0.5rem;
+}
+
+.ftd-showcase-buttons {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+}
+
+.ftd-showcase-backgrounds {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+	gap: 1rem;
+}
+
+.ftd-showcase-bg-card__sample {
+	height: 5rem;
+	border-radius: 0.5rem;
+	border: 1px solid rgba(0, 0, 0, 0.08);
+	margin-bottom: 0.5rem;
+}
+
+.ftd-showcase-bg-card__sample--image {
+	background-size: cover;
+	background-position: center;
+}
+
+.ftd-showcase-bg-card__label {
+	margin: 0 0 0.25rem;
+	font-weight: 600;
+	font-size: 0.9rem;
+}
+
+.ftd-showcase-bg-card code {
+	font-size: 0.72rem;
+	color: var(--color-midgrey, #4b4b4b);
+}
+
+.ftd-showcase-type-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	gap: 1rem;
+}
+
+.ftd-showcase-type-card {
+	padding: 1.25rem;
+	border-radius: 0.65rem;
+	background: #fff;
+	border: 1px solid rgba(103, 63, 105, 0.1);
+}
+
+.ftd-showcase-type-card--plum {
+	background: #2d132c;
+	color: #fff;
+}
+
+.ftd-showcase-type-card--plum .fg-headline {
+	color: #fff;
+}
+
+.ftd-showcase-type-card--stone {
+	background: #f7f0ea;
+}
+
+.ftd-showcase-type-card .gcc-archive-intro-prose {
+	margin: 0;
+}
+
+@media (max-width: 768px) {
+	.ftd-showcase-page {
+		padding-left: 1rem;
+		padding-right: 1rem;
+	}
+}

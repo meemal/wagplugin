@@ -138,7 +138,7 @@ function ftd_render_gnls_join_cta( $overrides = array() ) {
 			<?php if ( $settings['button_enabled'] && $settings['button_label'] && $settings['button_url'] ) : ?>
 				<p class="gnls-join-cta-button-wrap">
 					<a class="btn gnls-join-cta-button" href="<?php echo esc_url( $settings['button_url'] ); ?>">
-						<span class="gnls-join-cta-button-icon" aria-hidden="true">▶</span>
+						<span class="gnls-join-cta-button-icon ftd-btn-arrow" aria-hidden="true"></span>
 						<span><?php echo esc_html( $settings['button_label'] ); ?></span>
 					</a>
 				</p>

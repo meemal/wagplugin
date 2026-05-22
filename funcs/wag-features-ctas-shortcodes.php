@@ -288,7 +288,7 @@ function ftd_render_wag_features_cta_panel( $panel ) {
 						href="<?php echo esc_url( $panel['link_url'] ); ?>"
 						<?php echo ! empty( $panel['link_target'] ) ? ' target="' . esc_attr( $panel['link_target'] ) . '" rel="noopener noreferrer"' : ''; ?>
 					>
-						<span class="wagfc-btn-icon" aria-hidden="true"></span>
+						<span class="wagfc-btn-icon ftd-btn-arrow" aria-hidden="true"></span>
 						<span class="wagfc-btn-text"><?php echo esc_html( $panel['link_label'] ?: $panel['button_label'] ); ?></span>
 					</a>
 				<?php endif; ?>

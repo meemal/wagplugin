@@ -101,11 +101,6 @@
 	transform: translateY(-1px);
 }
 
-.gnls-join-cta-button-icon {
-	font-size: 0.75rem;
-	line-height: 1;
-}
-
 .gnls-join-cta-footer {
 	display: flex;
 	flex-wrap: wrap;

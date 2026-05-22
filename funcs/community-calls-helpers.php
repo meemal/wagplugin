@@ -188,28 +188,16 @@ function ftd_render_gnls_archive_intro() {
 				</header>
 			<?php endif; ?>
 
-			<?php if ( $col1_body || $col2_body || ! empty( $col1_highlights ) ) : ?>
+			<?php if ( $col1_body || $col2_body ) : ?>
 				<div class="gcc-archive-intro-columns">
-					<?php if ( $col1_body || ! empty( $col1_highlights ) ) : ?>
+					<?php if ( $col1_body ) : ?>
 						<div class="gcc-archive-intro-col">
 							<?php if ( $col1_title ) : ?>
 								<h3 class="gcc-archive-intro-col-title text-purple"><?php echo esc_html( $col1_title ); ?></h3>
 							<?php endif; ?>
-							<?php if ( $col1_body ) : ?>
-								<div class="gcc-archive-intro-prose entry-content">
-									<?php echo $col1_body; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- sanitized in helper. ?>
-								</div>
-							<?php endif; ?>
-							<?php if ( ! empty( $col1_highlights ) ) : ?>
-								<ul class="gcc-archive-intro-highlights">
-									<?php foreach ( $col1_highlights as $highlight ) : ?>
-										<li class="gcc-archive-intro-highlight">
-											<span class="gcc-archive-intro-highlight-marker" aria-hidden="true"></span>
-											<span class="gcc-archive-intro-highlight-text"><?php echo esc_html( $highlight['text'] ); ?></span>
-										</li>
-									<?php endforeach; ?>
-								</ul>
-							<?php endif; ?>
+							<div class="gcc-archive-intro-prose entry-content">
+								<?php echo $col1_body; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- sanitized in helper. ?>
+							</div>
 						</div>
 					<?php endif; ?>
 
@@ -223,6 +211,19 @@ function ftd_render_gnls_archive_intro() {
 							</div>
 						</div>
 					<?php endif; ?>
+				</div>
+			<?php endif; ?>
+
+			<?php if ( ! empty( $col1_highlights ) ) : ?>
+				<div class="gcc-archive-intro-highlights-wrap">
+					<ul class="gcc-archive-intro-highlights">
+						<?php foreach ( $col1_highlights as $highlight ) : ?>
+							<li class="gcc-archive-intro-highlight">
+								<span class="gcc-archive-intro-highlight-marker" aria-hidden="true"></span>
+								<span class="gcc-archive-intro-highlight-text"><?php echo esc_html( $highlight['text'] ); ?></span>
+							</li>
+						<?php endforeach; ?>
+					</ul>
 				</div>
 			<?php endif; ?>
 		</div>
@@ -933,6 +934,164 @@ function ftd_render_gnls_featured_session_panel() {
  */
 function ftd_the_gnls_featured_session_panel() {
 	echo ftd_render_gnls_featured_session_panel(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper.
+}
+
+/**
+ * Archive session grid card markup.
+ *
+ * @param int $post_id Session post ID.
+ * @return string
+ */
+function ftd_render_gnls_archive_session_card( $post_id ) {
+	$post_id = (int) $post_id;
+
+	if ( $post_id <= 0 ) {
+		return '';
+	}
+
+	$short_desc   = ftd_get_community_call_short_description( $post_id );
+	$members      = ftd_get_community_call_members( $post_id );
+	$feature_html = ftd_get_community_call_feature_image_html(
+		$post_id,
+		'medium_large',
+		array( 'class' => 'gcc-card-image std-border-radius' )
+	);
+
+	ob_start();
+	?>
+	<article <?php post_class( 'gcc-card card', $post_id ); ?>>
+		<?php if ( $feature_html ) : ?>
+			<a class="gcc-card-image-link" href="<?php echo esc_url( get_permalink( $post_id ) ); ?>">
+				<?php echo $feature_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped by wp_get_attachment_image. ?>
+			</a>
+		<?php endif; ?>
+
+		<div class="gcc-card-body">
+			<p class="gcc-card-kicker"><?php echo esc_html( ftd_gnls_kicker() ); ?></p>
+			<h3 class="gcc-card-title">
+				<a href="<?php echo esc_url( get_permalink( $post_id ) ); ?>"><?php echo esc_html( get_the_title( $post_id ) ); ?></a>
+			</h3>
+
+			<?php if ( $short_desc ) : ?>
+				<p class="gcc-card-subtitle"><?php echo esc_html( $short_desc ); ?></p>
+			<?php endif; ?>
+
+			<?php if ( ! empty( $members ) ) : ?>
+				<p class="gcc-card-members">
+					<?php
+					echo esc_html(
+						sprintf(
+							/* translators: %s: comma-separated member names */
+							__( 'With %s', 'ftd-directory-listings' ),
+							implode(
+								', ',
+								array_map(
+									static function ( $member ) {
+										return $member['name'];
+									},
+									$members
+								)
+							)
+						)
+					);
+					?>
+				</p>
+			<?php endif; ?>
+
+			<a class="btn gcc-card-btn" href="<?php echo esc_url( get_permalink( $post_id ) ); ?>">
+				<?php esc_html_e( 'View session', 'ftd-directory-listings' ); ?>
+			</a>
+		</div>
+	</article>
+	<?php
+	return ob_get_clean();
+}
+
+/**
+ * Upcoming session highlight with "Up Next" banner (archive sessions section).
+ *
+ * @param int $post_id Session post ID. Defaults to featured/upcoming session.
+ * @return string
+ */
+function ftd_render_gnls_up_next_session( $post_id = 0 ) {
+	$post_id = $post_id ? (int) $post_id : ftd_get_featured_live_session_id();
+
+	if ( $post_id <= 0 ) {
+		return '';
+	}
+
+	$short_desc   = ftd_get_community_call_short_description( $post_id );
+	$members      = ftd_get_community_call_members( $post_id );
+	$schedule     = ftd_get_community_call_schedule_parts( $post_id );
+	$date_line    = ftd_get_community_call_promo_date( $post_id );
+	$time_line    = ftd_get_community_call_promo_times( $post_id );
+	$feature_html = ftd_get_community_call_feature_image_html(
+		$post_id,
+		'medium_large',
+		array( 'class' => 'gcc-up-next-image std-border-radius' )
+	);
+
+	ob_start();
+	?>
+	<div class="gcc-up-next">
+		<p class="gcc-up-next-banner"><?php esc_html_e( 'Up Next', 'ftd-directory-listings' ); ?></p>
+		<a class="gcc-up-next-card card" href="<?php echo esc_url( get_permalink( $post_id ) ); ?>">
+			<?php if ( $feature_html ) : ?>
+				<div class="gcc-up-next-media">
+					<?php echo $feature_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped by wp_get_attachment_image. ?>
+				</div>
+			<?php endif; ?>
+
+			<div class="gcc-up-next-body">
+				<?php if ( $schedule['day_name'] || $date_line || $time_line ) : ?>
+					<p class="gcc-up-next-date">
+						<?php if ( $schedule['day_name'] ) : ?>
+							<span class="gcc-up-next-date-day"><?php echo esc_html( $schedule['day_name'] ); ?></span>
+						<?php endif; ?>
+						<?php if ( $date_line ) : ?>
+							<span class="gcc-up-next-date-num"><?php echo esc_html( $date_line ); ?></span>
+						<?php endif; ?>
+						<?php if ( $time_line ) : ?>
+							<span class="gcc-up-next-date-time"><?php echo esc_html( $time_line ); ?></span>
+						<?php endif; ?>
+					</p>
+				<?php endif; ?>
+
+				<p class="gcc-up-next-kicker"><?php echo esc_html( ftd_gnls_kicker() ); ?></p>
+				<h3 class="gcc-up-next-title"><?php echo esc_html( get_the_title( $post_id ) ); ?></h3>
+
+				<?php if ( $short_desc ) : ?>
+					<p class="gcc-up-next-subtitle"><?php echo esc_html( $short_desc ); ?></p>
+				<?php endif; ?>
+
+				<?php if ( ! empty( $members ) ) : ?>
+					<p class="gcc-up-next-members">
+						<?php
+						echo esc_html(
+							sprintf(
+								/* translators: %s: comma-separated member names */
+								__( 'With %s', 'ftd-directory-listings' ),
+								implode(
+									', ',
+									array_map(
+										static function ( $member ) {
+											return $member['name'];
+										},
+										$members
+									)
+								)
+							)
+						);
+						?>
+					</p>
+				<?php endif; ?>
+
+				<span class="btn gcc-up-next-btn"><?php esc_html_e( 'View session', 'ftd-directory-listings' ); ?></span>
+			</div>
+		</a>
+	</div>
+	<?php
+	return ob_get_clean();
 }
 
 /**

@@ -113,8 +113,3 @@ body.ftd-has-page-header #content {
 	color: var(--color-darkgrey, #111);
 	transform: translateY(-1px);
 }
-
-.ftd-page-header-cta-icon {
-	font-size: 0.75rem;
-	line-height: 1;
-}

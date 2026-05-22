@@ -63,43 +63,59 @@ function ftd_get_gnls_session_cta_site_label() {
 }
 
 /**
- * Bundled We Are Geniuses logo URL for promo cards.
+ * We Are Geniuses stacked logo URL for session promo card header.
  *
  * @return string
  */
-function ftd_get_wag_logo_url() {
+function ftd_get_wag_logo_sm_url() {
 	static $url = null;
 
 	if ( null !== $url ) {
 		return $url;
 	}
 
-	$path = plugin_dir_path( FTD_DIRECTORY_LISTINGS_FILE ) . 'assets/we-are-geniuses-logo.png';
+	$plugin_dir = plugin_dir_path( FTD_DIRECTORY_LISTINGS_FILE );
+	$plugin_url = plugin_dir_url( FTD_DIRECTORY_LISTINGS_FILE );
 
-	if ( ! file_exists( $path ) ) {
-		$url = '';
+	$svg_path = $plugin_dir . 'assets/we-are-geniuses-logo.svg';
+
+	if ( file_exists( $svg_path ) ) {
+		$url = $plugin_url . 'assets/we-are-geniuses-logo.svg';
 		return $url;
 	}
 
-	$url = plugin_dir_url( FTD_DIRECTORY_LISTINGS_FILE ) . 'assets/we-are-geniuses-logo.png';
+	$png_path = $plugin_dir . 'assets/we-are-geniuses-logo-sm.png';
 
+	if ( file_exists( $png_path ) ) {
+		$url = $plugin_url . 'assets/we-are-geniuses-logo-sm.png';
+		return $url;
+	}
+
+	$uploads_logo = WP_CONTENT_DIR . '/uploads/2025/05/We-Are-Geniuses-Logosm.png';
+
+	if ( file_exists( $uploads_logo ) ) {
+		$url = content_url( 'uploads/2025/05/We-Are-Geniuses-Logosm.png' );
+		return $url;
+	}
+
+	$url = '';
 	return $url;
 }
 
 /**
- * Logo markup for the session promo CTA.
+ * Logo markup for the session promo CTA header.
  *
  * @return string
  */
 function ftd_get_gnls_session_cta_logo_html() {
-	$logo_url = ftd_get_wag_logo_url();
+	$logo_url = ftd_get_wag_logo_sm_url();
 
 	if ( ! $logo_url ) {
 		return '';
 	}
 
 	return sprintf(
-		'<img class="gnls-cta-logo" src="%1$s" alt="%2$s" width="325" height="150" loading="lazy" decoding="async" />',
+		'<img class="gnls-cta-logo gnls-cta-logo--stacked" src="%1$s" alt="%2$s" width="515" height="374" loading="lazy" decoding="async" />',
 		esc_url( $logo_url ),
 		esc_attr__( 'We Are Geniuses', 'ftd-directory-listings' )
 	);
@@ -302,7 +318,7 @@ function ftd_render_gnls_session_cta( $post_id, $atts = array() ) {
 					<?php endif; ?>
 					<?php if ( $show_button && $button && $button_url ) : ?>
 						<a class="btn gnls-cta-button" href="<?php echo esc_url( $button_url ); ?>">
-							<span class="gnls-cta-button-icon" aria-hidden="true">▶</span>
+						<span class="gnls-cta-button-icon ftd-btn-arrow" aria-hidden="true"></span>
 							<span><?php echo esc_html( $button ); ?></span>
 						</a>
 					<?php endif; ?>
@@ -319,7 +335,7 @@ function ftd_render_gnls_session_cta( $post_id, $atts = array() ) {
 
 		<?php if ( $image_html || $is_capture ) : ?>
 			<div class="gnls-cta-media">
-				<?php echo $image_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped by wp_get_attachment_image. ?>
+				<?php echo $image_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
 			</div>
 		<?php endif; ?>
 	</div>
