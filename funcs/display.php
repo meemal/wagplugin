@@ -25,8 +25,11 @@ function ftd_render_simple_card($heading = '', $body = '', $button = '', $subtex
 
 add_filter( 'avatar_defaults', 'ftd_custom_default_avatar' );
 function ftd_custom_default_avatar( $avatars ) {
+	$default_url = function_exists( 'ftd_get_default_profile_image_url' )
+		? ftd_get_default_profile_image_url()
+		: 'https://wearegeniuses.com/wp-content/uploads/2025/07/Default-Profile-Image.png';
 
-    $avatars[ 'https://wearegeniuses.com/wp-content/uploads/2025/07/Default-Profile-Image.png'] = 'We Are Geniuses Default Profile';
+    $avatars[ $default_url ] = 'We Are Geniuses Default Profile';
     return $avatars;
 }
 

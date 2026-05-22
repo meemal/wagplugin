@@ -253,6 +253,36 @@ function ftd_render_gnls_archive_outro() {
 function ftd_get_community_call_field( $field, $post_id = 0, $legacy = array() ) {
 	$post_id = $post_id ? (int) $post_id : get_the_ID();
 
+	if ( 'profile_members' === $field ) {
+		$value = null;
+
+		if ( function_exists( 'get_field' ) ) {
+			$value = get_field( $field, $post_id );
+
+			if ( is_array( $value ) && ! empty( $value ) ) {
+				return $value;
+			}
+		}
+
+		if ( function_exists( 'ftd_read_community_call_profile_members_meta' ) ) {
+			$rows = ftd_read_community_call_profile_members_meta( $post_id );
+
+			if ( ! empty( $rows ) ) {
+				return $rows;
+			}
+		}
+
+		foreach ( array( 'involved_members' ) as $legacy_field ) {
+			$legacy = get_post_meta( $post_id, $legacy_field, true );
+
+			if ( ! empty( $legacy ) && is_array( $legacy ) && function_exists( 'ftd_normalize_community_call_profile_members' ) ) {
+				return ftd_normalize_community_call_profile_members( $legacy, $post_id, array() );
+			}
+		}
+
+		return is_array( $value ) ? $value : array();
+	}
+
 	if ( function_exists( 'get_field' ) ) {
 		$value = get_field( $field, $post_id );
 
@@ -377,11 +407,11 @@ function ftd_get_member_profile_url( $user_id ) {
  * Profile-linked members for a community call.
  *
  * @param int $post_id Post ID.
- * @return array<int, array{id: int, name: string, url: string}>
+ * @return array<int, array{id: int, name: string, url: string, avatar_url: string, subtitle: string}>
  */
 function ftd_get_community_call_members( $post_id = 0 ) {
 	$post_id = $post_id ? (int) $post_id : get_the_ID();
-	$members = ftd_get_community_call_field( 'profile_members', $post_id, array( 'involved_members' ) );
+	$members = ftd_get_community_call_field( 'profile_members', $post_id );
 
 	if ( empty( $members ) ) {
 		return array();
@@ -391,15 +421,29 @@ function ftd_get_community_call_members( $post_id = 0 ) {
 		$members = array( $members );
 	}
 
+	if ( function_exists( 'ftd_normalize_community_call_profile_members' ) ) {
+		$members = ftd_normalize_community_call_profile_members( $members, $post_id, array() );
+	}
+
 	$out = array();
 
 	foreach ( $members as $member ) {
-		$user_id = 0;
+		$user_id  = 0;
+		$subtitle = '';
 
 		if ( is_array( $member ) ) {
-			$user_id = (int) ( $member['ID'] ?? $member['id'] ?? 0 );
+			$user_id    = function_exists( 'ftd_get_community_call_profile_member_id_from_row' )
+				? ftd_get_community_call_profile_member_id_from_row( $member )
+				: (int) ( $member['member'] ?? $member['ID'] ?? $member['id'] ?? 0 );
+			$subtitle   = function_exists( 'ftd_get_community_call_profile_subtitle_from_row' )
+				? ftd_get_community_call_profile_subtitle_from_row( $member )
+				: ( isset( $member['subtitle'] ) ? trim( (string) $member['subtitle'] ) : '' );
+			$role_label = function_exists( 'ftd_get_community_call_profile_role_from_row' )
+				? ftd_get_community_call_profile_role_from_row( $member )
+				: ( isset( $member['role_label'] ) ? trim( (string) $member['role_label'] ) : '' );
 		} else {
-			$user_id = (int) $member;
+			$user_id    = (int) $member;
+			$role_label = '';
 		}
 
 		$user = get_userdata( $user_id );
@@ -408,11 +452,17 @@ function ftd_get_community_call_members( $post_id = 0 ) {
 			continue;
 		}
 
+		if ( '' === $subtitle && function_exists( 'ftd_get_community_call_member_tagline' ) ) {
+			$subtitle = ftd_get_community_call_member_tagline( $user_id );
+		}
+
 		$out[] = array(
 			'id'         => $user_id,
 			'name'       => $user->display_name,
 			'url'        => ftd_get_member_profile_url( $user_id ),
 			'avatar_url' => ftd_get_community_call_member_avatar_url( $user_id ),
+			'subtitle'   => $subtitle,
+			'role_label' => $role_label ?? '',
 		);
 	}
 
@@ -705,12 +755,39 @@ function ftd_get_community_call_promo_date( $post_id = 0 ) {
 }
 
 /**
- * Combined time line for promo CTAs.
+ * Combined time line for promo CTAs (UK · ET · CET when call datetime is set).
  *
  * @param int $post_id Post ID.
  * @return string
  */
 function ftd_get_community_call_promo_times( $post_id = 0 ) {
+	$post_id  = $post_id ? (int) $post_id : get_the_ID();
+	$datetime = ftd_get_community_call_datetime( $post_id );
+
+	if ( '' !== $datetime ) {
+		$timestamp = false;
+
+		if ( function_exists( 'wp_timezone' ) ) {
+			$dt = date_create( $datetime, wp_timezone() );
+
+			if ( $dt instanceof DateTime ) {
+				$timestamp = $dt->getTimestamp();
+			}
+		}
+
+		if ( ! $timestamp ) {
+			$timestamp = strtotime( $datetime );
+		}
+
+		if ( $timestamp ) {
+			$formatted = ftd_format_community_call_timezone_times( $timestamp );
+
+			if ( '' !== $formatted ) {
+				return $formatted;
+			}
+		}
+	}
+
 	$schedule = ftd_get_community_call_schedule_parts( $post_id );
 
 	if ( empty( $schedule['time_lines'] ) ) {
@@ -718,6 +795,150 @@ function ftd_get_community_call_promo_times( $post_id = 0 ) {
 	}
 
 	return implode( ' · ', $schedule['time_lines'] );
+}
+
+/**
+ * Unix timestamp for a session call datetime.
+ *
+ * @param int $post_id Post ID.
+ * @return int
+ */
+function ftd_get_community_call_timestamp( $post_id = 0 ) {
+	$post_id  = $post_id ? (int) $post_id : get_the_ID();
+	$datetime = ftd_get_community_call_datetime( $post_id );
+
+	if ( '' === $datetime ) {
+		return 0;
+	}
+
+	if ( function_exists( 'wp_timezone' ) ) {
+		$dt = date_create( $datetime, wp_timezone() );
+
+		if ( $dt instanceof DateTime ) {
+			return $dt->getTimestamp();
+		}
+	}
+
+	return (int) strtotime( $datetime );
+}
+
+/**
+ * Popular timezone labels for session times.
+ *
+ * @return array<string, string>
+ */
+function ftd_get_community_call_timezone_zones() {
+	return apply_filters(
+		'ftd_community_call_timezone_zones',
+		array(
+			'UK'   => 'Europe/London',
+			'CET'  => 'Europe/Paris',
+			'ET'   => 'America/New_York',
+			'PT'   => 'America/Los_Angeles',
+			'CT'   => 'America/Chicago',
+			'IST'  => 'Asia/Kolkata',
+			'AEST' => 'Australia/Sydney',
+			'UTC'  => 'UTC',
+		)
+	);
+}
+
+/**
+ * Timezone lines for a session (label + formatted time).
+ *
+ * @param int $post_id Post ID.
+ * @param int $limit   Max zones (0 = all).
+ * @return array<int, array{label: string, time: string, text: string}>
+ */
+function ftd_get_community_call_timezone_lines( $post_id = 0, $limit = 0 ) {
+	$post_id   = $post_id ? (int) $post_id : get_the_ID();
+	$timestamp = ftd_get_community_call_timestamp( $post_id );
+	$zones     = ftd_get_community_call_timezone_zones();
+
+	if ( $limit > 0 ) {
+		$zones = array_slice( $zones, 0, $limit, true );
+	}
+
+	if ( $timestamp <= 0 ) {
+		$schedule = ftd_get_community_call_schedule_parts( $post_id );
+
+		if ( empty( $schedule['time_lines'] ) ) {
+			return array();
+		}
+
+		$lines = array();
+
+		foreach ( $schedule['time_lines'] as $line ) {
+			$line = trim( (string) $line );
+
+			if ( '' === $line ) {
+				continue;
+			}
+
+			$lines[] = array(
+				'label' => '',
+				'time'  => $line,
+				'text'  => $line,
+			);
+		}
+
+		return $lines;
+	}
+
+	$lines = array();
+
+	foreach ( $zones as $label => $timezone ) {
+		try {
+			$zone = new DateTimeZone( $timezone );
+		} catch ( Exception $e ) {
+			continue;
+		}
+
+		$time    = strtolower( wp_date( 'g:ia', $timestamp, $zone ) );
+		$lines[] = array(
+			'label' => $label,
+			'time'  => $time,
+			'text'  => $time . ' ' . $label,
+		);
+	}
+
+	return $lines;
+}
+
+/**
+ * Format a session timestamp as timezone labels.
+ *
+ * @param int $timestamp Unix timestamp.
+ * @param int $limit     Max zones (0 = all).
+ * @return string
+ */
+function ftd_format_community_call_timezone_times( $timestamp, $limit = 3 ) {
+	$timestamp = (int) $timestamp;
+
+	if ( $timestamp <= 0 ) {
+		return '';
+	}
+
+	$zones = ftd_get_community_call_timezone_zones();
+
+	if ( $limit > 0 ) {
+		$zones = array_slice( $zones, 0, $limit, true );
+	}
+
+	$parts = array();
+
+	foreach ( $zones as $label => $timezone ) {
+		try {
+			$zone = new DateTimeZone( $timezone );
+		} catch ( Exception $e ) {
+			continue;
+		}
+
+		$time    = strtolower( wp_date( 'g:ia', $timestamp, $zone ) );
+		$parts[] = $time . ' ' . $label;
+	}
+
+	return implode( ' · ', $parts );
 }
 
 /**
@@ -1374,7 +1595,13 @@ function ftd_get_community_call_member_avatar_url( $user_id ) {
 	$user_id = (int) $user_id;
 
 	if ( $user_id <= 0 ) {
-		return '';
+		return function_exists( 'ftd_get_default_profile_image_url' )
+			? ftd_get_default_profile_image_url()
+			: '';
+	}
+
+	if ( function_exists( 'ftd_get_user_profile_image_url' ) ) {
+		return ftd_get_user_profile_image_url( $user_id, 96 );
 	}
 
 	if ( function_exists( 'get_user_profile_pic' ) ) {
@@ -1404,6 +1631,10 @@ function ftd_get_community_call_section_icon( $icon ) {
 		'featuring' => '<svg class="gcc-section-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>',
 		'do'        => '<svg class="gcc-section-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z"/></svg>',
 		'need'      => '<svg class="gcc-section-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M19 7h-3V6a4 4 0 0 0-8 0v1H5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2zm-9-1a2 2 0 0 1 4 0v1h-4V6zm2 10a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/></svg>',
+		'bring'     => '<svg class="gcc-section-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>',
+		'when'      => '<svg class="gcc-section-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/></svg>',
+		'where'     => '<svg class="gcc-section-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4V6h16v12zM6 10h2v7H6v-7zm4 3h2v4h-2v-4zm4-6h2v10h-2V7z"/></svg>',
+		'recording' => '<svg class="gcc-section-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M8 5v14l11-7L8 5z"/></svg>',
 	);
 
 	return $icons[ $icon ] ?? '';
@@ -1433,9 +1664,13 @@ function ftd_render_community_call_section_title( $title, $icon = '' ) {
  * @return void
  */
 function ftd_render_community_call_member_link( $member ) {
-	$name       = $member['name'] ?? '';
-	$url        = $member['url'] ?? '';
-	$avatar_url = $member['avatar_url'] ?? '';
+	$name            = $member['name'] ?? '';
+	$url             = $member['url'] ?? '';
+	$avatar_url      = $member['avatar_url'] ?? '';
+	$default_avatar  = function_exists( 'ftd_get_default_profile_image_url' )
+		? ftd_get_default_profile_image_url()
+		: get_avatar_url( 0 );
+	$resolved_avatar = $avatar_url ? $avatar_url : $default_avatar;
 
 	if ( '' === $name ) {
 		return;
@@ -1443,17 +1678,522 @@ function ftd_render_community_call_member_link( $member ) {
 
 	if ( $url ) {
 		printf(
-			'<a class="gcc-member-link" href="%1$s"><img class="gcc-member-avatar" src="%2$s" alt="%3$s" width="48" height="48" loading="lazy" /><span class="gcc-member-name">%3$s</span></a>',
+			'<a class="gcc-member-link" href="%1$s"><img class="gcc-member-avatar" src="%2$s" alt="%3$s" width="48" height="48" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=\'%4$s\';" /><span class="gcc-member-name">%3$s</span></a>',
 			esc_url( $url ),
-			esc_url( $avatar_url ? $avatar_url : get_avatar_url( 0 ) ),
-			esc_attr( $name )
+			esc_url( $resolved_avatar ),
+			esc_attr( $name ),
+			esc_url( $default_avatar )
 		);
 		return;
 	}
 
 	printf(
-		'<span class="gcc-member-link gcc-member-link--static"><img class="gcc-member-avatar" src="%1$s" alt="%2$s" width="48" height="48" loading="lazy" /><span class="gcc-member-name">%2$s</span></span>',
-		esc_url( $avatar_url ? $avatar_url : get_avatar_url( 0 ) ),
-		esc_attr( $name )
+		'<span class="gcc-member-link gcc-member-link--static"><img class="gcc-member-avatar" src="%1$s" alt="%2$s" width="48" height="48" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=\'%3$s\';" /><span class="gcc-member-name">%2$s</span></span>',
+		esc_url( $resolved_avatar ),
+		esc_attr( $name ),
+		esc_url( $default_avatar )
 	);
+}
+
+/**
+ * Archive URL for community calls.
+ *
+ * @return string
+ */
+function ftd_get_community_call_archive_url() {
+	$url = get_post_type_archive_link( FTD_COMMUNITY_CALL_POST_TYPE );
+
+	return $url ? (string) $url : home_url( '/' );
+}
+
+/**
+ * Kicker for single session hero.
+ *
+ * @param int $post_id Post ID.
+ * @return string
+ */
+function ftd_get_community_call_single_kicker( $post_id = 0 ) {
+	$post_id     = $post_id ? (int) $post_id : get_the_ID();
+	$session_num = ftd_get_live_session_number( $post_id );
+	$label       = __( 'GENIUS COMMUNITY CALL', 'ftd-directory-listings' );
+
+	if ( $session_num > 0 ) {
+		return sprintf( '%s · %02d', $label, $session_num );
+	}
+
+	return $label;
+}
+
+/**
+ * Long formatted date for sidebar (e.g. Monday 2 June 2026).
+ *
+ * @param int $post_id Post ID.
+ * @return string
+ */
+function ftd_get_community_call_formatted_date_long( $post_id = 0 ) {
+	$post_id   = $post_id ? (int) $post_id : get_the_ID();
+	$timestamp = ftd_get_community_call_timestamp( $post_id );
+
+	if ( $timestamp > 0 ) {
+		return wp_date( 'l j F Y', $timestamp );
+	}
+
+	$schedule = ftd_get_community_call_schedule_parts( $post_id );
+	$parts    = array_filter(
+		array(
+			$schedule['day_name'] ? ucfirst( strtolower( $schedule['day_name'] ) ) : '',
+			ltrim( (string) $schedule['day_num'], '0' ),
+			$schedule['month_name'] ? ucfirst( strtolower( $schedule['month_name'] ) ) : '',
+		)
+	);
+
+	return implode( ' ', $parts );
+}
+
+/**
+ * Default copy for single session sidebar rows.
+ *
+ * @param int $post_id Post ID.
+ * @return array<string, string>
+ */
+function ftd_get_community_call_details_defaults( $post_id = 0 ) {
+	$post_id = $post_id ? (int) $post_id : get_the_ID();
+
+	return apply_filters(
+		'ftd_community_call_details_defaults',
+		array(
+			'where_label'       => __( 'Zoom', 'ftd-directory-listings' ),
+			'where_subtext'     => __( 'Link arrives in your inbox the morning of', 'ftd-directory-listings' ),
+			'recording_label'   => __( 'Available after', 'ftd-directory-listings' ),
+			'recording_subtext' => __( 'Posted to YouTube for members', 'ftd-directory-listings' ),
+		),
+		$post_id
+	);
+}
+
+/**
+ * Google Calendar URL for a session.
+ *
+ * @param int $post_id Post ID.
+ * @return string
+ */
+function ftd_get_community_call_google_calendar_url( $post_id = 0 ) {
+	$post_id   = $post_id ? (int) $post_id : get_the_ID();
+	$timestamp = ftd_get_community_call_timestamp( $post_id );
+
+	if ( $timestamp <= 0 ) {
+		return '';
+	}
+
+	$end    = $timestamp + HOUR_IN_SECONDS;
+	$params = array(
+		'action'   => 'TEMPLATE',
+		'text'     => get_the_title( $post_id ),
+		'dates'    => gmdate( 'Ymd\THis\Z', $timestamp ) . '/' . gmdate( 'Ymd\THis\Z', $end ),
+		'details'  => get_permalink( $post_id ),
+		'location' => 'Zoom',
+	);
+
+	return 'https://calendar.google.com/calendar/render?' . http_build_query( $params, '', '&', PHP_QUERY_RFC3986 );
+}
+
+/**
+ * Outlook web calendar URL for a session.
+ *
+ * @param int $post_id Post ID.
+ * @return string
+ */
+function ftd_get_community_call_outlook_calendar_url( $post_id = 0 ) {
+	$post_id   = $post_id ? (int) $post_id : get_the_ID();
+	$timestamp = ftd_get_community_call_timestamp( $post_id );
+
+	if ( $timestamp <= 0 ) {
+		return '';
+	}
+
+	$end    = $timestamp + HOUR_IN_SECONDS;
+	$params = array(
+		'path'     => '/calendar/action/compose',
+		'rru'      => 'addevent',
+		'subject'  => get_the_title( $post_id ),
+		'startdt'  => gmdate( 'Y-m-d\TH:i:s\Z', $timestamp ),
+		'enddt'    => gmdate( 'Y-m-d\TH:i:s\Z', $end ),
+		'body'     => get_permalink( $post_id ),
+		'location' => 'Zoom',
+	);
+
+	return 'https://outlook.live.com/calendar/0/deeplink/compose?' . http_build_query( $params, '', '&', PHP_QUERY_RFC3986 );
+}
+
+/**
+ * Download URL for session .ics file.
+ *
+ * @param int $post_id Post ID.
+ * @return string
+ */
+function ftd_get_community_call_ics_url( $post_id = 0 ) {
+	$post_id = $post_id ? (int) $post_id : get_the_ID();
+	$url     = get_permalink( $post_id );
+
+	if ( ! $url ) {
+		return '';
+	}
+
+	return add_query_arg( 'ftd_gcc_ics', '1', $url );
+}
+
+/**
+ * Apple Calendar webcal URL for a session.
+ *
+ * @param int $post_id Post ID.
+ * @return string
+ */
+function ftd_get_community_call_apple_calendar_url( $post_id = 0 ) {
+	$ics_url = ftd_get_community_call_ics_url( $post_id );
+
+	if ( '' === $ics_url ) {
+		return '';
+	}
+
+	return preg_replace( '#^https?://#', 'webcal://', $ics_url );
+}
+
+/**
+ * iCalendar file contents for a session.
+ *
+ * @param int $post_id Post ID.
+ * @return string
+ */
+function ftd_get_community_call_ics_content( $post_id = 0 ) {
+	$post_id   = $post_id ? (int) $post_id : get_the_ID();
+	$timestamp = ftd_get_community_call_timestamp( $post_id );
+
+	if ( $timestamp <= 0 ) {
+		return '';
+	}
+
+	$end       = $timestamp + HOUR_IN_SECONDS;
+	$title     = get_the_title( $post_id );
+	$permalink = get_permalink( $post_id );
+	$uid       = 'gcc-' . $post_id . '@' . wp_parse_url( home_url(), PHP_URL_HOST );
+
+	$lines = array(
+		'BEGIN:VCALENDAR',
+		'VERSION:2.0',
+		'PRODID:-//We Are Geniuses//Community Call//EN',
+		'CALSCALE:GREGORIAN',
+		'METHOD:PUBLISH',
+		'BEGIN:VEVENT',
+		'UID:' . $uid,
+		'DTSTAMP:' . gmdate( 'Ymd\THis\Z' ),
+		'DTSTART:' . gmdate( 'Ymd\THis\Z', $timestamp ),
+		'DTEND:' . gmdate( 'Ymd\THis\Z', $end ),
+		'SUMMARY:' . ftd_escape_ics_text( $title ),
+		'DESCRIPTION:' . ftd_escape_ics_text( $permalink ),
+		'LOCATION:Zoom',
+		'URL:' . $permalink,
+		'END:VEVENT',
+		'END:VCALENDAR',
+	);
+
+	return implode( "\r\n", $lines ) . "\r\n";
+}
+
+/**
+ * Escape text for iCalendar properties.
+ *
+ * @param string $text Raw text.
+ * @return string
+ */
+function ftd_escape_ics_text( $text ) {
+	$text = wp_strip_all_tags( (string) $text );
+	$text = str_replace( array( '\\', ';', ',', "\n", "\r" ), array( '\\\\', '\\;', '\\,', '\\n', '' ), $text );
+
+	return $text;
+}
+
+/**
+ * Back link markup for single session pages.
+ *
+ * @return string
+ */
+function ftd_render_community_call_single_back_link() {
+	return sprintf(
+		'<p class="gcc-single-back"><a href="%1$s">%2$s</a></p>',
+		esc_url( ftd_get_community_call_archive_url() ),
+		esc_html__( '← ALL COMMUNITY CALLS', 'ftd-directory-listings' )
+	);
+}
+
+/**
+ * Hero banner for single session page.
+ *
+ * @param int $post_id Post ID.
+ * @return string
+ */
+function ftd_render_community_call_single_hero( $post_id = 0 ) {
+	$post_id      = $post_id ? (int) $post_id : get_the_ID();
+	$feature_html = ftd_get_community_call_feature_image_html(
+		$post_id,
+		'large',
+		array(
+			'class' => 'gcc-single-hero-image',
+		)
+	);
+	$schedule     = ftd_get_community_call_schedule_parts( $post_id );
+	$tagline      = trim( (string) $schedule['subtitle'] );
+	$title_html   = ftd_format_gnls_session_cta_title( get_the_title( $post_id ) );
+	$hero_classes = 'gcc-single-hero std-border-radius';
+
+	if ( ! $feature_html ) {
+		$hero_classes .= ' gcc-single-hero--no-image';
+	}
+
+	ob_start();
+	?>
+	<div class="<?php echo esc_attr( $hero_classes ); ?>">
+		<?php if ( $feature_html ) : ?>
+			<div class="gcc-single-hero-media">
+				<?php echo $feature_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+			</div>
+		<?php endif; ?>
+		<div class="gcc-single-hero-overlay" aria-hidden="true"></div>
+		<div class="gcc-single-hero-content">
+			<div class="gcc-single-hero-copy">
+				<p class="gcc-single-hero-kicker"><?php echo esc_html( ftd_get_community_call_single_kicker( $post_id ) ); ?></p>
+				<h1 class="gcc-single-hero-title"><?php echo $title_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></h1>
+				<?php if ( $tagline ) : ?>
+					<p class="gcc-single-hero-tagline"><?php echo esc_html( $tagline ); ?></p>
+				<?php endif; ?>
+			</div>
+			<?php if ( $schedule['day_name'] || $schedule['day_num'] || $schedule['month_name'] ) : ?>
+				<div class="gcc-single-hero-date" aria-label="<?php echo esc_attr( ftd_get_community_call_formatted_date_long( $post_id ) ); ?>">
+					<?php if ( $schedule['day_name'] ) : ?>
+						<span class="gcc-single-hero-date-day"><?php echo esc_html( $schedule['day_name'] ); ?></span>
+					<?php endif; ?>
+					<?php if ( $schedule['day_num'] ) : ?>
+						<span class="gcc-single-hero-date-num"><?php echo esc_html( ltrim( $schedule['day_num'], '0' ) ); ?></span>
+					<?php endif; ?>
+					<?php if ( $schedule['month_name'] ) : ?>
+						<span class="gcc-single-hero-date-month"><?php echo esc_html( $schedule['month_name'] ); ?></span>
+					<?php endif; ?>
+				</div>
+			<?php endif; ?>
+		</div>
+	</div>
+	<?php
+	return (string) ob_get_clean();
+}
+
+/**
+ * Featuring / hosts section for single session page.
+ *
+ * @param int $post_id Post ID.
+ * @return string
+ */
+function ftd_render_community_call_featuring_section( $post_id = 0 ) {
+	$post_id = $post_id ? (int) $post_id : get_the_ID();
+	$members = ftd_get_community_call_members( $post_id );
+
+	if ( empty( $members ) ) {
+		return '';
+	}
+
+	ob_start();
+	?>
+	<section class="gcc-single-featuring">
+		<h2 class="gcc-single-featuring-title"><?php esc_html_e( 'Featuring', 'ftd-directory-listings' ); ?></h2>
+		<div class="gcc-featuring-list gcc-featuring-list--count-<?php echo esc_attr( (string) count( $members ) ); ?>">
+			<?php foreach ( $members as $index => $member ) : ?>
+				<?php echo ftd_render_community_call_featuring_member( $member, $index ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+			<?php endforeach; ?>
+		</div>
+	</section>
+	<?php
+	return (string) ob_get_clean();
+}
+
+/**
+ * Featuring card for single session page.
+ *
+ * @param array{id: int, name: string, url: string, avatar_url?: string, subtitle?: string, role_label?: string} $member Member data.
+ * @param int                                                                                                     $index  Zero-based index.
+ * @return string
+ */
+function ftd_render_community_call_featuring_member( $member, $index = 0 ) {
+	$name       = $member['name'] ?? '';
+	$url        = $member['url'] ?? '';
+	$subtitle   = $member['subtitle'] ?? '';
+	$role_label = $member['role_label'] ?? '';
+
+	if ( '' === $name ) {
+		return '';
+	}
+
+	$user_id           = (int) ( $member['id'] ?? 0 );
+	$has_custom_avatar = function_exists( 'ftd_user_has_custom_profile_image' ) && ftd_user_has_custom_profile_image( $user_id );
+	$avatar_url        = function_exists( 'ftd_get_user_profile_image_url' )
+		? ftd_get_user_profile_image_url( $user_id, 144 )
+		: ( $member['avatar_url'] ?? '' );
+	$initials          = ftd_get_member_initials( $name );
+	$tag               = $url ? 'a' : 'div';
+	$avatar_html       = '';
+
+	if ( $has_custom_avatar && $avatar_url ) {
+		$avatar_html = sprintf(
+			'<img class="gcc-featuring-avatar gcc-featuring-avatar--photo" src="%1$s" alt="" width="80" height="80" loading="lazy" decoding="async" />',
+			esc_url( $avatar_url )
+		);
+	} else {
+		$avatar_html = sprintf(
+			'<span class="gcc-featuring-avatar gcc-featuring-avatar--initials">%1$s</span>',
+			esc_html( $initials )
+		);
+	}
+
+	ob_start();
+	printf(
+		'<%1$s class="gcc-featuring-member gcc-featuring-member--%2$d"%3$s>',
+		$tag,
+		$index + 1,
+		$url ? ' href="' . esc_url( $url ) . '"' : ''
+	);
+	?>
+	<div class="gcc-featuring-avatar-wrap">
+		<?php echo $avatar_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+	</div>
+	<div class="gcc-featuring-copy">
+		<span class="gcc-featuring-name"><?php echo esc_html( strtoupper( $name ) ); ?></span>
+		<?php if ( $subtitle ) : ?>
+			<span class="gcc-featuring-subtitle"><?php echo esc_html( $subtitle ); ?></span>
+		<?php else : ?>
+			<span class="gcc-featuring-subtitle gcc-featuring-subtitle--empty" aria-hidden="true"></span>
+		<?php endif; ?>
+		<?php if ( $role_label ) : ?>
+			<span class="gcc-featuring-role"><?php echo esc_html( $role_label ); ?></span>
+		<?php endif; ?>
+	</div>
+	<?php
+	printf( '</%s>', $tag );
+
+	return (string) ob_get_clean();
+}
+
+/**
+ * Details sidebar for single session page.
+ *
+ * @param int $post_id Post ID.
+ * @return string
+ */
+function ftd_render_community_call_details_sidebar( $post_id = 0 ) {
+	$post_id      = $post_id ? (int) $post_id : get_the_ID();
+	$defaults     = ftd_get_community_call_details_defaults( $post_id );
+	$date_long    = ftd_get_community_call_formatted_date_long( $post_id );
+	$time_lines   = ftd_get_community_call_timezone_lines( $post_id, 0 );
+	$time_text    = implode( ' · ', wp_list_pluck( $time_lines, 'text' ) );
+	$what_need    = ftd_get_community_call_what_do_i_need( $post_id );
+	$youtube      = ftd_get_community_call_youtube_link( $post_id );
+	$embed_url    = ftd_get_youtube_embed_url( $youtube );
+	$google_cal   = ftd_get_community_call_google_calendar_url( $post_id );
+	$apple_cal    = ftd_get_community_call_apple_calendar_url( $post_id );
+	$outlook_cal  = ftd_get_community_call_outlook_calendar_url( $post_id );
+	$ics_url      = ftd_get_community_call_ics_url( $post_id );
+	$bring_lines  = array_values(
+		array_filter(
+			array_map(
+				'trim',
+				preg_split( '/\.\s+/', wp_strip_all_tags( $what_need ), 2 )
+			)
+		)
+	);
+	$bring_primary = $bring_lines[0] ?? $what_need;
+	$bring_secondary = $bring_lines[1] ?? '';
+
+	ob_start();
+	?>
+	<aside class="gcc-single-details card">
+		<h2 class="gcc-single-details-title"><?php esc_html_e( 'The details', 'ftd-directory-listings' ); ?></h2>
+
+		<?php if ( $date_long || $time_text ) : ?>
+			<section class="gcc-single-details-row">
+				<h3 class="gcc-single-details-label">
+					<?php echo ftd_get_community_call_section_icon( 'when' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<span><?php esc_html_e( 'When', 'ftd-directory-listings' ); ?></span>
+				</h3>
+				<?php if ( $date_long ) : ?>
+					<p class="gcc-single-details-date"><?php echo esc_html( $date_long ); ?></p>
+				<?php endif; ?>
+				<?php if ( $time_text ) : ?>
+					<p class="gcc-single-details-times"><?php echo esc_html( $time_text ); ?></p>
+				<?php endif; ?>
+			</section>
+		<?php endif; ?>
+
+		<section class="gcc-single-details-row">
+			<h3 class="gcc-single-details-label">
+				<?php echo ftd_get_community_call_section_icon( 'where' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<span><?php esc_html_e( 'Where', 'ftd-directory-listings' ); ?></span>
+			</h3>
+			<p class="gcc-single-details-strong"><?php echo esc_html( $defaults['where_label'] ); ?></p>
+			<p class="gcc-single-details-subtext"><?php echo esc_html( $defaults['where_subtext'] ); ?></p>
+		</section>
+
+		<?php if ( $what_need ) : ?>
+			<section class="gcc-single-details-row">
+				<h3 class="gcc-single-details-label">
+					<?php echo ftd_get_community_call_section_icon( 'bring' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<span><?php esc_html_e( 'What to bring', 'ftd-directory-listings' ); ?></span>
+				</h3>
+				<p class="gcc-single-details-bring">
+					<?php if ( $bring_primary ) : ?>
+						<em class="gcc-single-details-bring-accent"><?php echo esc_html( rtrim( $bring_primary, '.' ) ); ?>,</em>
+					<?php endif; ?>
+					<?php if ( $bring_secondary ) : ?>
+						<span><?php echo esc_html( lcfirst( $bring_secondary ) ); ?></span>
+					<?php elseif ( ! $bring_primary ) : ?>
+						<span><?php echo esc_html( $what_need ); ?></span>
+					<?php endif; ?>
+				</p>
+			</section>
+		<?php endif; ?>
+
+		<section class="gcc-single-details-row">
+			<h3 class="gcc-single-details-label">
+				<?php echo ftd_get_community_call_section_icon( 'recording' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<span><?php esc_html_e( 'Recording', 'ftd-directory-listings' ); ?></span>
+			</h3>
+			<p class="gcc-single-details-strong"><?php echo esc_html( $defaults['recording_label'] ); ?></p>
+			<p class="gcc-single-details-subtext">
+				<?php if ( $embed_url ) : ?>
+					<a href="<?php echo esc_url( ftd_normalize_external_link( $youtube ) ); ?>" target="_blank" rel="noopener noreferrer">
+						<?php echo esc_html( $defaults['recording_subtext'] ); ?>
+					</a>
+				<?php else : ?>
+					<?php echo esc_html( $defaults['recording_subtext'] ); ?>
+				<?php endif; ?>
+			</p>
+		</section>
+
+		<?php if ( $google_cal || $apple_cal || $outlook_cal || $ics_url ) : ?>
+			<section class="gcc-single-details-row gcc-single-details-row--calendar">
+				<h3 class="gcc-single-details-calendars-title"><?php esc_html_e( 'Add to calendar', 'ftd-directory-listings' ); ?></h3>
+				<div class="gcc-single-details-calendars">
+				<?php if ( $google_cal ) : ?>
+					<a class="gcc-single-details-cal-btn" href="<?php echo esc_url( $google_cal ); ?>" target="_blank" rel="noopener noreferrer">+ Google</a>
+				<?php endif; ?>
+				<?php if ( $apple_cal ) : ?>
+					<a class="gcc-single-details-cal-btn" href="<?php echo esc_url( $apple_cal ); ?>">+ Apple</a>
+				<?php endif; ?>
+				<?php if ( $outlook_cal ) : ?>
+					<a class="gcc-single-details-cal-btn" href="<?php echo esc_url( $outlook_cal ); ?>" target="_blank" rel="noopener noreferrer">+ Outlook</a>
+				<?php endif; ?>
+				<?php if ( $ics_url ) : ?>
+					<a class="gcc-single-details-cal-btn" href="<?php echo esc_url( $ics_url ); ?>" download="community-call.ics">+ .ics</a>
+				<?php endif; ?>
+				</div>
+			</section>
+		<?php endif; ?>
+	</aside>
+	<?php
+	return (string) ob_get_clean();
 }

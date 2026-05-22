@@ -1,0 +1,148 @@
+/* YouTube thumbnail capture — fixed 1280×720 layout for html2canvas */
+
+.gnls-cta-capture-shell {
+	width: 1280px;
+	height: 720px;
+	overflow: hidden;
+	background: #111;
+}
+
+.gnls-cta-capture-shell .ftd-sc--gnls-session-cta.gnls-cta--capture {
+	display: grid;
+	grid-template-columns: 808px 472px;
+	width: 1280px;
+	height: 720px;
+	max-width: none;
+	margin: 0;
+	overflow: hidden;
+	border-radius: 0;
+	box-shadow: none;
+}
+
+.gnls-cta--capture .gnls-cta-content {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	height: 720px;
+	min-height: 720px;
+	padding: 28px 32px 24px;
+	box-sizing: border-box;
+	overflow: hidden;
+}
+
+.gnls-cta--capture .gnls-cta-title {
+	margin: 0 0 6px;
+	font-size: 38px;
+	line-height: 1.08;
+}
+
+.gnls-cta--capture .gnls-cta-tagline {
+	margin: 0 0 18px;
+	font-size: 17px;
+	line-height: 1.35;
+}
+
+.gnls-cta--capture .gnls-cta-date {
+	font-size: 54px;
+	line-height: 1;
+}
+
+.gnls-cta--capture .gnls-cta-capture-bg {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	z-index: 0;
+	pointer-events: none;
+}
+
+.gnls-cta--capture .gnls-cta-content > :not(.gnls-cta-capture-bg) {
+	position: relative;
+	z-index: 1;
+}
+
+.gnls-cta--capture .gnls-cta-brand {
+	margin: 0 0 10px;
+}
+
+.gnls-cta--capture .gnls-cta-logo--stacked {
+	display: block;
+	width: 220px;
+	max-width: 220px;
+	height: auto;
+}
+
+.gnls-cta--capture .gnls-cta-series {
+	margin: 0 0 8px;
+	font-size: 13px;
+}
+
+.gnls-cta--capture .gnls-cta-bottom {
+	margin-top: auto;
+	gap: 16px 24px;
+	align-items: flex-end;
+}
+
+.gnls-cta--capture .gnls-cta-host {
+	width: 120px;
+}
+
+.gnls-cta--capture .gnls-cta-host-avatar-wrap,
+.gnls-cta--capture .gnls-cta-host-avatar {
+	width: 72px;
+	height: 72px;
+}
+
+.gnls-cta--capture .gnls-cta-host-name {
+	font-size: 11px;
+}
+
+.gnls-cta--capture .gnls-cta-host-tagline {
+	font-size: 12px;
+}
+
+.gnls-cta--capture .gnls-cta-host-sep {
+	margin-top: 22px;
+	font-size: 22px;
+}
+
+.gnls-cta--capture .gnls-cta-when {
+	min-width: 170px;
+}
+
+.gnls-cta--capture .gnls-cta-day {
+	font-size: 11px;
+}
+
+.gnls-cta--capture .gnls-cta-date {
+	font-size: 54px;
+	line-height: 1;
+}
+
+.gnls-cta--capture .gnls-cta-times {
+	margin: 6px 0 0;
+	font-size: 13px;
+	line-height: 1.4;
+}
+
+.gnls-cta--capture .gnls-cta-footer {
+	margin-top: 14px;
+	padding-top: 10px;
+	font-size: 12px;
+}
+
+.gnls-cta--capture .gnls-cta-media {
+	height: 720px;
+	min-height: 720px;
+	overflow: hidden;
+}
+
+.gnls-cta--capture .gnls-cta-image {
+	display: block;
+	width: 100%;
+	height: 100%;
+	min-height: 720px;
+	object-fit: cover;
+	aspect-ratio: auto;
+}

@@ -160,3 +160,40 @@
 		display: none;
 	}
 }
+
+/* In archive sessions section — under Up Next */
+.gcc-archive-sessions .ftd-sc--gnls-join-cta {
+	margin-top: 2rem;
+}
+
+/* Sidebar variant — single session page */
+.gnls-join-cta--sidebar {
+	width: auto;
+	max-width: none;
+	margin: 1rem 0 0;
+	padding: 1.5rem 1.25rem;
+	border-radius: inherit;
+	text-align: center;
+}
+
+.gnls-join-cta--sidebar .gnls-join-cta-inner {
+	max-width: none;
+}
+
+.gnls-join-cta--sidebar .gnls-join-cta-heading {
+	font-size: 1.35rem;
+}
+
+.gnls-join-cta--sidebar .gnls-join-cta-subtitle {
+	margin-bottom: 0;
+}
+
+.gnls-join-cta--sidebar .gnls-join-cta-button-wrap {
+	margin-top: 1.25rem;
+}
+
+.gnls-join-cta--sidebar .gnls-join-cta-button {
+	width: 100%;
+	justify-content: center;
+	box-sizing: border-box;
+}

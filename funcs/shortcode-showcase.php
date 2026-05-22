@@ -127,7 +127,7 @@ function ftd_get_shortcode_showcase_groups() {
 					'name'    => 'founding_genius_banner',
 					'aliases' => array(),
 					'code'    => '[founding_genius_banner]',
-					'notes'   => __( 'Animated founding spots counter + progress bar + discount code.', 'ftd-directory-listings' ),
+					'notes'   => __( 'Animated founding spots counter + progress bar + discount code. Copy editable in Genius Directory Settings → Banner → Founding genius banner.', 'ftd-directory-listings' ),
 					'render'  => true,
 				),
 				array(

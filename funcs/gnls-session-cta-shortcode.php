@@ -63,7 +63,16 @@ function ftd_get_gnls_session_cta_site_label() {
 }
 
 /**
- * We Are Geniuses stacked logo URL for session promo card header.
+ * Site URL for CTA footer link.
+ *
+ * @return string
+ */
+function ftd_get_gnls_session_cta_site_url() {
+	return home_url( '/' );
+}
+
+/**
+ * We Are Geniuses white stacked logo URL for session promo card header.
  *
  * @return string
  */
@@ -76,6 +85,13 @@ function ftd_get_wag_logo_sm_url() {
 
 	$plugin_dir = plugin_dir_path( FTD_DIRECTORY_LISTINGS_FILE );
 	$plugin_url = plugin_dir_url( FTD_DIRECTORY_LISTINGS_FILE );
+
+	$svg_white_path = $plugin_dir . 'assets/we-are-geniuses-logo-white.svg';
+
+	if ( file_exists( $svg_white_path ) ) {
+		$url = $plugin_url . 'assets/we-are-geniuses-logo-white.svg';
+		return $url;
+	}
 
 	$svg_path = $plugin_dir . 'assets/we-are-geniuses-logo.svg';
 
@@ -105,9 +121,25 @@ function ftd_get_wag_logo_sm_url() {
 /**
  * Logo markup for the session promo CTA header.
  *
+ * @param bool $for_capture Whether this is for YouTube thumbnail capture.
  * @return string
  */
-function ftd_get_gnls_session_cta_logo_html() {
+function ftd_get_gnls_session_cta_logo_html( $for_capture = false ) {
+	if ( $for_capture ) {
+		$svg_path = plugin_dir_path( FTD_DIRECTORY_LISTINGS_FILE ) . 'assets/we-are-geniuses-logo-white.svg';
+
+		if ( file_exists( $svg_path ) ) {
+			$svg      = file_get_contents( $svg_path );
+			$data_uri = 'data:image/svg+xml;base64,' . base64_encode( $svg );
+
+			return sprintf(
+				'<img class="gnls-cta-logo gnls-cta-logo--stacked" src="%1$s" alt="%2$s" width="220" height="160" decoding="sync" />',
+				esc_attr( $data_uri ),
+				esc_attr__( 'We Are Geniuses', 'ftd-directory-listings' )
+			);
+		}
+	}
+
 	$logo_url = ftd_get_wag_logo_sm_url();
 
 	if ( ! $logo_url ) {
@@ -172,7 +204,8 @@ function ftd_render_gnls_session_cta( $post_id, $atts = array() ) {
 
 	$link_to_session = ! empty( $atts['link_to_session'] ) && filter_var( $atts['link_to_session'], FILTER_VALIDATE_BOOLEAN );
 	$show_logo       = ! isset( $atts['show_logo'] ) || filter_var( $atts['show_logo'], FILTER_VALIDATE_BOOLEAN );
-	$logo_html       = $show_logo ? ftd_get_gnls_session_cta_logo_html() : '';
+	$is_capture      = ! empty( $atts['capture'] ) && filter_var( $atts['capture'], FILTER_VALIDATE_BOOLEAN );
+	$logo_html       = $show_logo ? ftd_get_gnls_session_cta_logo_html( $is_capture ) : '';
 	$presents        = ! empty( $atts['presents'] ) ? (string) $atts['presents'] : '';
 
 	$schedule   = ftd_get_community_call_schedule_parts( $post_id );
@@ -201,15 +234,33 @@ function ftd_render_gnls_session_cta( $post_id, $atts = array() ) {
 	$day_name   = $schedule['day_name'];
 	$date_line  = ftd_get_community_call_promo_date( $post_id );
 	$time_line  = ftd_get_community_call_promo_times( $post_id );
-	$is_capture = ! empty( $atts['capture'] ) && filter_var( $atts['capture'], FILTER_VALIDATE_BOOLEAN );
-	$image_size = $is_capture ? 'gnls-youtube-thumb' : 'large';
-	$image_html = ftd_get_community_call_feature_image_html(
-		$post_id,
-		$image_size,
-		array(
-			'class' => 'gnls-cta-image',
-		)
-	);
+	$image_html = '';
+
+	if ( $is_capture ) {
+		$attachment_id = ftd_get_community_call_feature_image_id( $post_id );
+
+		if ( $attachment_id > 0 ) {
+			$img_url = wp_get_attachment_image_url( $attachment_id, 'full' );
+			$img_src = function_exists( 'ftd_get_gnls_capture_image_data_uri' )
+				? ftd_get_gnls_capture_image_data_uri( $img_url )
+				: $img_url;
+
+			if ( $img_src ) {
+				$image_html = sprintf(
+					'<img class="gnls-cta-image" src="%1$s" alt="" width="472" height="720" decoding="sync" />',
+					esc_attr( $img_src )
+				);
+			}
+		}
+	} else {
+		$image_html = ftd_get_community_call_feature_image_html(
+			$post_id,
+			'large',
+			array(
+				'class' => 'gnls-cta-image',
+			)
+		);
+	}
 
 	$card_classes = array( 'ftd-sc', 'ftd-sc--gnls-session-cta', 'gnls-session-cta' );
 	if ( $is_capture ) {
@@ -219,13 +270,24 @@ function ftd_render_gnls_session_cta( $post_id, $atts = array() ) {
 		$card_classes[] = 'gnls-cta--linked';
 	}
 
-	$content_style = function_exists( 'ftd_get_session_cta_background_style_attr' )
-		? ftd_get_session_cta_background_style_attr( $post_id )
-		: '';
+	$content_style = '';
+	$bg_config     = function_exists( 'ftd_get_session_cta_background_config' )
+		? ftd_get_session_cta_background_config( $post_id )
+		: array(
+			'color' => '#673f69',
+			'image' => '',
+		);
 
-	$bg_color = function_exists( 'ftd_get_session_cta_background_config' )
-		? ftd_get_session_cta_background_config( $post_id )['color']
-		: '#673f69';
+	if ( ! $is_capture && function_exists( 'ftd_get_session_cta_background_style_attr' ) ) {
+		$content_style = ftd_get_session_cta_background_style_attr( $post_id );
+	} elseif ( $is_capture ) {
+		$content_style = 'background-color:' . esc_attr( $bg_config['color'] );
+	}
+
+	$bg_color = $bg_config['color'];
+	$bg_src   = ( $is_capture && ! empty( $bg_config['image'] ) && function_exists( 'ftd_get_gnls_capture_image_data_uri' ) )
+		? ftd_get_gnls_capture_image_data_uri( $bg_config['image'] )
+		: ( $bg_config['image'] ?? '' );
 
 	ob_start();
 	?>
@@ -246,6 +308,9 @@ function ftd_render_gnls_session_cta( $post_id, $atts = array() ) {
 			</a>
 		<?php endif; ?>
 		<div class="gnls-cta-content"<?php echo $content_style ? ' style="' . esc_attr( $content_style ) . '"' : ''; ?>>
+			<?php if ( $is_capture && $bg_src ) : ?>
+				<img class="gnls-cta-capture-bg" src="<?php echo esc_attr( $bg_src ); ?>" alt="" decoding="sync" />
+			<?php endif; ?>
 			<?php if ( $logo_html ) : ?>
 				<div class="gnls-cta-brand"><?php echo $logo_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?></div>
 			<?php elseif ( $presents ) : ?>
@@ -267,10 +332,16 @@ function ftd_render_gnls_session_cta( $post_id, $atts = array() ) {
 					<div class="gnls-cta-hosts">
 						<?php
 						foreach ( $members as $index => $host ) :
-							$profile_url = ! empty( $host['url'] ) ? $host['url'] : ftd_get_member_profile_url( $host['id'] );
-							$tagline_host = ftd_get_community_call_member_tagline( $host['id'] );
-							$initials     = ftd_get_member_initials( $host['name'] );
-							$has_avatar     = ! empty( $host['avatar_url'] ) && false === strpos( $host['avatar_url'], 'gravatar.com/avatar/?' );
+							$profile_url       = ! empty( $host['url'] ) ? $host['url'] : ftd_get_member_profile_url( $host['id'] );
+							$host_subtitle     = trim( (string) ( $host['subtitle'] ?? '' ) );
+							$has_custom_avatar = function_exists( 'ftd_user_has_custom_profile_image' ) && ftd_user_has_custom_profile_image( $host['id'] );
+							$avatar_url        = function_exists( 'ftd_get_user_profile_image_url' )
+								? ftd_get_user_profile_image_url( $host['id'], 144 )
+								: ( $host['avatar_url'] ?? '' );
+							if ( $is_capture && $has_custom_avatar && $avatar_url && function_exists( 'ftd_get_gnls_capture_image_data_uri' ) ) {
+								$avatar_url = ftd_get_gnls_capture_image_data_uri( $avatar_url );
+							}
+							$initials          = ftd_get_member_initials( $host['name'] );
 							?>
 							<?php if ( $index > 0 ) : ?>
 								<span class="gnls-cta-host-sep" aria-hidden="true">&amp;</span>
@@ -281,22 +352,28 @@ function ftd_render_gnls_session_cta( $post_id, $atts = array() ) {
 							<?php else : ?>
 								<div class="gnls-cta-host gnls-cta-host--<?php echo esc_attr( (string) ( $index + 1 ) ); ?>">
 							<?php endif; ?>
-									<?php if ( $has_avatar ) : ?>
-										<img
-											class="gnls-cta-host-avatar gnls-cta-host-avatar--photo"
-											src="<?php echo esc_url( $host['avatar_url'] ); ?>"
-											alt="<?php echo esc_attr( $host['name'] ); ?>"
-											width="72"
-											height="72"
-											loading="lazy"
-										/>
-									<?php else : ?>
-										<span class="gnls-cta-host-avatar gnls-cta-host-avatar--initials"><?php echo esc_html( $initials ); ?></span>
-									<?php endif; ?>
-									<span class="gnls-cta-host-name"><?php echo esc_html( strtoupper( $host['name'] ) ); ?></span>
-									<?php if ( $tagline_host ) : ?>
-										<span class="gnls-cta-host-tagline"><?php echo esc_html( $tagline_host ); ?></span>
-									<?php endif; ?>
+									<div class="gnls-cta-host-avatar-wrap">
+										<?php if ( $has_custom_avatar ) : ?>
+											<img
+												class="gnls-cta-host-avatar gnls-cta-host-avatar--photo"
+												src="<?php echo $is_capture ? esc_attr( $avatar_url ) : esc_url( $avatar_url ); ?>"
+												alt="<?php echo esc_attr( $host['name'] ); ?>"
+												width="72"
+												height="72"
+												<?php echo $is_capture ? 'decoding="sync"' : 'loading="lazy" decoding="async"'; ?>
+											/>
+										<?php else : ?>
+											<span class="gnls-cta-host-avatar gnls-cta-host-avatar--initials"><?php echo esc_html( $initials ); ?></span>
+										<?php endif; ?>
+									</div>
+									<div class="gnls-cta-host-copy">
+										<span class="gnls-cta-host-name"><?php echo esc_html( strtoupper( $host['name'] ) ); ?></span>
+										<?php if ( $host_subtitle ) : ?>
+											<span class="gnls-cta-host-tagline"><?php echo esc_html( $host_subtitle ); ?></span>
+										<?php else : ?>
+											<span class="gnls-cta-host-tagline gnls-cta-host-tagline--empty" aria-hidden="true"></span>
+										<?php endif; ?>
+									</div>
 							<?php if ( $profile_url ) : ?>
 								</a>
 							<?php else : ?>
@@ -329,7 +406,9 @@ function ftd_render_gnls_session_cta( $post_id, $atts = array() ) {
 				<?php if ( $footnote ) : ?>
 					<span class="gnls-cta-footnote"><?php echo esc_html( $footnote ); ?></span>
 				<?php endif; ?>
-				<span class="gnls-cta-site"><?php echo esc_html( ftd_get_gnls_session_cta_site_label() ); ?></span>
+				<a class="gnls-cta-site" href="<?php echo esc_url( ftd_get_gnls_session_cta_site_url() ); ?>">
+					<?php echo esc_html( ftd_get_gnls_session_cta_site_label() ); ?>
+				</a>
 			</div>
 		</div>
 

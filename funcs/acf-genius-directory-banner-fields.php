@@ -275,6 +275,96 @@ function ftd_get_stats_ticker_text_settings() {
 }
 
 /**
+ * Default copy for [founding_genius_banner].
+ *
+ * @return array<string, string>
+ */
+function ftd_get_founding_genius_banner_text_defaults() {
+	return array(
+		'badge'          => 'Founding genius offer',
+		'headline'       => 'Free lifetime listing &mdash; forever',
+		'subtext'        => 'be one of the original {total},',
+		'code_label'     => 'use code',
+		'joined_text'    => '{used} joined',
+		'remaining_text' => '{remaining} left',
+		'all_claimed'    => 'All {total} founding spots have been claimed',
+		'claimed_notice' => 'The founding offer has now closed. Join now to access our standard plans.',
+	);
+}
+
+/**
+ * ACF subfields for founding genius banner text.
+ *
+ * @return array<int, array<string, mixed>>
+ */
+function ftd_founding_genius_banner_acf_text_fields() {
+	$defaults = ftd_get_founding_genius_banner_text_defaults();
+	$token_help = 'Tokens: {total}, {used}, {remaining}, {code}. Used and remaining update live from membership data.';
+
+	$fields = array(
+		array(
+			'key'     => 'field_ftd_fgb_intro',
+			'label'   => '',
+			'name'    => '',
+			'type'    => 'message',
+			'message' => 'Copy for the <code>[founding_genius_banner]</code> block on Live Sessions pages. ' . $token_help . ' Total spots and discount code come from the sitewide banner settings above.',
+		),
+		array(
+			'key'   => 'field_ftd_fgb_badge',
+			'label' => 'Eyebrow label',
+			'name'  => 'badge',
+		),
+		array(
+			'key'   => 'field_ftd_fgb_headline',
+			'label' => 'Headline',
+			'name'  => 'headline',
+		),
+		array(
+			'key'   => 'field_ftd_fgb_subtext',
+			'label' => 'Subtext',
+			'name'  => 'subtext',
+		),
+		array(
+			'key'   => 'field_ftd_fgb_code_label',
+			'label' => 'Discount code label',
+			'name'  => 'code_label',
+		),
+		array(
+			'key'   => 'field_ftd_fgb_joined_text',
+			'label' => 'Progress — joined label',
+			'name'  => 'joined_text',
+		),
+		array(
+			'key'   => 'field_ftd_fgb_remaining_text',
+			'label' => 'Progress — remaining label',
+			'name'  => 'remaining_text',
+		),
+		array(
+			'key'   => 'field_ftd_fgb_all_claimed',
+			'label' => 'All claimed — headline',
+			'name'  => 'all_claimed',
+		),
+		array(
+			'key'   => 'field_ftd_fgb_claimed_notice',
+			'label' => 'All claimed — notice',
+			'name'  => 'claimed_notice',
+		),
+	);
+
+	foreach ( $fields as $index => $field ) {
+		if ( 'message' === ( $field['type'] ?? '' ) ) {
+			continue;
+		}
+
+		$name = $field['name'];
+		$fields[ $index ]['type']          = 'text';
+		$fields[ $index ]['default_value'] = $defaults[ $name ] ?? '';
+	}
+
+	return $fields;
+}
+
+/**
  * Register founding spots banner field group.
  */
 function ftd_register_founding_spots_banner_acf_fields() {
@@ -369,6 +459,14 @@ function ftd_register_founding_spots_banner_acf_fields() {
 					'layout'        => 'block',
 					'instructions'  => 'Copy for each slide in the scrolling stats ticker and sitewide banner. Use {total} in the founding spots label.',
 					'sub_fields'    => ftd_stats_ticker_acf_text_fields(),
+				),
+				array(
+					'key'        => 'field_ftd_fgb_group',
+					'label'      => 'Founding genius banner',
+					'name'       => 'founding_genius_banner',
+					'type'       => 'group',
+					'layout'     => 'block',
+					'sub_fields' => ftd_founding_genius_banner_acf_text_fields(),
 				),
 			),
 			'location'              => array(

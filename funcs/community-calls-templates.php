@@ -8,6 +8,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 add_filter( 'template_include', 'ftd_community_calls_template_include', 99 );
+add_filter( 'body_class', 'ftd_community_calls_body_class' );
+add_action( 'template_redirect', 'ftd_maybe_serve_community_call_ics' );
 
 /**
  * Load plugin templates for community calls.
@@ -33,6 +35,46 @@ function ftd_community_calls_template_include( $template ) {
 	}
 
 	return $template;
+}
+
+/**
+ * Body classes for community call templates.
+ *
+ * @param string[] $classes Body classes.
+ * @return string[]
+ */
+function ftd_community_calls_body_class( $classes ) {
+	if ( is_singular( FTD_COMMUNITY_CALL_POST_TYPE ) ) {
+		$classes[] = 'gcc-single-session';
+	}
+
+	return $classes;
+}
+
+/**
+ * Serve .ics download for a single community call.
+ */
+function ftd_maybe_serve_community_call_ics() {
+	if ( ! is_singular( FTD_COMMUNITY_CALL_POST_TYPE ) ) {
+		return;
+	}
+
+	if ( empty( $_GET['ftd_gcc_ics'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return;
+	}
+
+	$content = ftd_get_community_call_ics_content( get_the_ID() );
+
+	if ( '' === $content ) {
+		status_header( 404 );
+		exit;
+	}
+
+	nocache_headers();
+	header( 'Content-Type: text/calendar; charset=utf-8' );
+	header( 'Content-Disposition: attachment; filename="community-call.ics"' );
+	echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	exit;
 }
 
 add_action( 'wp_enqueue_scripts', 'ftd_enqueue_community_calls_styles', 25 );
@@ -101,6 +143,12 @@ function ftd_enqueue_community_calls_styles() {
 	if ( $is_calls_single || $is_calls_archive ) {
 		wp_enqueue_style( 'ftd-sc-founding-genius' );
 		wp_enqueue_style( 'ftd-sc-wag-features-ctas' );
+	}
+
+	if ( $is_calls_single ) {
+		wp_enqueue_style( 'ftd-sc-social-share' );
+		wp_enqueue_style( 'ftd-sc-gnls-join-cta' );
+		wp_enqueue_script( 'ftd-live-session-share' );
 	}
 
 	if ( $is_calls_archive ) {

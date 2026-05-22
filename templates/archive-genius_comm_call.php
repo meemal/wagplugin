@@ -29,6 +29,10 @@ echo ftd_render_gnls_featured_session_panel(); // phpcs:ignore WordPress.Securit
 		<?php
 		if ( $featured_session_id ) {
 			echo ftd_render_gnls_up_next_session( $featured_session_id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper.
+
+			if ( function_exists( 'ftd_render_gnls_join_cta' ) ) {
+				echo ftd_render_gnls_join_cta(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper.
+			}
 		}
 
 		$grid_session_ids = array();
@@ -61,8 +65,6 @@ echo ftd_render_gnls_featured_session_panel(); // phpcs:ignore WordPress.Securit
 			</div>
 		<?php endif; ?>
 	</section>
-
-	<?php ftd_render_gnls_archive_outro(); ?>
 
 	<section class="gcc-page-section gcc-page-section--spots">
 		<?php echo do_shortcode( '[founding_genius_banner]' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>

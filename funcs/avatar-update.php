@@ -75,8 +75,22 @@ function my_user_avatar_filter( $avatar, $id_or_email, $size, $default, $alt ) {
         }
     }
 
-    // 3) No custom? Fallback to whatever default you want
-    //    (you can pass in a custom URL, or let WP/Gravatar handle it)
+    // 3) No custom upload — use the site default profile image.
+    if ( function_exists( 'ftd_get_default_profile_image_url' ) ) {
+        $default_url = ftd_get_default_profile_image_url();
+
+        if ( $default_url ) {
+            return sprintf(
+                "<img alt='%s' src='%s' class='avatar avatar-%d photo' height='%d' width='%d' />",
+                esc_attr( $alt ),
+                esc_url( $default_url ),
+                $size,
+                $size,
+                $size
+            );
+        }
+    }
+
     return $avatar;
 }
 

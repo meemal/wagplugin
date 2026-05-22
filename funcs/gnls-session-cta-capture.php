@@ -13,6 +13,98 @@ add_action( 'template_redirect', 'ftd_handle_gnls_cta_capture_preview', 1 );
 add_action( 'wp_ajax_ftd_save_gnls_cta_thumbnail', 'ftd_ajax_save_gnls_cta_thumbnail' );
 
 /**
+ * Map a public image URL to a local filesystem path when possible.
+ *
+ * @param string $url Image URL.
+ * @return string
+ */
+function ftd_gnls_capture_url_to_path( $url ) {
+	$map = array(
+		plugin_dir_url( FTD_DIRECTORY_LISTINGS_FILE )  => plugin_dir_path( FTD_DIRECTORY_LISTINGS_FILE ),
+		content_url()                                 => WP_CONTENT_DIR,
+		site_url()                                    => ABSPATH,
+	);
+
+	foreach ( $map as $base_url => $base_path ) {
+		if ( 0 !== strpos( $url, $base_url ) ) {
+			continue;
+		}
+
+		$relative = substr( $url, strlen( $base_url ) );
+		$path     = wp_normalize_path( $base_path . ltrim( $relative, '/' ) );
+
+		if ( is_readable( $path ) ) {
+			return $path;
+		}
+	}
+
+	return '';
+}
+
+/**
+ * Inline data URI for images used in html2canvas capture.
+ *
+ * @param string $url Image URL.
+ * @return string
+ */
+function ftd_get_gnls_capture_image_data_uri( $url ) {
+	$url = trim( (string) $url );
+
+	if ( '' === $url ) {
+		return '';
+	}
+
+	static $cache = array();
+
+	if ( isset( $cache[ $url ] ) ) {
+		return $cache[ $url ];
+	}
+
+	$path = ftd_gnls_capture_url_to_path( $url );
+
+	if ( $path ) {
+		$mime = wp_check_filetype( $path );
+		$type = ! empty( $mime['type'] ) ? $mime['type'] : 'image/jpeg';
+		$data = file_get_contents( $path );
+
+		if ( false !== $data && '' !== $data ) {
+			$cache[ $url ] = 'data:' . $type . ';base64,' . base64_encode( $data );
+			return $cache[ $url ];
+		}
+	}
+
+	$response = wp_remote_get(
+		$url,
+		array(
+			'timeout'   => 15,
+			'sslverify' => apply_filters( 'https_local_ssl_verify', false ),
+		)
+	);
+
+	if ( is_wp_error( $response ) || 200 !== (int) wp_remote_retrieve_response_code( $response ) ) {
+		$cache[ $url ] = $url;
+		return $url;
+	}
+
+	$body = wp_remote_retrieve_body( $response );
+	$type = wp_remote_retrieve_header( $response, 'content-type' );
+
+	if ( ! is_string( $type ) || '' === $type ) {
+		$type = 'image/jpeg';
+	} else {
+		$type = trim( strtok( $type, ';' ) );
+	}
+
+	if ( '' === $body ) {
+		$cache[ $url ] = $url;
+		return $url;
+	}
+
+	$cache[ $url ] = 'data:' . $type . ';base64,' . base64_encode( $body );
+	return $cache[ $url ];
+}
+
+/**
  * Meta box on live session edit screen.
  */
 function ftd_register_gnls_cta_capture_meta_box() {
@@ -90,6 +182,13 @@ function ftd_enqueue_gnls_cta_capture_admin_assets( $hook ) {
 		'ftd-gnls-session-cta',
 		plugin_dir_url( FTD_DIRECTORY_LISTINGS_FILE ) . 'css/gnls-session-cta.css',
 		array( 'directory-listings-style' ),
+		FTD_DIRECTORY_LISTINGS_VERSION
+	);
+
+	wp_enqueue_style(
+		'ftd-gnls-session-cta-capture',
+		plugin_dir_url( FTD_DIRECTORY_LISTINGS_FILE ) . 'css/gnls-session-cta-capture.css',
+		array( 'ftd-gnls-session-cta' ),
 		FTD_DIRECTORY_LISTINGS_VERSION
 	);
 
@@ -172,13 +271,12 @@ function ftd_handle_gnls_cta_capture_preview() {
 	<meta name="viewport" content="width=1280">
 	<link rel="stylesheet" href="<?php echo esc_url( $css_base . 'directory-listings.css?ver=' . $ver ); ?>">
 	<link rel="stylesheet" href="<?php echo esc_url( $css_base . 'gnls-session-cta.css?ver=' . $ver ); ?>">
+	<link rel="stylesheet" href="<?php echo esc_url( $css_base . 'gnls-session-cta-capture.css?ver=' . $ver ); ?>">
 	<style>
 		html, body {
 			margin: 0;
 			padding: 0;
 			background: #111;
-		}
-		.gnls-cta-capture-shell {
 			width: <?php echo (int) FTD_GNLS_YOUTUBE_WIDTH; ?>px;
 			height: <?php echo (int) FTD_GNLS_YOUTUBE_HEIGHT; ?>px;
 			overflow: hidden;

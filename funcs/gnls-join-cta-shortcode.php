@@ -168,3 +168,52 @@ function ftd_render_gnls_join_cta( $overrides = array() ) {
 	<?php
 	return ob_get_clean();
 }
+
+/**
+ * Compact join CTA for single session sidebar (same content as archive outro).
+ *
+ * @param array<string, mixed> $overrides Optional setting overrides.
+ * @return string
+ */
+function ftd_render_gnls_join_cta_sidebar( $overrides = array() ) {
+	if ( ! function_exists( 'ftd_get_gnls_join_cta_settings' ) ) {
+		return '';
+	}
+
+	$settings = ftd_get_gnls_join_cta_settings( $overrides );
+
+	if ( '' === trim( $settings['eyebrow'] ) && '' === trim( $settings['heading'] ) && '' === trim( $settings['subtitle'] ) ) {
+		return '';
+	}
+
+	wp_enqueue_style( 'ftd-sc-gnls-join-cta' );
+
+	ob_start();
+	?>
+	<section class="ftd-sc ftd-sc--gnls-join-cta gnls-join-cta gnls-join-cta--sidebar card">
+		<div class="gnls-join-cta-inner">
+			<?php if ( $settings['eyebrow'] ) : ?>
+				<p class="gnls-join-cta-eyebrow"><?php echo esc_html( $settings['eyebrow'] ); ?></p>
+			<?php endif; ?>
+
+			<?php if ( $settings['heading'] ) : ?>
+				<h2 class="gnls-join-cta-heading"><?php echo esc_html( $settings['heading'] ); ?></h2>
+			<?php endif; ?>
+
+			<?php if ( $settings['subtitle'] ) : ?>
+				<p class="gnls-join-cta-subtitle"><?php echo esc_html( $settings['subtitle'] ); ?></p>
+			<?php endif; ?>
+
+			<?php if ( $settings['button_enabled'] && $settings['button_label'] && $settings['button_url'] ) : ?>
+				<p class="gnls-join-cta-button-wrap">
+					<a class="btn gnls-join-cta-button" href="<?php echo esc_url( $settings['button_url'] ); ?>">
+						<span class="gnls-join-cta-button-icon ftd-btn-arrow" aria-hidden="true"></span>
+						<span><?php echo esc_html( $settings['button_label'] ); ?></span>
+					</a>
+				</p>
+			<?php endif; ?>
+		</div>
+	</section>
+	<?php
+	return ob_get_clean();
+}

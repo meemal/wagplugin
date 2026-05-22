@@ -66,23 +66,63 @@ function ftd_founding_genius_animated_number_markup( $template, $token, $value, 
 }
 
 /**
+ * Founding genius banner settings from ACF (with shortcode defaults as fallback).
+ *
+ * @return array<string, mixed>
+ */
+function ftd_get_founding_genius_banner_settings() {
+	$settings = array_merge(
+		ftd_get_founding_genius_banner_text_defaults(),
+		array(
+			'total' => 111,
+			'code'  => 'originalgenius111',
+		)
+	);
+
+	if ( function_exists( 'ftd_get_founding_spots_banner_settings' ) ) {
+		$spots = ftd_get_founding_spots_banner_settings();
+
+		$settings['total'] = (int) ( $spots['total_spots'] ?? $settings['total'] );
+		$settings['code']  = (string) ( $spots['discount_code'] ?? $settings['code'] );
+	}
+
+	if ( function_exists( 'ftd_genius_directory_banner_get_field' ) ) {
+		$group = ftd_genius_directory_banner_get_field( 'founding_genius_banner' );
+
+		if ( is_array( $group ) ) {
+			foreach ( array_keys( ftd_get_founding_genius_banner_text_defaults() ) as $key ) {
+				if ( isset( $group[ $key ] ) && is_string( $group[ $key ] ) && '' !== trim( $group[ $key ] ) ) {
+					$settings[ $key ] = trim( $group[ $key ] );
+				}
+			}
+		}
+	}
+
+	$settings['total'] = max( 1, (int) $settings['total'] );
+	$settings['code']  = sanitize_text_field( strtolower( (string) $settings['code'] ) );
+
+	return apply_filters( 'ftd_founding_genius_banner_settings', $settings );
+}
+
+/**
  * @param array|string $atts Shortcode attributes.
  * @return string
  */
 function ftd_founding_genius_banner_shortcode( $atts ) {
+	$acf_settings = ftd_get_founding_genius_banner_settings();
 
 	$atts = shortcode_atts(
 		array(
-			'total'           => 111,
-			'code'            => 'originalgenius111',
-			'badge'           => 'Founding genius offer',
-			'headline'        => 'Free lifetime listing &mdash; forever',
-			'subtext'         => 'be one of the original {total},',
-			'code_label'      => 'use code',
-			'joined_text'     => '{used} joined',
-			'remaining_text'  => '{remaining} left',
-			'all_claimed'     => 'All {total} founding spots have been claimed',
-			'claimed_notice'  => 'The founding offer has now closed. Join now to access our standard plans.',
+			'total'           => $acf_settings['total'],
+			'code'            => $acf_settings['code'],
+			'badge'           => $acf_settings['badge'],
+			'headline'        => $acf_settings['headline'],
+			'subtext'         => $acf_settings['subtext'],
+			'code_label'      => $acf_settings['code_label'],
+			'joined_text'     => $acf_settings['joined_text'],
+			'remaining_text'  => $acf_settings['remaining_text'],
+			'all_claimed'     => $acf_settings['all_claimed'],
+			'claimed_notice'  => $acf_settings['claimed_notice'],
 		),
 		$atts,
 		'founding_genius_banner'

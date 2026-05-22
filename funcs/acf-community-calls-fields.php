@@ -7,11 +7,185 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+add_action( 'acf/init', 'ftd_ensure_community_calls_acf_local_field_group', 5 );
 add_action( 'acf/init', 'ftd_register_community_calls_acf_fields' );
 add_filter( 'acf/load_value/name=profile_members', 'ftd_default_community_call_profile_members', 10, 3 );
+add_action( 'acf/save_post', 'ftd_cleanup_legacy_community_call_involved_members', 25 );
 
 /**
- * Default profile members on new calls.
+ * Use the plugin PHP field group only — remove stale DB copies that block saves.
+ */
+function ftd_ensure_community_calls_acf_local_field_group() {
+	if ( ! function_exists( 'acf_get_field_group' ) || ! function_exists( 'acf_delete_field_group' ) ) {
+		return;
+	}
+
+	$group = acf_get_field_group( 'group_ftd_genius_community_call' );
+
+	if ( empty( $group['ID'] ) || ! empty( $group['local'] ) ) {
+		return;
+	}
+
+	acf_delete_field_group( (int) $group['ID'] );
+}
+
+/**
+ * Extract a member user ID from a repeater row (name keys or ACF field keys).
+ *
+ * @param array<string, mixed> $row Repeater row.
+ * @return int
+ */
+function ftd_get_community_call_profile_member_id_from_row( $row ) {
+	if ( ! is_array( $row ) ) {
+		return (int) $row;
+	}
+
+	return (int) (
+		$row['member']
+		?? $row['field_gcc_profile_member_user']
+		?? $row['ID']
+		?? $row['id']
+		?? 0
+	);
+}
+
+/**
+ * Extract subtitle text from a repeater row.
+ *
+ * @param array<string, mixed> $row Repeater row.
+ * @return string
+ */
+function ftd_get_community_call_profile_subtitle_from_row( $row ) {
+	if ( ! is_array( $row ) ) {
+		return '';
+	}
+
+	return trim(
+		(string) (
+			$row['subtitle']
+			?? $row['field_gcc_profile_member_subtitle']
+			?? ''
+		)
+	);
+}
+
+/**
+ * Extract role label from a repeater row.
+ *
+ * @param array<string, mixed> $row Repeater row.
+ * @return string
+ */
+function ftd_get_community_call_profile_role_from_row( $row ) {
+	if ( ! is_array( $row ) ) {
+		return '';
+	}
+
+	return trim(
+		(string) (
+			$row['role_label']
+			?? $row['field_gcc_profile_member_role']
+			?? ''
+		)
+	);
+}
+
+/**
+ * Convert legacy profile_members (user ID list) to repeater rows.
+ *
+ * @param mixed $value   Stored value.
+ * @param int   $post_id Post ID.
+ * @param array $field   ACF field.
+ * @return mixed
+ */
+function ftd_normalize_community_call_profile_members( $value, $post_id, $field ) {
+	unset( $field, $post_id );
+
+	if ( empty( $value ) || ! is_array( $value ) ) {
+		return $value;
+	}
+
+	$normalized = array();
+
+	foreach ( $value as $item ) {
+		$user_id = ftd_get_community_call_profile_member_id_from_row( $item );
+
+		if ( $user_id <= 0 ) {
+			continue;
+		}
+
+		$normalized[] = array(
+			'member'     => $user_id,
+			'subtitle'   => ftd_get_community_call_profile_subtitle_from_row( $item ),
+			'role_label' => ftd_get_community_call_profile_role_from_row( $item ),
+		);
+	}
+
+	return $normalized;
+}
+
+/**
+ * Remove legacy involved_members once profile_members rows exist.
+ *
+ * @param int|string $post_id Post ID.
+ */
+function ftd_cleanup_legacy_community_call_involved_members( $post_id ) {
+	$post_id = (int) $post_id;
+
+	if ( $post_id <= 0 || FTD_COMMUNITY_CALL_POST_TYPE !== get_post_type( $post_id ) ) {
+		return;
+	}
+
+	$rows = ftd_read_community_call_profile_members_meta( $post_id );
+
+	if ( ! empty( $rows ) ) {
+		delete_post_meta( $post_id, 'involved_members' );
+	}
+}
+
+/**
+ * Read profile_members rows directly from post meta when ACF load fails.
+ *
+ * @param int $post_id Post ID.
+ * @return array<int, array{member: int, subtitle: string, role_label: string}>
+ */
+function ftd_read_community_call_profile_members_meta( $post_id ) {
+	$post_id = (int) $post_id;
+
+	if ( $post_id <= 0 || ! metadata_exists( 'post', $post_id, 'profile_members' ) ) {
+		return array();
+	}
+
+	$count = (int) get_post_meta( $post_id, 'profile_members', true );
+
+	if ( $count <= 0 ) {
+		return array();
+	}
+
+	$rows = array();
+
+	for ( $i = 0; $i < $count; $i++ ) {
+		$user_id = (int) get_post_meta( $post_id, 'profile_members_' . $i . '_member', true );
+
+		if ( $user_id <= 0 ) {
+			$user_id = (int) get_post_meta( $post_id, 'profile_members_' . $i . '_user', true );
+		}
+
+		if ( $user_id <= 0 ) {
+			continue;
+		}
+
+		$rows[] = array(
+			'member'     => $user_id,
+			'subtitle'   => (string) get_post_meta( $post_id, 'profile_members_' . $i . '_subtitle', true ),
+			'role_label' => (string) get_post_meta( $post_id, 'profile_members_' . $i . '_role_label', true ),
+		);
+	}
+
+	return $rows;
+}
+
+/**
+ * Default profile members on new calls only.
  *
  * @param mixed $value   Stored value.
  * @param int   $post_id Post ID.
@@ -24,23 +198,21 @@ function ftd_default_community_call_profile_members( $value, $post_id ) {
 
 	$post = $post_id ? get_post( $post_id ) : null;
 
-	if ( $post instanceof WP_Post && 'auto-draft' !== $post->post_status ) {
-		$existing = get_post_meta( $post_id, 'profile_members', true );
-
-		if ( '' !== $existing && false !== $existing && null !== $existing ) {
-			return $value;
-		}
-
-		$legacy = get_post_meta( $post_id, 'involved_members', true );
-
-		if ( '' !== $legacy && false !== $legacy && null !== $legacy ) {
-			return $value;
-		}
+	if ( ! $post instanceof WP_Post || 'auto-draft' !== $post->post_status ) {
+		return $value;
 	}
 
 	$default_id = ftd_get_naomi_spirit_user_id();
 
-	return $default_id ? array( $default_id ) : $value;
+	return $default_id
+		? array(
+			array(
+				'member'     => $default_id,
+				'subtitle'   => '',
+				'role_label' => '',
+			),
+		)
+		: $value;
 }
 
 /**
@@ -96,12 +268,42 @@ function ftd_register_community_calls_acf_fields() {
 					'key'           => 'field_gcc_profile_members',
 					'label'         => 'Profile links',
 					'name'          => 'profile_members',
-					'type'          => 'user',
-					'role'          => '',
-					'allow_null'    => 1,
-					'multiple'      => 1,
-					'return_format' => 'id',
-					'instructions'  => 'Members featured on this call. Links to their profile pages. Defaults to Naomi Spirit on new calls.',
+					'type'          => 'repeater',
+					'layout'        => 'block',
+					'button_label'  => 'Add member',
+					'min'           => 0,
+					'max'           => 0,
+					'instructions'  => 'Members featured on the promo card and single call page. Pick a member for each row, then add optional subtitle and role.',
+					'sub_fields'    => array(
+						array(
+							'key'           => 'field_gcc_profile_member_user',
+							'label'         => 'Member',
+							'name'          => 'member',
+							'type'          => 'user',
+							'role'          => '',
+							'allow_null'    => 1,
+							'return_format' => 'id',
+							'required'      => 0,
+						),
+						array(
+							'key'           => 'field_gcc_profile_member_subtitle',
+							'label'         => 'Subtitle',
+							'name'          => 'subtitle',
+							'type'          => 'text',
+							'default_value' => '',
+							'placeholder'   => 'We Are Geniuses',
+							'instructions'  => 'Optional. Shown under the member name.',
+						),
+						array(
+							'key'           => 'field_gcc_profile_member_role',
+							'label'         => 'Role',
+							'name'          => 'role_label',
+							'type'          => 'text',
+							'default_value' => '',
+							'placeholder'   => 'Founder · hosting',
+							'instructions'  => 'Optional. Shown on the single call page.',
+						),
+					),
 				),
 				array(
 					'key'           => 'field_gcc_youtube_link',
