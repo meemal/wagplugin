@@ -26,6 +26,8 @@ function ftd_get_shortcode_styles() {
 		'ftd_favourite_quotes'               => 'css/favourite-quotes.css',
 		'custom_member_profile'              => 'css/user-profile.css',
 		'my_directory_listings_account_page' => 'css/directory-toggle.css',
+		'gnls_session_cta'                   => 'css/gnls-session-cta.css',
+		'live_session_cta'                   => 'css/gnls-session-cta.css',
 	);
 }
 

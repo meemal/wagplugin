@@ -304,6 +304,8 @@ function ftd_render_wag_features_cta_panel( $panel ) {
 function ftd_wag_features_ctas_shortcode() {
 	$panels = ftd_get_wag_features_cta_panels();
 
+	wp_enqueue_style( 'ftd-sc-wag-features-ctas' );
+
 	ob_start();
 	?>
 	<div class="ftd-sc ftd-sc--wag-features-ctas">

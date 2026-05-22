@@ -1,0 +1,326 @@
+/* Live session promo CTA — [gnls_session_cta] */
+
+.ftd-sc--gnls-session-cta {
+	--gnls-cta-bg: var(--color-purple, #673f69);
+	--gnls-cta-gold: var(--color-golden, #f2a341);
+	--gnls-cta-coral: var(--color-coral, #f26849);
+	--gnls-cta-pink: var(--color-pinkcoral, #d13d60);
+
+	display: grid;
+	grid-template-columns: minmax(0, 1.45fr) minmax(220px, 0.85fr);
+	width: 100%;
+	max-width: 980px;
+	aspect-ratio: 16 / 9;
+	margin: 0 auto;
+	overflow: hidden;
+	border-radius: 0.35rem;
+	background: var(--gnls-cta-bg);
+	color: var(--color-white, #fff);
+	box-shadow: 0 18px 40px rgba(17, 17, 17, 0.18);
+}
+
+.ftd-sc--gnls-session-cta.gnls-cta--capture {
+	width: 1280px;
+	max-width: none;
+	height: 720px;
+	aspect-ratio: auto;
+	box-shadow: none;
+	border-radius: 0;
+}
+
+.ftd-sc--gnls-session-cta.gnls-cta--linked {
+	position: relative;
+}
+
+.gnls-cta-card-link {
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	border-radius: inherit;
+	text-decoration: none;
+}
+
+.gnls-cta-card-link:focus-visible {
+	outline: 2px solid var(--color-cyan, #00e6e6);
+	outline-offset: 3px;
+}
+
+.gnls-cta--linked .gnls-cta-host,
+.gnls-cta--linked .gnls-cta-button {
+	position: relative;
+	z-index: 2;
+}
+
+.gnls-cta--linked:hover {
+	box-shadow: 0 22px 48px rgba(17, 17, 17, 0.22);
+}
+
+.gnls-cta-content {
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+	padding: clamp(1.5rem, 3vw, 2.25rem);
+}
+
+.gnls-cta--capture .gnls-cta-content {
+	padding: 2rem 2.25rem;
+}
+
+.gnls-cta-brand {
+	margin: 0 0 0.75rem;
+}
+
+.gnls-cta-logo {
+	display: block;
+	width: auto;
+	max-width: 100%;
+	height: auto;
+	max-height: clamp(264px, 42vw, 408px);
+}
+
+.gnls-cta--capture .gnls-cta-logo {
+	max-width: 100%;
+	max-height: 480px;
+}
+
+.gnls-cta-presents,
+.gnls-cta-series {
+	margin: 0;
+	font-size: 0.82rem;
+	line-height: 1.4;
+	color: var(--gnls-cta-gold);
+}
+
+.gnls-cta-presents {
+	font-family: Georgia, "Times New Roman", serif;
+	font-style: italic;
+}
+
+.gnls-cta-brand + .gnls-cta-series,
+.gnls-cta-presents + .gnls-cta-series {
+	margin-top: 0.35rem;
+}
+
+.gnls-cta-series {
+	margin-top: 0;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	opacity: 0.92;
+}
+
+.gnls-cta-title {
+	margin: 0.85rem 0 0.35rem;
+	font-size: clamp(1.65rem, 3.5vw, 2.35rem);
+	line-height: 1.08;
+	font-weight: 700;
+	color: var(--color-white, #fff);
+}
+
+.gnls-cta-title-accent {
+	color: var(--gnls-cta-gold);
+}
+
+.gnls-cta-tagline {
+	margin: 0 0 1.5rem;
+	font-family: Georgia, "Times New Roman", serif;
+	font-style: italic;
+	font-size: clamp(0.95rem, 2vw, 1.05rem);
+	color: var(--gnls-cta-gold);
+}
+
+.gnls-cta-bottom {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 1.25rem 2rem;
+	margin-top: auto;
+}
+
+.gnls-cta-hosts {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: 0.75rem 1rem;
+}
+
+.gnls-cta-host-sep {
+	align-self: center;
+	margin: 0 0.15rem 2.2rem;
+	font-family: Georgia, "Times New Roman", serif;
+	font-style: italic;
+	font-size: 1.35rem;
+	color: var(--gnls-cta-gold);
+}
+
+.gnls-cta-host {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: 7.5rem;
+	text-align: center;
+	text-decoration: none;
+	color: inherit;
+}
+
+a.gnls-cta-host:hover {
+	color: inherit;
+	opacity: 0.92;
+}
+
+.gnls-cta-host-avatar {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 72px;
+	height: 72px;
+	margin-bottom: 0.65rem;
+	border-radius: 50%;
+	overflow: hidden;
+	font-size: 1.35rem;
+	font-weight: 700;
+	color: var(--color-white, #fff);
+}
+
+.gnls-cta-host-avatar--photo {
+	object-fit: cover;
+	border: 2px solid rgba(255, 255, 255, 0.55);
+}
+
+.gnls-cta-host--1 .gnls-cta-host-avatar--initials {
+	background: linear-gradient(135deg, var(--gnls-cta-coral) 0%, var(--gnls-cta-pink) 100%);
+}
+
+.gnls-cta-host--2 .gnls-cta-host-avatar--initials,
+.gnls-cta-host--3 .gnls-cta-host-avatar--initials {
+	background: linear-gradient(135deg, var(--gnls-cta-pink) 0%, #9b59b6 100%);
+}
+
+.gnls-cta-host-name {
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	line-height: 1.35;
+}
+
+.gnls-cta-host-tagline {
+	margin-top: 0.15rem;
+	font-family: Georgia, "Times New Roman", serif;
+	font-style: italic;
+	font-size: 0.78rem;
+	line-height: 1.35;
+	color: rgba(255, 255, 255, 0.82);
+}
+
+.gnls-cta-when {
+	min-width: 150px;
+	text-align: left;
+}
+
+.gnls-cta-day {
+	margin: 0;
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.12em;
+	color: var(--gnls-cta-gold);
+}
+
+.gnls-cta-date {
+	margin: 0.1rem 0 0;
+	font-size: clamp(1.35rem, 2.5vw, 1.75rem);
+	line-height: 1.1;
+	font-weight: 700;
+}
+
+.gnls-cta-times {
+	margin: 0.2rem 0 0.85rem;
+	font-size: 0.82rem;
+	line-height: 1.45;
+	opacity: 0.95;
+}
+
+.gnls-cta-button {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.75rem 1.25rem;
+	border-radius: 999px;
+	background: var(--color-cyan, #00e6e6);
+	border: 2px solid var(--color-cyan, #00e6e6);
+	color: var(--color-darkgrey, #111);
+	font-weight: 700;
+	text-decoration: none;
+	white-space: nowrap;
+}
+
+.gnls-cta-button:hover {
+	background: var(--color-cyan2, #00cccc);
+	border-color: var(--color-cyan2, #00cccc);
+	color: var(--color-darkgrey, #111);
+}
+
+.gnls-cta-button-icon {
+	font-size: 0.72rem;
+	line-height: 1;
+}
+
+.gnls-cta-footer {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	gap: 0.75rem 1.5rem;
+	margin-top: 1.35rem;
+	padding-top: 0.85rem;
+	font-size: 0.78rem;
+}
+
+.gnls-cta-footnote {
+	font-family: Georgia, "Times New Roman", serif;
+	font-style: italic;
+	color: rgba(255, 255, 255, 0.78);
+}
+
+.gnls-cta-site {
+	color: rgba(255, 255, 255, 0.92);
+}
+
+.gnls-cta-media {
+	min-height: 0;
+	height: 100%;
+	background: rgba(0, 0, 0, 0.12);
+}
+
+.gnls-cta-image {
+	display: block;
+	width: 100%;
+	height: 100%;
+	min-height: 0;
+	object-fit: cover;
+	aspect-ratio: 16 / 9;
+}
+
+@media (max-width: 768px) {
+	.ftd-sc--gnls-session-cta {
+		grid-template-columns: 1fr;
+		aspect-ratio: auto;
+	}
+
+	.gnls-cta-media {
+		order: -1;
+	}
+
+	.gnls-cta-image {
+		aspect-ratio: 16 / 9;
+		min-height: 0;
+	}
+
+	.gnls-cta-bottom {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.gnls-cta-when {
+		text-align: left;
+	}
+}

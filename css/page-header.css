@@ -1,0 +1,120 @@
+/* Standardised full-width page header */
+
+body.ftd-has-page-header .page-title,
+body.ftd-has-page-header .fancy-header,
+body.ftd-has-page-header .ph-wrap,
+body.ftd-has-page-header .breadcrumbs {
+	display: none;
+}
+
+body.ftd-has-page-header #main,
+body.ftd-has-page-header .wf-container-main,
+body.ftd-has-page-header .content,
+body.ftd-has-page-header #content {
+	padding-top: 0;
+	margin-top: 0;
+}
+
+.ftd-sc--page-header {
+	--ftd-ph-bg: var(--color-purple, #673f69);
+	--ftd-ph-eyebrow: var(--color-coral, #f26849);
+	--ftd-ph-title-accent: var(--color-golden, #f2a341);
+	--ftd-ph-subtitle: var(--color-coral, #f26849);
+
+	width: 100vw;
+	max-width: 100vw;
+	margin-top: 0;
+	margin-left: calc(50% - 50vw);
+	margin-right: calc(50% - 50vw);
+	padding: clamp(2.5rem, 6vw, 4.5rem) 1.5rem clamp(2.75rem, 6vw, 4.75rem);
+	box-sizing: border-box;
+	background-color: var(--ftd-ph-bg);
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+	color: var(--color-white, #fff);
+	text-align: center;
+}
+
+.ftd-page-header-inner {
+	max-width: 52rem;
+	margin: 0 auto;
+}
+
+.ftd-page-header-eyebrow {
+	margin: 0 0 0.85rem;
+	font-size: 0.78rem;
+	font-weight: 600;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--ftd-ph-eyebrow);
+}
+
+.ftd-page-header-title {
+	margin: 0 0 0.65rem;
+	font-size: clamp(2.2rem, 6vw, 3.5rem);
+	line-height: 1.05;
+	font-weight: 700;
+}
+
+.ftd-page-header-title-main {
+	color: var(--color-white, #fff);
+}
+
+.ftd-page-header-title-accent {
+	color: var(--ftd-ph-title-accent);
+}
+
+.ftd-page-header-subtitle {
+	margin: 0 0 1.35rem;
+	font-family: Georgia, "Times New Roman", serif;
+	font-style: italic;
+	font-size: clamp(1rem, 2.4vw, 1.2rem);
+	color: var(--ftd-ph-subtitle);
+}
+
+.ftd-page-header-description {
+	max-width: 42rem;
+	margin: 0 auto;
+	font-size: 1rem;
+	line-height: 1.75;
+	color: var(--color-white, #fff);
+}
+
+.ftd-page-header-description p {
+	margin: 0 0 1rem;
+}
+
+.ftd-page-header-description p:last-child {
+	margin-bottom: 0;
+}
+
+.ftd-page-header-cta-wrap {
+	margin: 1.75rem 0 0;
+}
+
+.ftd-page-header-cta {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.55rem;
+	padding: 0.85rem 1.6rem;
+	border-radius: 999px;
+	background: var(--color-cyan, #00e6e6);
+	border: 2px solid var(--color-cyan, #00e6e6);
+	color: var(--color-darkgrey, #111);
+	font-weight: 700;
+	text-decoration: none;
+	transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.ftd-page-header-cta:hover {
+	background: var(--color-cyan2, #00cccc);
+	border-color: var(--color-cyan2, #00cccc);
+	color: var(--color-darkgrey, #111);
+	transform: translateY(-1px);
+}
+
+.ftd-page-header-cta-icon {
+	font-size: 0.75rem;
+	line-height: 1;
+}

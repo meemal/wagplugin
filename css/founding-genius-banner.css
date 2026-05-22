@@ -64,6 +64,12 @@
 	font-weight: 700;
 	color: var(--color-white, #fff);
 	letter-spacing: -0.03em;
+	transition: transform 0.35s ease, text-shadow 0.35s ease;
+}
+
+.ftd-sc--founding-genius .fg-banner.fg-is-animating .fg-counter-num {
+	transform: scale(1.03);
+	text-shadow: 0 0 24px rgba(255, 255, 255, 0.18);
 }
 
 .ftd-sc--founding-genius .fg-counter-of {
@@ -98,9 +104,41 @@
 
 .ftd-sc--founding-genius .fg-fill {
 	height: 100%;
+	width: 0;
 	border-radius: 999px;
 	background: linear-gradient(90deg, var(--color-coral, #f26849) 0%, var(--fg-accent-soft) 100%);
-	transition: width 0.4s ease;
+	transition: width 1.7s cubic-bezier(0.22, 1, 0.36, 1);
+	position: relative;
+	overflow: hidden;
+}
+
+.ftd-sc--founding-genius .fg-fill::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(
+		110deg,
+		transparent 0%,
+		rgba(255, 255, 255, 0.28) 45%,
+		transparent 70%
+	);
+	transform: translateX(-120%);
+	opacity: 0;
+}
+
+.ftd-sc--founding-genius .fg-banner.fg-is-animating .fg-fill::after {
+	opacity: 1;
+	animation: fg-progress-shimmer 1.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes fg-progress-shimmer {
+	to {
+		transform: translateX(120%);
+	}
+}
+
+.ftd-sc--founding-genius .fg-banner.fg-has-animated .fg-fill {
+	transition: none;
 }
 
 .ftd-sc--founding-genius .fg-progress-labels {
@@ -159,6 +197,24 @@
 	color: var(--fg-accent-soft);
 	font-style: italic;
 	max-width: 28rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.ftd-sc--founding-genius .fg-fill,
+	.ftd-sc--founding-genius .fg-counter-num {
+		transition: none;
+	}
+
+	.ftd-sc--founding-genius .fg-banner.fg-is-animating .fg-counter-num {
+		transform: none;
+		text-shadow: none;
+	}
+
+	.ftd-sc--founding-genius .fg-fill::after,
+	.ftd-sc--founding-genius .fg-banner.fg-is-animating .fg-fill::after {
+		animation: none;
+		opacity: 0;
+	}
 }
 
 @media (max-width: 480px) {

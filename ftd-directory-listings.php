@@ -11,7 +11,8 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 define( 'FTD_DIRECTORY_LISTINGS_FILE', __FILE__ );
-define( 'FTD_DIRECTORY_LISTINGS_VERSION', '1.0.39' );
+define( 'FTD_DIRECTORY_LISTINGS_VERSION', '1.0.52' );
+define( 'FTD_COMMUNITY_CALL_POST_TYPE', 'genius_comm_call' );
 
 require_once plugin_dir_path( __FILE__ ) . 'includes/shortcode-assets.php';
 
@@ -80,6 +81,19 @@ register_activation_hook(__FILE__, function() {
 register_deactivation_hook(__FILE__, function() {
     flush_rewrite_rules();
 });
+
+add_action(
+	'init',
+	function () {
+		$stored_version = get_option( 'ftd_directory_listings_rewrite_version', '' );
+
+		if ( $stored_version !== FTD_DIRECTORY_LISTINGS_VERSION ) {
+			flush_rewrite_rules( false );
+			update_option( 'ftd_directory_listings_rewrite_version', FTD_DIRECTORY_LISTINGS_VERSION );
+		}
+	},
+	999
+);
 
 
 require_once(ABSPATH . 'wp-admin/includes/file.php');
