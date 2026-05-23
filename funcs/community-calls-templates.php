@@ -82,6 +82,7 @@ add_action( 'wp_enqueue_scripts', 'ftd_register_live_session_share_assets', 15 )
 add_action( 'wp_head', 'ftd_output_community_call_social_meta', 5 );
 add_filter( 'wpseo_opengraph_image', 'ftd_filter_community_call_share_image' );
 add_filter( 'wpseo_twitter_image', 'ftd_filter_community_call_share_image' );
+add_filter( 'wpseo_opengraph_image_id', 'ftd_filter_community_call_share_image_id' );
 add_filter( 'rank_math/opengraph/facebook/og_image', 'ftd_filter_community_call_share_image' );
 add_filter( 'rank_math/opengraph/twitter/image', 'ftd_filter_community_call_share_image' );
 
@@ -96,9 +97,25 @@ function ftd_filter_community_call_share_image( $image ) {
 		return $image;
 	}
 
-	$url = ftd_get_community_call_share_image_url( get_the_ID() );
+	$og = ftd_get_community_call_og_image_data( get_the_ID() );
 
-	return $url ? $url : $image;
+	return ! empty( $og['url'] ) ? $og['url'] : $image;
+}
+
+/**
+ * Prefer the session promo attachment for SEO plugin share tags.
+ *
+ * @param int|string $image_id Existing attachment ID.
+ * @return int|string
+ */
+function ftd_filter_community_call_share_image_id( $image_id ) {
+	if ( ! is_singular( FTD_COMMUNITY_CALL_POST_TYPE ) ) {
+		return $image_id;
+	}
+
+	$attachment_id = ftd_get_community_call_share_image_id( get_the_ID() );
+
+	return $attachment_id > 0 ? $attachment_id : $image_id;
 }
 
 /**
@@ -116,33 +133,31 @@ function ftd_output_community_call_social_meta() {
 	$post_id = get_the_ID();
 	$url     = get_permalink( $post_id );
 	$title   = wp_strip_all_tags( get_the_title( $post_id ) );
-	$desc    = ftd_get_community_call_short_description( $post_id );
-	$image   = ftd_get_community_call_share_image_url( $post_id );
+	$content = ftd_get_live_session_share_content( $post_id );
+	$desc    = $content['text'];
 
 	if ( '' === $desc ) {
 		$desc = $title;
 	}
+
+	$image = ftd_get_community_call_og_image_data( $post_id );
 
 	echo '<meta property="og:type" content="article" />' . "\n";
 	echo '<meta property="og:title" content="' . esc_attr( $title ) . '" />' . "\n";
 	echo '<meta property="og:description" content="' . esc_attr( $desc ) . '" />' . "\n";
 	echo '<meta property="og:url" content="' . esc_url( $url ) . '" />' . "\n";
 
-	if ( $image ) {
-		echo '<meta property="og:image" content="' . esc_url( $image ) . '" />' . "\n";
+	if ( ! empty( $image['url'] ) ) {
+		echo '<meta property="og:image" content="' . esc_url( $image['url'] ) . '" />' . "\n";
+		echo '<meta property="og:image:secure_url" content="' . esc_url( $image['url'] ) . '" />' . "\n";
 
-		if ( function_exists( 'ftd_get_community_call_share_image_id' ) && function_exists( 'ftd_get_community_call_social_share_thumbnail_id' ) ) {
-			$share_id  = ftd_get_community_call_share_image_id( $post_id );
-			$social_id = ftd_get_community_call_social_share_thumbnail_id( $post_id );
-
-			if ( $share_id > 0 && $social_id > 0 && $share_id === $social_id ) {
-				echo '<meta property="og:image:width" content="' . esc_attr( (string) FTD_GNLS_SOCIAL_WIDTH ) . '" />' . "\n";
-				echo '<meta property="og:image:height" content="' . esc_attr( (string) FTD_GNLS_SOCIAL_HEIGHT ) . '" />' . "\n";
-			}
+		if ( ! empty( $image['width'] ) && ! empty( $image['height'] ) ) {
+			echo '<meta property="og:image:width" content="' . esc_attr( (string) $image['width'] ) . '" />' . "\n";
+			echo '<meta property="og:image:height" content="' . esc_attr( (string) $image['height'] ) . '" />' . "\n";
 		}
 
 		echo '<meta name="twitter:card" content="summary_large_image" />' . "\n";
-		echo '<meta name="twitter:image" content="' . esc_url( $image ) . '" />' . "\n";
+		echo '<meta name="twitter:image" content="' . esc_url( $image['url'] ) . '" />' . "\n";
 	} else {
 		echo '<meta name="twitter:card" content="summary" />' . "\n";
 	}

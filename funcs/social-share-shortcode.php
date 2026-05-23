@@ -123,8 +123,20 @@ function ftd_get_social_share_urls( $text, $affiliate_url ) {
 		'facebook'  => 'https://www.facebook.com/sharer/sharer.php?u=' . rawurlencode( $affiliate_url ) . '&quote=' . rawurlencode( $text ),
 		'linkedin'  => 'https://www.linkedin.com/sharing/share-offsite/?url=' . rawurlencode( $affiliate_url ),
 		'whatsapp'  => 'https://wa.me/?text=' . rawurlencode( $body ),
+		'telegram'  => ftd_get_telegram_share_url( $affiliate_url, $text ),
 		'email'     => 'mailto:?subject=' . rawurlencode( __( 'Join me on We Are Geniuses', 'ftd-directory-listings' ) ) . '&body=' . rawurlencode( $body ),
 	);
+}
+
+/**
+ * Build a Telegram share URL.
+ *
+ * @param string $url  Link to share.
+ * @param string $text Optional message shown above the link.
+ * @return string
+ */
+function ftd_get_telegram_share_url( $url, $text = '' ) {
+	return 'https://t.me/share/url?url=' . rawurlencode( $url ) . '&text=' . rawurlencode( $text );
 }
 
 /**
@@ -254,6 +266,10 @@ function ftd_social_share_shortcode( $atts ) {
 						<span class="ftd-ss-pill-icon" aria-hidden="true"><?php echo ftd_social_share_icon_svg( 'whatsapp' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
 						<span class="ftd-ss-pill-label">WhatsApp</span>
 					</a>
+					<a class="ftd-ss-pill ftd-ss-pill--telegram" href="<?php echo esc_url( $prepared[0]['urls']['telegram'] ); ?>" data-share="telegram" target="_blank" rel="noopener noreferrer">
+						<span class="ftd-ss-pill-icon" aria-hidden="true"><?php echo ftd_social_share_icon_svg( 'telegram' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+						<span class="ftd-ss-pill-label">Telegram</span>
+					</a>
 				</div>
 				<button type="button" class="ftd-ss-pill ftd-ss-pill--copy" data-ftd-ss-copy>
 					<span class="ftd-ss-pill-icon ftd-ss-pill-icon--copy" aria-hidden="true"><?php echo ftd_social_share_icon_svg( 'copy' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
@@ -280,6 +296,7 @@ function ftd_social_share_icon_svg( $name ) {
 		'facebook'  => '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.437H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-.295 1.144-1.527 2.174-3.047 2.174v3.47h3.281z"/></svg>',
 		'linkedin'  => '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.919v5.813h-3.554V9.351h3.554v1.561h.051c.711-1.966 2.878-3.154 4.847-3.154 5.604 0 6.557 3.617 6.557 7.498v6.196zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.065zm1.782 13.019H3.555V9.351h3.564v11.101zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>',
 		'whatsapp'  => '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.336-.407.465-.14.176-.292.473-.386.67-.156.197-.003.36-.618.54-.82.174-.149.297-.247.386-.475.099.178-.617.92-.95 1.551-.297.67-.003.447-.292.519 1.058.748 1.674.748 2.444 0 1.422-.139 2.654-.837 3.683-.606 1.102-2.03 2.001-2.03.973-.004.01-.004.729-.054.134-1.72z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492l4.399-1.145A11.95 11.95 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.77 9.77 0 01-4.986-1.363l-.357-.212-3.826 1.004.98-3.735-.233-.371A9.818 9.818 0 0112 2.182c5.454 0 9.818 4.364 9.818 9.818 0 5.454-4.364 9.818-9.818 9.818z"/></svg>',
+		'telegram'  => '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M9.417 15.181l-.397 5.584c.568 0 .814-.244 1.109-.537l2.664-2.538 5.523 4.038c1.012.557 1.73.264 1.979-.936l3.594-16.822h.001c.318-1.478-.537-2.055-1.514-1.708L1.179 9.557c-1.454.564-1.434 1.374-.248 1.735l4.753 1.482 11.054-6.954c.521-.329 1.000-.146.608.183"/></svg>',
 		'copy'      => '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>',
 	);
 

@@ -273,6 +273,16 @@ function ftd_register_community_calls_acf_fields() {
 					'placeholder'   => 'Monday 2 June · 7pm UK / 8pm CT',
 				),
 				array(
+					'key'           => 'field_gcc_social_share_message',
+					'label'         => 'Social share message',
+					'name'          => 'social_share_message',
+					'type'          => 'textarea',
+					'rows'          => 6,
+					'new_lines'     => 'br',
+					'instructions'  => 'Message used when sharing this session (WhatsApp, X, email, copy). Placeholders: {title}, {times}, {url}, {image}. Put {url} on its own line so the link is recognised. {image} adds the promo image link on the next line (helps WhatsApp show the poster).',
+					'placeholder'   => "Join us for {title} — a Genius Network Live Session with We Are Geniuses.\n{times}\n{url}\n{image}",
+				),
+				array(
 					'key'          => 'field_gcc_long_description',
 					'label'        => 'Long description',
 					'name'         => 'long_description',

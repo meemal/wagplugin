@@ -29,13 +29,83 @@
 			document.execCommand('copy');
 			onSuccess();
 		} catch (err) {
-			window.prompt('Copy this link:', text);
+			window.prompt('Copy this message:', text);
 		}
 
 		document.body.removeChild(area);
 	}
 
+	function extensionForBlob(blob) {
+		if (!blob || !blob.type) {
+			return 'jpg';
+		}
+
+		if (blob.type.indexOf('png') !== -1) {
+			return 'png';
+		}
+
+		if (blob.type.indexOf('webp') !== -1) {
+			return 'webp';
+		}
+
+		return 'jpg';
+	}
+
+	function shareWithImage(link) {
+		var text = link.getAttribute('data-share-text') || '';
+		var imageUrl = link.getAttribute('data-share-image');
+
+		if (!imageUrl || !navigator.share) {
+			return Promise.resolve(false);
+		}
+
+		return fetch(imageUrl)
+			.then(function (response) {
+				if (!response.ok) {
+					throw new Error('Image fetch failed');
+				}
+
+				return response.blob();
+			})
+			.then(function (blob) {
+				var file = new File(
+					[blob],
+					'live-session.' + extensionForBlob(blob),
+					{ type: blob.type || 'image/jpeg' }
+				);
+				var shareData = {
+					text: text,
+					files: [file]
+				};
+
+				if (!navigator.canShare || !navigator.canShare(shareData)) {
+					return false;
+				}
+
+				return navigator.share(shareData).then(function () {
+					return true;
+				});
+			})
+			.catch(function () {
+				return false;
+			});
+	}
+
 	document.addEventListener('click', function (event) {
+		var whatsappLink = event.target.closest('.gcc-share-whatsapp');
+
+		if (whatsappLink && whatsappLink.getAttribute('data-share-image')) {
+			event.preventDefault();
+
+			shareWithImage(whatsappLink).then(function (shared) {
+				if (!shared) {
+					window.open(whatsappLink.getAttribute('href'), '_blank', 'noopener,noreferrer');
+				}
+			});
+
+			return;
+		}
+
 		var button = event.target.closest('.gcc-share-copy');
 
 		if (!button) {
@@ -44,16 +114,16 @@
 
 		event.preventDefault();
 
-		var url = button.getAttribute('data-copy-url');
+		var text = button.getAttribute('data-copy-text') || button.getAttribute('data-copy-url');
 
-		if (!url) {
+		if (!text) {
 			return;
 		}
 
 		var label = button.querySelector('.ftd-ss-pill-label');
 		var defaultText = label ? label.textContent : '';
 
-		copyText(url, function () {
+		copyText(text, function () {
 			button.classList.add('is-copied');
 
 			if (label) {

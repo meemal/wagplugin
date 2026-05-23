@@ -1045,10 +1045,7 @@ a.gcc-featured-host-link:hover .gcc-featured-host-name {
 }
 
 .gcc-share--session .gcc-share-preview {
-	display: grid;
-	grid-template-columns: minmax(200px, 320px) minmax(0, 1fr);
-	gap: 1.25rem;
-	align-items: center;
+	display: block;
 	margin-bottom: 1.15rem;
 	padding-bottom: 1.15rem;
 	border-bottom: 1px solid rgba(103, 63, 105, 0.1);
@@ -1068,6 +1065,35 @@ a.gcc-featured-host-link:hover .gcc-featured-host-name {
 	font-size: 0.88rem;
 	line-height: 1.5;
 	color: var(--color-midgrey, #4b4b4b);
+}
+
+.gcc-share--session .gcc-share-message {
+	margin-bottom: 1.15rem;
+	padding-bottom: 1.15rem;
+	border-bottom: 1px solid rgba(103, 63, 105, 0.1);
+}
+
+.gcc-share--session .gcc-share-message-label {
+	margin: 0 0 0.45rem;
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--color-purple, #673f69);
+}
+
+.gcc-share--session .gcc-share-message-text {
+	margin: 0;
+	padding: 0.85rem 1rem;
+	font-size: 0.88rem;
+	line-height: 1.55;
+	color: var(--color-darkgrey, #111);
+	background: rgba(248, 217, 255, 0.18);
+	border: 1px solid rgba(103, 63, 105, 0.12);
+	border-radius: 0.35rem;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+	word-break: break-word;
 }
 
 .gcc-page-section {

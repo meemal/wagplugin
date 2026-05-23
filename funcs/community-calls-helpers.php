@@ -99,6 +99,7 @@ function ftd_render_gnls_archive_share_buttons() {
 		'facebook' => 'https://www.facebook.com/sharer/sharer.php?u=' . rawurlencode( $url ) . '&quote=' . rawurlencode( $text ),
 		'linkedin' => 'https://www.linkedin.com/sharing/share-offsite/?url=' . rawurlencode( $url ),
 		'whatsapp' => 'https://wa.me/?text=' . rawurlencode( $body ),
+		'telegram' => function_exists( 'ftd_get_telegram_share_url' ) ? ftd_get_telegram_share_url( $url, $text ) : 'https://t.me/share/url?url=' . rawurlencode( $url ) . '&text=' . rawurlencode( $text ),
 		'email'    => 'mailto:?subject=' . rawurlencode( $title ) . '&body=' . rawurlencode( $body ),
 	);
 
@@ -124,6 +125,10 @@ function ftd_render_gnls_archive_share_buttons() {
 			<a class="ftd-ss-pill ftd-ss-pill--whatsapp" href="<?php echo esc_url( $urls['whatsapp'] ); ?>" target="_blank" rel="noopener noreferrer">
 				<span class="ftd-ss-pill-icon" aria-hidden="true"><?php echo ftd_social_share_icon_svg( 'whatsapp' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
 				<span class="ftd-ss-pill-label">WhatsApp</span>
+			</a>
+			<a class="ftd-ss-pill ftd-ss-pill--telegram" href="<?php echo esc_url( $urls['telegram'] ); ?>" target="_blank" rel="noopener noreferrer">
+				<span class="ftd-ss-pill-icon" aria-hidden="true"><?php echo ftd_social_share_icon_svg( 'telegram' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+				<span class="ftd-ss-pill-label">Telegram</span>
 			</a>
 			<a class="ftd-ss-pill ftd-ss-pill--email" href="<?php echo esc_url( $urls['email'] ); ?>">
 				<span class="ftd-ss-pill-icon" aria-hidden="true">✉</span>
@@ -1502,6 +1507,211 @@ function ftd_get_community_call_share_image_url( $post_id = 0, $size = 'full' ) 
 }
 
 /**
+ * Open Graph image data for a live session (promo image preferred).
+ *
+ * @param int $post_id Post ID.
+ * @return array{url: string, width: int, height: int}
+ */
+function ftd_get_community_call_og_image_data( $post_id = 0 ) {
+	$post_id = $post_id ? (int) $post_id : get_the_ID();
+
+	if ( $post_id <= 0 ) {
+		return array(
+			'url'    => '',
+			'width'  => 0,
+			'height' => 0,
+		);
+	}
+
+	$attachment_id = ftd_get_community_call_share_image_id( $post_id );
+
+	if ( $attachment_id <= 0 ) {
+		return array(
+			'url'    => '',
+			'width'  => 0,
+			'height' => 0,
+		);
+	}
+
+	$social_id = function_exists( 'ftd_get_community_call_social_share_thumbnail_id' )
+		? ftd_get_community_call_social_share_thumbnail_id( $post_id )
+		: (int) get_post_meta( $post_id, 'social_share_thumbnail', true );
+
+	$size   = ( $social_id > 0 && $social_id === $attachment_id ) ? 'gnls-social-og' : 'full';
+	$url    = wp_get_attachment_image_url( $attachment_id, $size );
+	$width  = 0;
+	$height = 0;
+
+	if ( ! $url && 'gnls-social-og' === $size ) {
+		$url = wp_get_attachment_image_url( $attachment_id, 'full' );
+	}
+
+	if ( $url && 'gnls-social-og' === $size && defined( 'FTD_GNLS_SOCIAL_WIDTH' ) && defined( 'FTD_GNLS_SOCIAL_HEIGHT' ) ) {
+		$width  = (int) FTD_GNLS_SOCIAL_WIDTH;
+		$height = (int) FTD_GNLS_SOCIAL_HEIGHT;
+	} elseif ( $url ) {
+		$meta = wp_get_attachment_metadata( $attachment_id );
+
+		if ( is_array( $meta ) ) {
+			if ( ! empty( $meta['sizes'][ $size ]['width'] ) && ! empty( $meta['sizes'][ $size ]['height'] ) ) {
+				$width  = (int) $meta['sizes'][ $size ]['width'];
+				$height = (int) $meta['sizes'][ $size ]['height'];
+			} elseif ( ! empty( $meta['width'] ) && ! empty( $meta['height'] ) ) {
+				$width  = (int) $meta['width'];
+				$height = (int) $meta['height'];
+			}
+		}
+	}
+
+	return array(
+		'url'    => is_string( $url ) ? $url : '',
+		'width'  => $width,
+		'height' => $height,
+	);
+}
+
+/**
+ * Collapse extra blank lines in share copy.
+ *
+ * @param string $text Share message.
+ * @return string
+ */
+function ftd_compact_live_session_share_text( $text ) {
+	$text = preg_replace( "/\r\n|\r/", "\n", (string) $text );
+	$lines = array();
+
+	foreach ( explode( "\n", $text ) as $line ) {
+		$line = rtrim( $line );
+
+		if ( '' === $line ) {
+			continue;
+		}
+
+		$lines[] = $line;
+	}
+
+	return implode( "\n", $lines );
+}
+
+/**
+ * Default social share copy for a live session (when the ACF field is empty).
+ *
+ * @param int $post_id Post ID.
+ * @return string
+ */
+function ftd_get_live_session_share_message_default( $post_id = 0 ) {
+	$post_id = $post_id ? (int) $post_id : get_the_ID();
+	$title   = wp_strip_all_tags( get_the_title( $post_id ) );
+	$times   = ftd_get_community_call_promo_times( $post_id );
+
+	$lines = array(
+		sprintf(
+			/* translators: %s: live session title */
+			__( 'Join us for %s — a Genius Network Live Session with We Are Geniuses.', 'ftd-directory-listings' ),
+			$title
+		),
+	);
+
+	if ( '' !== $times ) {
+		$lines[] = $times;
+	}
+
+	$lines[] = '{url}';
+	$lines[] = '{image}';
+
+	return implode( "\n", $lines );
+}
+
+/**
+ * Replace live session share placeholders in a message template.
+ *
+ * @param string $template Message template.
+ * @param int    $post_id  Post ID.
+ * @return string
+ */
+function ftd_replace_live_session_share_placeholders( $template, $post_id = 0 ) {
+	$post_id = $post_id ? (int) $post_id : get_the_ID();
+	$url     = get_permalink( $post_id );
+	$og      = ftd_get_community_call_og_image_data( $post_id );
+
+	$replacements = array(
+		'{title}' => wp_strip_all_tags( get_the_title( $post_id ) ),
+		'{times}' => ftd_get_community_call_promo_times( $post_id ),
+		'{url}'   => is_string( $url ) ? $url : '',
+		'{image}' => ! empty( $og['url'] ) ? $og['url'] : '',
+	);
+
+	$message = str_replace( array_keys( $replacements ), array_values( $replacements ), (string) $template );
+
+	if ( function_exists( 'ftd_normalize_share_message_text' ) ) {
+		$message = ftd_normalize_share_message_text( $message );
+	} else {
+		$message = preg_replace( '#<br\s*/?>#i', "\n", $message );
+		$message = wp_strip_all_tags( $message );
+		$message = str_replace( array( "\r\n", "\r" ), "\n", $message );
+	}
+
+	return ftd_compact_live_session_share_text( $message );
+}
+
+/**
+ * Share copy for a live session (text + full body with URL).
+ *
+ * @param int $post_id Post ID.
+ * @return array{text: string, body: string, url: string, image_url: string}
+ */
+function ftd_get_live_session_share_content( $post_id = 0 ) {
+	$post_id = $post_id ? (int) $post_id : get_the_ID();
+	$url     = get_permalink( $post_id );
+	$url     = is_string( $url ) ? $url : '';
+	$og      = ftd_get_community_call_og_image_data( $post_id );
+	$image_url = ! empty( $og['url'] ) ? $og['url'] : '';
+
+	$custom = ftd_get_community_call_field( 'social_share_message', $post_id );
+
+	if ( is_string( $custom ) && '' !== trim( $custom ) ) {
+		$template = $custom;
+	} else {
+		$template = ftd_get_live_session_share_message_default( $post_id );
+	}
+
+	$has_url_placeholder   = false !== strpos( $template, '{url}' );
+	$has_image_placeholder = false !== strpos( $template, '{image}' );
+	$body                  = ftd_replace_live_session_share_placeholders( $template, $post_id );
+
+	if ( ! $has_url_placeholder && '' !== $url ) {
+		$body = ftd_compact_live_session_share_text( rtrim( $body ) . "\n" . $url );
+	}
+
+	if ( ! $has_image_placeholder && '' !== $image_url ) {
+		$body = ftd_compact_live_session_share_text( $body . "\n" . $image_url );
+	}
+
+	$text = $body;
+
+	if ( '' !== $url ) {
+		$text = trim( str_replace( $url, '', $text ) );
+	}
+
+	if ( '' !== $image_url ) {
+		$text = trim( str_replace( $image_url, '', $text ) );
+	}
+
+	$text = ftd_compact_live_session_share_text( $text );
+
+	if ( '' === $text ) {
+		$text = wp_strip_all_tags( get_the_title( $post_id ) );
+	}
+
+	return array(
+		'text'       => $text,
+		'body'       => $body,
+		'url'        => $url,
+		'image_url'  => $image_url,
+	);
+}
+
+/**
  * Share URLs for a live session page.
  *
  * @param int $post_id Post ID.
@@ -1509,21 +1719,18 @@ function ftd_get_community_call_share_image_url( $post_id = 0, $size = 'full' ) 
  */
 function ftd_get_live_session_share_urls( $post_id = 0 ) {
 	$post_id = $post_id ? (int) $post_id : get_the_ID();
-	$url     = get_permalink( $post_id );
+	$content = ftd_get_live_session_share_content( $post_id );
+	$url     = $content['url'];
+	$text    = $content['text'];
+	$body    = $content['body'];
 	$title   = get_the_title( $post_id );
-	$text    = ftd_get_community_call_short_description( $post_id );
-
-	if ( '' === $text ) {
-		$text = $title;
-	}
-
-	$body = $text . "\n\n" . $url;
 
 	return array(
 		'twitter'  => 'https://twitter.com/intent/tweet?text=' . rawurlencode( $body ),
 		'facebook' => 'https://www.facebook.com/sharer/sharer.php?u=' . rawurlencode( $url ) . '&quote=' . rawurlencode( $text ),
 		'linkedin' => 'https://www.linkedin.com/sharing/share-offsite/?url=' . rawurlencode( $url ),
 		'whatsapp' => 'https://wa.me/?text=' . rawurlencode( $body ),
+		'telegram' => function_exists( 'ftd_get_telegram_share_url' ) ? ftd_get_telegram_share_url( $url, $text ) : 'https://t.me/share/url?url=' . rawurlencode( $url ) . '&text=' . rawurlencode( $text ),
 		'email'    => 'mailto:?subject=' . rawurlencode( $title ) . '&body=' . rawurlencode( $body ),
 	);
 }
@@ -1536,9 +1743,11 @@ function ftd_get_live_session_share_urls( $post_id = 0 ) {
  */
 function ftd_render_live_session_share_buttons( $post_id = 0 ) {
 	$post_id = $post_id ? (int) $post_id : get_the_ID();
+	$content = ftd_get_live_session_share_content( $post_id );
 	$urls    = ftd_get_live_session_share_urls( $post_id );
-	$url     = get_permalink( $post_id );
-	$share_image_url = ftd_get_community_call_share_image_url( $post_id, 'full' );
+	$url     = $content['url'];
+	$body    = $content['body'];
+	$share_image_url = $content['image_url'];
 
 	if ( ! function_exists( 'ftd_social_share_icon_svg' ) ) {
 		return '';
@@ -1561,6 +1770,13 @@ function ftd_render_live_session_share_buttons( $post_id = 0 ) {
 				</div>
 			<?php endif; ?>
 
+			<?php if ( $body ) : ?>
+				<div class="gcc-share-message">
+					<p class="gcc-share-message-label"><?php esc_html_e( 'Share message', 'ftd-directory-listings' ); ?></p>
+					<div class="gcc-share-message-text"><?php echo esc_html( $body ); ?></div>
+				</div>
+			<?php endif; ?>
+
 			<div class="gcc-share-grid">
 				<a class="ftd-ss-pill ftd-ss-pill--twitter" href="<?php echo esc_url( $urls['twitter'] ); ?>" target="_blank" rel="noopener noreferrer">
 					<span class="ftd-ss-pill-icon" aria-hidden="true"><?php echo ftd_social_share_icon_svg( 'twitter' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
@@ -1574,17 +1790,21 @@ function ftd_render_live_session_share_buttons( $post_id = 0 ) {
 					<span class="ftd-ss-pill-icon" aria-hidden="true"><?php echo ftd_social_share_icon_svg( 'linkedin' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
 					<span class="ftd-ss-pill-label">LinkedIn</span>
 				</a>
-				<a class="ftd-ss-pill ftd-ss-pill--whatsapp" href="<?php echo esc_url( $urls['whatsapp'] ); ?>" target="_blank" rel="noopener noreferrer">
+				<a class="ftd-ss-pill ftd-ss-pill--whatsapp gcc-share-whatsapp" href="<?php echo esc_url( $urls['whatsapp'] ); ?>" target="_blank" rel="noopener noreferrer" data-share-text="<?php echo esc_attr( $body ); ?>"<?php echo $share_image_url ? ' data-share-image="' . esc_attr( $share_image_url ) . '"' : ''; ?>>
 					<span class="ftd-ss-pill-icon" aria-hidden="true"><?php echo ftd_social_share_icon_svg( 'whatsapp' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
 					<span class="ftd-ss-pill-label">WhatsApp</span>
+				</a>
+				<a class="ftd-ss-pill ftd-ss-pill--telegram" href="<?php echo esc_url( $urls['telegram'] ); ?>" target="_blank" rel="noopener noreferrer">
+					<span class="ftd-ss-pill-icon" aria-hidden="true"><?php echo ftd_social_share_icon_svg( 'telegram' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+					<span class="ftd-ss-pill-label">Telegram</span>
 				</a>
 				<a class="ftd-ss-pill ftd-ss-pill--email" href="<?php echo esc_url( $urls['email'] ); ?>">
 					<span class="ftd-ss-pill-icon" aria-hidden="true">✉</span>
 					<span class="ftd-ss-pill-label"><?php esc_html_e( 'Email', 'ftd-directory-listings' ); ?></span>
 				</a>
-				<button type="button" class="ftd-ss-pill ftd-ss-pill--copy gcc-share-copy" data-copy-url="<?php echo esc_attr( $url ); ?>">
+				<button type="button" class="ftd-ss-pill ftd-ss-pill--copy gcc-share-copy" data-copy-text="<?php echo esc_attr( $body ); ?>" data-copy-url="<?php echo esc_attr( $url ); ?>"<?php echo $share_image_url ? ' data-share-image="' . esc_attr( $share_image_url ) . '"' : ''; ?>>
 					<span class="ftd-ss-pill-icon ftd-ss-pill-icon--copy" aria-hidden="true"><?php echo ftd_social_share_icon_svg( 'copy' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
-					<span class="ftd-ss-pill-label"><?php esc_html_e( 'Copy link', 'ftd-directory-listings' ); ?></span>
+					<span class="ftd-ss-pill-label"><?php esc_html_e( 'Copy message', 'ftd-directory-listings' ); ?></span>
 				</button>
 			</div>
 
@@ -2015,7 +2235,11 @@ function ftd_render_community_call_single_back_link() {
 	return sprintf(
 		'<p class="gcc-single-back"><a href="%1$s">%2$s</a></p>',
 		esc_url( ftd_get_community_call_archive_url() ),
-		esc_html__( '← ALL COMMUNITY CALLS', 'ftd-directory-listings' )
+		sprintf(
+			/* translators: %s: uppercase archive label */
+			esc_html__( '← All %s', 'ftd-directory-listings' ),
+			ftd_gnls_kicker()
+		)
 	);
 }
 
