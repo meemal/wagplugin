@@ -66,25 +66,111 @@ function ftd_stats_count_members() {
 }
 
 /**
- * Members with a map pin (Genius Map).
+ * Whether a user should appear on the Genius Map (matches PMPro Membership Maps logic).
+ *
+ * @param int $user_id User ID.
+ * @return bool
+ */
+function ftd_stats_user_is_on_map( $user_id ) {
+	$user_id = (int) $user_id;
+
+	if ( ! $user_id ) {
+		return false;
+	}
+
+	$member_address = get_user_meta( $user_id, 'pmpromm_pin_location', true );
+	if ( ! is_array( $member_address ) ) {
+		$member_address = array();
+	}
+
+	$old_lat = get_user_meta( $user_id, 'pmpro_lat', true );
+	$old_lng = get_user_meta( $user_id, 'pmpro_lng', true );
+
+	if ( empty( $member_address ) && ! empty( $old_lat ) ) {
+		$member_address['old_lat'] = $old_lat;
+		$member_address['old_lng'] = $old_lng;
+	}
+
+	if ( ! isset( $member_address['optin'] ) && ! empty( $member_address['old_lat'] ) ) {
+		$member_address['optin'] = true;
+	}
+
+	if ( empty( $member_address['optin'] ) ) {
+		return false;
+	}
+
+	return true;
+}
+
+/**
+ * Active members with a visible Genius Map pin (opted in with coordinates).
  *
  * @return int
  */
 function ftd_stats_count_on_map() {
 	global $wpdb;
 
-	return (int) $wpdb->get_var(
-		"SELECT COUNT( DISTINCT u.ID )
+	$user_ids = $wpdb->get_col(
+		"SELECT DISTINCT u.ID
 		 FROM {$wpdb->users} u
+		 LEFT JOIN {$wpdb->usermeta} umh
+			 ON umh.meta_key = 'pmpromd_hide_directory' AND u.ID = umh.user_id
 		 INNER JOIN {$wpdb->pmpro_memberships_users} mu
 			 ON u.ID = mu.user_id
 			AND mu.status = 'active'
 			AND mu.membership_id > 0
-		 INNER JOIN {$wpdb->usermeta} um
-			 ON u.ID = um.user_id
-			AND um.meta_key = 'pmpromd_pin_location'
-			AND um.meta_value != ''
-			AND um.meta_value IS NOT NULL"
+		 LEFT JOIN {$wpdb->usermeta} umlat
+			 ON umlat.meta_key = 'pmpro_lat' AND u.ID = umlat.user_id
+		 LEFT JOIN {$wpdb->usermeta} umlng
+			 ON umlng.meta_key = 'pmpro_lng' AND u.ID = umlng.user_id
+		 LEFT JOIN {$wpdb->usermeta} ummap
+			 ON ummap.meta_key = 'pmpromm_pin_location' AND u.ID = ummap.user_id
+		 WHERE (umh.meta_value IS NULL OR umh.meta_value <> '1')
+		   AND (
+			   (umlat.meta_value IS NOT NULL AND umlat.meta_value <> '')
+			   OR (umlng.meta_value IS NOT NULL AND umlng.meta_value <> '')
+			   OR (ummap.meta_value IS NOT NULL AND ummap.meta_value <> '')
+		   )"
+	);
+
+	if ( empty( $user_ids ) ) {
+		return 0;
+	}
+
+	$count = 0;
+
+	foreach ( $user_ids as $user_id ) {
+		if ( ftd_stats_user_is_on_map( (int) $user_id ) ) {
+			++$count;
+		}
+	}
+
+	return $count;
+}
+
+/**
+ * Approved members with a visible directory profile.
+ *
+ * @return int
+ */
+function ftd_stats_count_profiles() {
+	global $wpdb;
+
+	return (int) $wpdb->get_var(
+		"SELECT COUNT( DISTINCT u.ID )
+		 FROM {$wpdb->users} u
+		 LEFT JOIN {$wpdb->usermeta} umh
+			 ON umh.meta_key = 'pmpromd_hide_directory' AND u.ID = umh.user_id
+		 INNER JOIN {$wpdb->pmpro_memberships_users} mu
+			 ON u.ID = mu.user_id
+		 LEFT JOIN {$wpdb->usermeta} umm
+			 ON umm.meta_key = CONCAT('pmpro_approval_', mu.membership_id)
+			AND umm.meta_key != 'pmpro_approval_log'
+			AND u.ID = umm.user_id
+		 WHERE mu.status = 'active'
+		   AND (umh.meta_value IS NULL OR umh.meta_value <> '1')
+		   AND mu.membership_id > 0
+		   AND (umm.meta_value LIKE '%approved%' OR umm.meta_value IS NULL)"
 	);
 }
 
@@ -224,6 +310,7 @@ function ftd_get_stats_ticker_values() {
 
 	$values = array(
 		'members'     => ftd_stats_count_members(),
+		'profiles'    => ftd_stats_count_profiles(),
 		'map'         => ftd_stats_count_on_map(),
 		'listings'    => ftd_stats_count_directory_listings(),
 		'creator'     => ftd_stats_count_creator_geniuses(),
@@ -254,6 +341,12 @@ function ftd_get_stats_ticker_slides() {
 			'value'   => $values['members'],
 			'label'   => $text['members_label'],
 			'tagline' => $text['members_tagline'],
+			'type'    => 'number',
+		),
+		array(
+			'value'   => $values['profiles'],
+			'label'   => $text['profiles_label'],
+			'tagline' => $text['profiles_tagline'],
 			'type'    => 'number',
 		),
 		array(

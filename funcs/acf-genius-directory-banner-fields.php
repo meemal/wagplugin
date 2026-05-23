@@ -149,6 +149,8 @@ function ftd_get_stats_ticker_text_defaults() {
 		'founding_spots_label'  => 'of {total} founding spots left',
 		'members_label'         => 'members',
 		'members_tagline'       => 'the community grows,',
+		'profiles_label'        => 'total geniuses',
+		'profiles_tagline'      => 'with a profile on the site,',
 		'map_label'             => 'on the genius map',
 		'map_tagline'           => 'sharing their genius,',
 		'listings_label'        => 'directory listings',
@@ -190,6 +192,16 @@ function ftd_stats_ticker_acf_text_fields() {
 			'key'   => 'field_ftd_stt_members_tagline',
 			'label' => 'Members — tagline',
 			'name'  => 'members_tagline',
+		),
+		array(
+			'key'   => 'field_ftd_stt_profiles_label',
+			'label' => 'Total geniuses — label',
+			'name'  => 'profiles_label',
+		),
+		array(
+			'key'   => 'field_ftd_stt_profiles_tagline',
+			'label' => 'Total geniuses — tagline',
+			'name'  => 'profiles_tagline',
 		),
 		array(
 			'key'   => 'field_ftd_stt_map_label',

@@ -278,6 +278,10 @@ add_action('wp_ajax_save_map_settings', function () {
     if (function_exists('pmpromm_save_pin_location_fields')) {
         pmpromm_save_pin_location_fields($user_id);
     }
+
+    if (function_exists('ftd_stats_ticker_clear_cache')) {
+        ftd_stats_ticker_clear_cache();
+    }
     
     wp_send_json_success(['message' => 'Your map settings have been updated. <a href="/genius-map">Visit Map</a>']);
 });
