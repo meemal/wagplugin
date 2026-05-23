@@ -30,8 +30,8 @@ echo ftd_render_gnls_featured_session_panel(); // phpcs:ignore WordPress.Securit
 		if ( $featured_session_id ) {
 			echo ftd_render_gnls_up_next_session( $featured_session_id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper.
 
-			if ( function_exists( 'ftd_render_gnls_join_cta' ) ) {
-				echo ftd_render_gnls_join_cta(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper.
+			if ( function_exists( 'ftd_render_gnls_next_steps_cta' ) ) {
+				echo ftd_render_gnls_next_steps_cta(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper.
 			}
 		}
 

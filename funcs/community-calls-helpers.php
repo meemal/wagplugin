@@ -1125,7 +1125,6 @@ function ftd_render_gnls_featured_session_panel() {
 	$cta_html = ftd_render_gnls_session_cta(
 		$post_id,
 		array(
-			'show_button'     => '0',
 			'link_to_session' => '1',
 		)
 	);
@@ -1425,6 +1424,84 @@ function ftd_normalize_external_link( $url ) {
 }
 
 /**
+ * Attachment ID used for social share previews (YouTube thumbnail, then featured image).
+ *
+ * @param int $post_id Post ID.
+ * @return int
+ */
+function ftd_get_community_call_share_image_id( $post_id = 0 ) {
+	$post_id = $post_id ? (int) $post_id : get_the_ID();
+
+	if ( $post_id <= 0 ) {
+		return 0;
+	}
+
+	if ( function_exists( 'ftd_get_community_call_social_share_thumbnail_id' ) ) {
+		$social_thumb = ftd_get_community_call_social_share_thumbnail_id( $post_id );
+
+		if ( $social_thumb > 0 ) {
+			return $social_thumb;
+		}
+	} else {
+		$social_thumb = (int) get_post_meta( $post_id, 'social_share_thumbnail', true );
+
+		if ( $social_thumb > 0 ) {
+			return $social_thumb;
+		}
+	}
+
+	if ( function_exists( 'ftd_get_community_call_youtube_thumbnail_id' ) ) {
+		$youtube_thumb = ftd_get_community_call_youtube_thumbnail_id( $post_id );
+
+		if ( $youtube_thumb > 0 ) {
+			return $youtube_thumb;
+		}
+	} else {
+		$youtube_thumb = (int) get_post_meta( $post_id, 'youtube_thumbnail', true );
+
+		if ( $youtube_thumb > 0 ) {
+			return $youtube_thumb;
+		}
+	}
+
+	return ftd_get_community_call_feature_image_id( $post_id );
+}
+
+/**
+ * Public image URL for social share previews.
+ *
+ * @param int    $post_id Post ID.
+ * @param string $size    Image size.
+ * @return string
+ */
+function ftd_get_community_call_share_image_url( $post_id = 0, $size = 'full' ) {
+	$attachment_id = ftd_get_community_call_share_image_id( $post_id );
+
+	if ( $attachment_id <= 0 ) {
+		return '';
+	}
+
+	if ( 'full' === $size ) {
+		$post_id   = $post_id ? (int) $post_id : get_the_ID();
+		$social_id = function_exists( 'ftd_get_community_call_social_share_thumbnail_id' )
+			? ftd_get_community_call_social_share_thumbnail_id( $post_id )
+			: (int) get_post_meta( $post_id, 'social_share_thumbnail', true );
+
+		if ( $social_id > 0 && $social_id === $attachment_id ) {
+			$size = 'gnls-social-og';
+		}
+	}
+
+	$url = wp_get_attachment_image_url( $attachment_id, $size );
+
+	if ( ! $url && 'gnls-social-og' === $size ) {
+		$url = wp_get_attachment_image_url( $attachment_id, 'full' );
+	}
+
+	return is_string( $url ) ? $url : '';
+}
+
+/**
  * Share URLs for a live session page.
  *
  * @param int $post_id Post ID.
@@ -1461,6 +1538,7 @@ function ftd_render_live_session_share_buttons( $post_id = 0 ) {
 	$post_id = $post_id ? (int) $post_id : get_the_ID();
 	$urls    = ftd_get_live_session_share_urls( $post_id );
 	$url     = get_permalink( $post_id );
+	$share_image_url = ftd_get_community_call_share_image_url( $post_id, 'full' );
 
 	if ( ! function_exists( 'ftd_social_share_icon_svg' ) ) {
 		return '';
@@ -1471,35 +1549,51 @@ function ftd_render_live_session_share_buttons( $post_id = 0 ) {
 
 	ob_start();
 	?>
-	<div class="gcc-share">
-		<h2 class="gcc-section-title"><?php esc_html_e( 'Share this session', 'ftd-directory-listings' ); ?></h2>
-		<div class="gcc-share-row">
-			<a class="ftd-ss-pill ftd-ss-pill--twitter" href="<?php echo esc_url( $urls['twitter'] ); ?>" target="_blank" rel="noopener noreferrer">
-				<span class="ftd-ss-pill-icon" aria-hidden="true"><?php echo ftd_social_share_icon_svg( 'twitter' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
-				<span class="ftd-ss-pill-label">X / Twitter</span>
-			</a>
-			<a class="ftd-ss-pill ftd-ss-pill--facebook" href="<?php echo esc_url( $urls['facebook'] ); ?>" target="_blank" rel="noopener noreferrer">
-				<span class="ftd-ss-pill-icon" aria-hidden="true"><?php echo ftd_social_share_icon_svg( 'facebook' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
-				<span class="ftd-ss-pill-label">Facebook</span>
-			</a>
-			<a class="ftd-ss-pill ftd-ss-pill--linkedin" href="<?php echo esc_url( $urls['linkedin'] ); ?>" target="_blank" rel="noopener noreferrer">
-				<span class="ftd-ss-pill-icon" aria-hidden="true"><?php echo ftd_social_share_icon_svg( 'linkedin' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
-				<span class="ftd-ss-pill-label">LinkedIn</span>
-			</a>
-			<a class="ftd-ss-pill ftd-ss-pill--whatsapp" href="<?php echo esc_url( $urls['whatsapp'] ); ?>" target="_blank" rel="noopener noreferrer">
-				<span class="ftd-ss-pill-icon" aria-hidden="true"><?php echo ftd_social_share_icon_svg( 'whatsapp' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
-				<span class="ftd-ss-pill-label">WhatsApp</span>
-			</a>
-			<a class="ftd-ss-pill ftd-ss-pill--email" href="<?php echo esc_url( $urls['email'] ); ?>">
-				<span class="ftd-ss-pill-icon" aria-hidden="true">✉</span>
-				<span class="ftd-ss-pill-label"><?php esc_html_e( 'Email', 'ftd-directory-listings' ); ?></span>
-			</a>
-			<button type="button" class="ftd-ss-pill ftd-ss-pill--copy gcc-share-copy" data-copy-url="<?php echo esc_attr( $url ); ?>">
-				<span class="ftd-ss-pill-icon ftd-ss-pill-icon--copy" aria-hidden="true"><?php echo ftd_social_share_icon_svg( 'copy' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
-				<span class="ftd-ss-pill-label"><?php esc_html_e( 'Copy link', 'ftd-directory-listings' ); ?></span>
-			</button>
+	<section class="gcc-share gcc-share--session" aria-labelledby="gcc-share-session-title">
+		<div class="gcc-share-panel card">
+			<div class="gcc-share-panel-head">
+				<h2 id="gcc-share-session-title" class="gcc-share-title"><?php esc_html_e( 'Share this session with other geniuses', 'ftd-directory-listings' ); ?></h2>
+			</div>
+
+			<?php if ( $share_image_url ) : ?>
+				<div class="gcc-share-preview">
+					<img class="gcc-share-preview-image" src="<?php echo esc_url( $share_image_url ); ?>" alt="" width="320" height="180" loading="lazy" decoding="async" />
+				</div>
+			<?php endif; ?>
+
+			<div class="gcc-share-grid">
+				<a class="ftd-ss-pill ftd-ss-pill--twitter" href="<?php echo esc_url( $urls['twitter'] ); ?>" target="_blank" rel="noopener noreferrer">
+					<span class="ftd-ss-pill-icon" aria-hidden="true"><?php echo ftd_social_share_icon_svg( 'twitter' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+					<span class="ftd-ss-pill-label">X / Twitter</span>
+				</a>
+				<a class="ftd-ss-pill ftd-ss-pill--facebook" href="<?php echo esc_url( $urls['facebook'] ); ?>" target="_blank" rel="noopener noreferrer">
+					<span class="ftd-ss-pill-icon" aria-hidden="true"><?php echo ftd_social_share_icon_svg( 'facebook' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+					<span class="ftd-ss-pill-label">Facebook</span>
+				</a>
+				<a class="ftd-ss-pill ftd-ss-pill--linkedin" href="<?php echo esc_url( $urls['linkedin'] ); ?>" target="_blank" rel="noopener noreferrer">
+					<span class="ftd-ss-pill-icon" aria-hidden="true"><?php echo ftd_social_share_icon_svg( 'linkedin' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+					<span class="ftd-ss-pill-label">LinkedIn</span>
+				</a>
+				<a class="ftd-ss-pill ftd-ss-pill--whatsapp" href="<?php echo esc_url( $urls['whatsapp'] ); ?>" target="_blank" rel="noopener noreferrer">
+					<span class="ftd-ss-pill-icon" aria-hidden="true"><?php echo ftd_social_share_icon_svg( 'whatsapp' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+					<span class="ftd-ss-pill-label">WhatsApp</span>
+				</a>
+				<a class="ftd-ss-pill ftd-ss-pill--email" href="<?php echo esc_url( $urls['email'] ); ?>">
+					<span class="ftd-ss-pill-icon" aria-hidden="true">✉</span>
+					<span class="ftd-ss-pill-label"><?php esc_html_e( 'Email', 'ftd-directory-listings' ); ?></span>
+				</a>
+				<button type="button" class="ftd-ss-pill ftd-ss-pill--copy gcc-share-copy" data-copy-url="<?php echo esc_attr( $url ); ?>">
+					<span class="ftd-ss-pill-icon ftd-ss-pill-icon--copy" aria-hidden="true"><?php echo ftd_social_share_icon_svg( 'copy' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+					<span class="ftd-ss-pill-label"><?php esc_html_e( 'Copy link', 'ftd-directory-listings' ); ?></span>
+				</button>
+			</div>
+
+			<div class="gcc-share-url-row">
+				<span class="gcc-share-url-label"><?php esc_html_e( 'Session link', 'ftd-directory-listings' ); ?></span>
+				<code class="gcc-share-url"><?php echo esc_html( $url ); ?></code>
+			</div>
 		</div>
-	</div>
+	</section>
 	<?php
 	return ob_get_clean();
 }
@@ -1942,6 +2036,9 @@ function ftd_render_community_call_single_hero( $post_id = 0 ) {
 	);
 	$schedule     = ftd_get_community_call_schedule_parts( $post_id );
 	$tagline      = trim( (string) $schedule['subtitle'] );
+	$promo_times  = function_exists( 'ftd_get_community_call_promo_times' )
+		? ftd_get_community_call_promo_times( $post_id )
+		: '';
 	$title_html   = ftd_format_gnls_session_cta_title( get_the_title( $post_id ) );
 	$hero_classes = 'gcc-single-hero std-border-radius';
 
@@ -1965,20 +2062,31 @@ function ftd_render_community_call_single_hero( $post_id = 0 ) {
 				<?php if ( $tagline ) : ?>
 					<p class="gcc-single-hero-tagline"><?php echo esc_html( $tagline ); ?></p>
 				<?php endif; ?>
+				<?php if ( $schedule['day_name'] || $schedule['day_num'] || $schedule['month_name'] || $promo_times ) : ?>
+					<div class="gcc-single-hero-schedule">
+						<?php if ( $schedule['day_name'] || $schedule['day_num'] || $schedule['month_name'] ) : ?>
+							<div class="gcc-single-hero-date" aria-label="<?php echo esc_attr( ftd_get_community_call_formatted_date_long( $post_id ) ); ?>">
+								<?php if ( $schedule['day_name'] ) : ?>
+									<span class="gcc-single-hero-date-day"><?php echo esc_html( $schedule['day_name'] ); ?></span>
+								<?php endif; ?>
+								<?php if ( $schedule['day_num'] || $schedule['month_name'] ) : ?>
+									<p class="gcc-single-hero-date-block">
+										<?php if ( $schedule['day_num'] ) : ?>
+											<span class="gcc-single-hero-date-num"><?php echo esc_html( ltrim( $schedule['day_num'], '0' ) ); ?></span>
+										<?php endif; ?>
+										<?php if ( $schedule['month_name'] ) : ?>
+											<span class="gcc-single-hero-date-month"><?php echo esc_html( $schedule['month_name'] ); ?></span>
+										<?php endif; ?>
+									</p>
+								<?php endif; ?>
+							</div>
+						<?php endif; ?>
+						<?php if ( $promo_times ) : ?>
+							<p class="gcc-single-hero-times"><?php echo esc_html( $promo_times ); ?></p>
+						<?php endif; ?>
+					</div>
+				<?php endif; ?>
 			</div>
-			<?php if ( $schedule['day_name'] || $schedule['day_num'] || $schedule['month_name'] ) : ?>
-				<div class="gcc-single-hero-date" aria-label="<?php echo esc_attr( ftd_get_community_call_formatted_date_long( $post_id ) ); ?>">
-					<?php if ( $schedule['day_name'] ) : ?>
-						<span class="gcc-single-hero-date-day"><?php echo esc_html( $schedule['day_name'] ); ?></span>
-					<?php endif; ?>
-					<?php if ( $schedule['day_num'] ) : ?>
-						<span class="gcc-single-hero-date-num"><?php echo esc_html( ltrim( $schedule['day_num'], '0' ) ); ?></span>
-					<?php endif; ?>
-					<?php if ( $schedule['month_name'] ) : ?>
-						<span class="gcc-single-hero-date-month"><?php echo esc_html( $schedule['month_name'] ); ?></span>
-					<?php endif; ?>
-				</div>
-			<?php endif; ?>
 		</div>
 	</div>
 	<?php
@@ -2090,7 +2198,6 @@ function ftd_render_community_call_details_sidebar( $post_id = 0 ) {
 	$defaults     = ftd_get_community_call_details_defaults( $post_id );
 	$date_long    = ftd_get_community_call_formatted_date_long( $post_id );
 	$time_lines   = ftd_get_community_call_timezone_lines( $post_id, 0 );
-	$time_text    = implode( ' · ', wp_list_pluck( $time_lines, 'text' ) );
 	$what_need    = ftd_get_community_call_what_do_i_need( $post_id );
 	$youtube      = ftd_get_community_call_youtube_link( $post_id );
 	$embed_url    = ftd_get_youtube_embed_url( $youtube );
@@ -2112,10 +2219,8 @@ function ftd_render_community_call_details_sidebar( $post_id = 0 ) {
 	ob_start();
 	?>
 	<aside class="gcc-single-details card">
-		<h2 class="gcc-single-details-title"><?php esc_html_e( 'The details', 'ftd-directory-listings' ); ?></h2>
-
-		<?php if ( $date_long || $time_text ) : ?>
-			<section class="gcc-single-details-row">
+		<?php if ( $date_long || ! empty( $time_lines ) ) : ?>
+			<section class="gcc-single-details-row gcc-single-details-row--first">
 				<h3 class="gcc-single-details-label">
 					<?php echo ftd_get_community_call_section_icon( 'when' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 					<span><?php esc_html_e( 'When', 'ftd-directory-listings' ); ?></span>
@@ -2123,8 +2228,19 @@ function ftd_render_community_call_details_sidebar( $post_id = 0 ) {
 				<?php if ( $date_long ) : ?>
 					<p class="gcc-single-details-date"><?php echo esc_html( $date_long ); ?></p>
 				<?php endif; ?>
-				<?php if ( $time_text ) : ?>
-					<p class="gcc-single-details-times"><?php echo esc_html( $time_text ); ?></p>
+				<?php if ( ! empty( $time_lines ) ) : ?>
+					<ul class="gcc-single-details-times-list">
+						<?php foreach ( $time_lines as $line ) : ?>
+							<li class="gcc-single-details-time">
+								<?php if ( ! empty( $line['label'] ) ) : ?>
+									<span class="gcc-single-details-time-value"><?php echo esc_html( $line['time'] ); ?></span>
+									<span class="gcc-single-details-time-label"><?php echo esc_html( $line['label'] ); ?></span>
+								<?php else : ?>
+									<span class="gcc-single-details-time-value"><?php echo esc_html( $line['text'] ); ?></span>
+								<?php endif; ?>
+							</li>
+						<?php endforeach; ?>
+					</ul>
 				<?php endif; ?>
 			</section>
 		<?php endif; ?>

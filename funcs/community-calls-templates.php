@@ -79,6 +79,77 @@ function ftd_maybe_serve_community_call_ics() {
 
 add_action( 'wp_enqueue_scripts', 'ftd_enqueue_community_calls_styles', 25 );
 add_action( 'wp_enqueue_scripts', 'ftd_register_live_session_share_assets', 15 );
+add_action( 'wp_head', 'ftd_output_community_call_social_meta', 5 );
+add_filter( 'wpseo_opengraph_image', 'ftd_filter_community_call_share_image' );
+add_filter( 'wpseo_twitter_image', 'ftd_filter_community_call_share_image' );
+add_filter( 'rank_math/opengraph/facebook/og_image', 'ftd_filter_community_call_share_image' );
+add_filter( 'rank_math/opengraph/twitter/image', 'ftd_filter_community_call_share_image' );
+
+/**
+ * Prefer the session promo image for SEO plugin share tags.
+ *
+ * @param string $image Existing image URL.
+ * @return string
+ */
+function ftd_filter_community_call_share_image( $image ) {
+	if ( ! is_singular( FTD_COMMUNITY_CALL_POST_TYPE ) ) {
+		return $image;
+	}
+
+	$url = ftd_get_community_call_share_image_url( get_the_ID() );
+
+	return $url ? $url : $image;
+}
+
+/**
+ * Open Graph / Twitter meta for live session pages without an SEO plugin.
+ */
+function ftd_output_community_call_social_meta() {
+	if ( ! is_singular( FTD_COMMUNITY_CALL_POST_TYPE ) ) {
+		return;
+	}
+
+	if ( defined( 'WPSEO_VERSION' ) || class_exists( 'RankMath' ) ) {
+		return;
+	}
+
+	$post_id = get_the_ID();
+	$url     = get_permalink( $post_id );
+	$title   = wp_strip_all_tags( get_the_title( $post_id ) );
+	$desc    = ftd_get_community_call_short_description( $post_id );
+	$image   = ftd_get_community_call_share_image_url( $post_id );
+
+	if ( '' === $desc ) {
+		$desc = $title;
+	}
+
+	echo '<meta property="og:type" content="article" />' . "\n";
+	echo '<meta property="og:title" content="' . esc_attr( $title ) . '" />' . "\n";
+	echo '<meta property="og:description" content="' . esc_attr( $desc ) . '" />' . "\n";
+	echo '<meta property="og:url" content="' . esc_url( $url ) . '" />' . "\n";
+
+	if ( $image ) {
+		echo '<meta property="og:image" content="' . esc_url( $image ) . '" />' . "\n";
+
+		if ( function_exists( 'ftd_get_community_call_share_image_id' ) && function_exists( 'ftd_get_community_call_social_share_thumbnail_id' ) ) {
+			$share_id  = ftd_get_community_call_share_image_id( $post_id );
+			$social_id = ftd_get_community_call_social_share_thumbnail_id( $post_id );
+
+			if ( $share_id > 0 && $social_id > 0 && $share_id === $social_id ) {
+				echo '<meta property="og:image:width" content="' . esc_attr( (string) FTD_GNLS_SOCIAL_WIDTH ) . '" />' . "\n";
+				echo '<meta property="og:image:height" content="' . esc_attr( (string) FTD_GNLS_SOCIAL_HEIGHT ) . '" />' . "\n";
+			}
+		}
+
+		echo '<meta name="twitter:card" content="summary_large_image" />' . "\n";
+		echo '<meta name="twitter:image" content="' . esc_url( $image ) . '" />' . "\n";
+	} else {
+		echo '<meta name="twitter:card" content="summary" />' . "\n";
+	}
+
+	echo '<meta name="twitter:title" content="' . esc_attr( $title ) . '" />' . "\n";
+	echo '<meta name="twitter:description" content="' . esc_attr( $desc ) . '" />' . "\n";
+}
 
 /**
  * Register live session share script.

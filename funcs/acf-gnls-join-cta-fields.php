@@ -11,6 +11,7 @@ define( 'FTD_GNLS_JOIN_CTA_SLUG', 'genius-directory-live-sessions-join-cta' );
 
 add_action( 'acf/init', 'ftd_register_gnls_join_cta_subpage', 12 );
 add_action( 'acf/init', 'ftd_register_gnls_join_cta_acf_fields', 16 );
+add_action( 'acf/init', 'ftd_cleanup_gnls_join_cta_obsolete_fields', 25 );
 
 /**
  * Register join CTA settings under Genius Directory Settings.
@@ -87,23 +88,66 @@ function ftd_get_gnls_join_cta_post_ids() {
  * @return array<string, mixed>
  */
 function ftd_get_gnls_join_cta_defaults() {
-	$sessions_url = function_exists( 'get_post_type_archive_link' )
-		? get_post_type_archive_link( FTD_COMMUNITY_CALL_POST_TYPE )
-		: home_url( '/genius-network-live-sessions/' );
-
 	return array(
-		'eyebrow'           => 'COME AND JOIN US',
-		'heading'           => 'All members welcome',
-		'subtitle'          => 'your seat is waiting,',
-		'body'              => "If you're not a member yet, it's time to join, my friend. Join the Genius Directory — it's free — and your invite for the first Live Session will land in your inbox. That's it. You're in.",
-		'button_enabled'    => 1,
-		'button_label'      => 'Join the directory & get your seat',
-		'button_url'        => '',
-		'footer_tagline'    => "the people you're seeking are seeking you,",
-		'share_enabled'     => 1,
-		'share_link_label'  => 'Share with a Genius',
-		'share_link_url'    => is_string( $sessions_url ) ? $sessions_url : '',
+		'eyebrow'        => 'COME AND JOIN US',
+		'heading'        => 'All members welcome',
+		'subtitle'       => 'your seat is waiting,',
+		'body'           => "If you're not a member yet, it's time to join, my friend. Join the Genius Directory — it's free — and your invite for the first Live Session will land in your inbox. That's it. You're in.",
+		'button_enabled' => 1,
+		'button_label'   => 'Join the directory & get your seat',
+		'button_url'     => '',
+		'footer_tagline' => "the people you're seeking are seeking you,",
 	);
+}
+
+/**
+ * Canonical ACF options post_id for the join CTA settings page.
+ *
+ * @return string
+ */
+function ftd_get_gnls_join_cta_options_post_id() {
+	static $post_id = null;
+
+	if ( null !== $post_id ) {
+		return $post_id;
+	}
+
+	$post_id = FTD_GNLS_JOIN_CTA_SLUG;
+
+	if ( function_exists( 'acf_get_options_page' ) ) {
+		$page = acf_get_options_page( FTD_GNLS_JOIN_CTA_SLUG );
+
+		if ( is_array( $page ) && ! empty( $page['post_id'] ) ) {
+			$post_id = function_exists( 'acf_get_valid_post_id' )
+				? acf_get_valid_post_id( $page['post_id'] )
+				: (string) $page['post_id'];
+		}
+	}
+
+	return $post_id;
+}
+
+/**
+ * Read the Show button toggle from the join CTA options page.
+ *
+ * @return bool
+ */
+function ftd_get_gnls_join_cta_button_enabled() {
+	$default = (bool) ftd_get_gnls_join_cta_defaults()['button_enabled'];
+
+	if ( ! function_exists( 'get_field' ) ) {
+		return $default;
+	}
+
+	$post_id = ftd_get_gnls_join_cta_options_post_id();
+	$value   = get_field( 'button_enabled', $post_id, false );
+
+	// ACF true_false: 1 = on, 0 = off. false/null means never saved — use default (on).
+	if ( false === $value || null === $value ) {
+		return $default;
+	}
+
+	return (bool) $value;
 }
 
 /**
@@ -113,28 +157,34 @@ function ftd_get_gnls_join_cta_defaults() {
  * @return mixed
  */
 function ftd_get_gnls_join_cta_field( $field ) {
-	if ( ! function_exists( 'get_field' ) ) {
-		$defaults = ftd_get_gnls_join_cta_defaults();
+	if ( 'button_enabled' === $field ) {
+		return ftd_get_gnls_join_cta_button_enabled();
+	}
 
+	$defaults = ftd_get_gnls_join_cta_defaults();
+
+	if ( ! function_exists( 'get_field' ) ) {
 		return $defaults[ $field ] ?? null;
 	}
 
-	foreach ( ftd_get_gnls_join_cta_post_ids() as $post_id ) {
-		$value = get_field( $field, $post_id );
+	$post_id = ftd_get_gnls_join_cta_options_post_id();
+	$value   = get_field( $field, $post_id );
 
-		if ( 'button_enabled' === $field || 'share_enabled' === $field ) {
-			if ( null !== $value && false !== $value ) {
-				return (bool) $value;
-			}
+	if ( null !== $value && false !== $value && '' !== $value ) {
+		return $value;
+	}
+
+	foreach ( ftd_get_gnls_join_cta_post_ids() as $fallback_id ) {
+		if ( $fallback_id === $post_id ) {
 			continue;
 		}
+
+		$value = get_field( $field, $fallback_id );
 
 		if ( null !== $value && false !== $value && '' !== $value ) {
 			return $value;
 		}
 	}
-
-	$defaults = ftd_get_gnls_join_cta_defaults();
 
 	return $defaults[ $field ] ?? null;
 }
@@ -149,17 +199,14 @@ function ftd_get_gnls_join_cta_settings( $overrides = array() ) {
 	$defaults = ftd_get_gnls_join_cta_defaults();
 
 	$settings = array(
-		'eyebrow'          => (string) ftd_get_gnls_join_cta_field( 'eyebrow' ),
-		'heading'          => (string) ftd_get_gnls_join_cta_field( 'heading' ),
-		'subtitle'         => (string) ftd_get_gnls_join_cta_field( 'subtitle' ),
-		'body'             => (string) ftd_get_gnls_join_cta_field( 'body' ),
-		'button_enabled'   => (bool) ftd_get_gnls_join_cta_field( 'button_enabled' ),
-		'button_label'     => (string) ftd_get_gnls_join_cta_field( 'button_label' ),
-		'button_url'       => (string) ftd_get_gnls_join_cta_field( 'button_url' ),
-		'footer_tagline'   => (string) ftd_get_gnls_join_cta_field( 'footer_tagline' ),
-		'share_enabled'    => (bool) ftd_get_gnls_join_cta_field( 'share_enabled' ),
-		'share_link_label' => (string) ftd_get_gnls_join_cta_field( 'share_link_label' ),
-		'share_link_url'   => (string) ftd_get_gnls_join_cta_field( 'share_link_url' ),
+		'eyebrow'        => (string) ftd_get_gnls_join_cta_field( 'eyebrow' ),
+		'heading'        => (string) ftd_get_gnls_join_cta_field( 'heading' ),
+		'subtitle'       => (string) ftd_get_gnls_join_cta_field( 'subtitle' ),
+		'body'           => (string) ftd_get_gnls_join_cta_field( 'body' ),
+		'button_enabled' => ftd_get_gnls_join_cta_button_enabled(),
+		'button_label'   => (string) ftd_get_gnls_join_cta_field( 'button_label' ),
+		'button_url'     => (string) ftd_get_gnls_join_cta_field( 'button_url' ),
+		'footer_tagline' => (string) ftd_get_gnls_join_cta_field( 'footer_tagline' ),
 	);
 
 	foreach ( $overrides as $key => $value ) {
@@ -167,12 +214,16 @@ function ftd_get_gnls_join_cta_settings( $overrides = array() ) {
 			continue;
 		}
 
-		if ( in_array( $key, array( 'button_enabled', 'share_enabled' ), true ) ) {
+		if ( 'button_enabled' === $key ) {
 			$settings[ $key ] = filter_var( $value, FILTER_VALIDATE_BOOLEAN );
 			continue;
 		}
 
 		$settings[ $key ] = (string) $value;
+	}
+
+	if ( '' === trim( $settings['button_label'] ) ) {
+		$settings['button_label'] = $defaults['button_label'];
 	}
 
 	if ( '' === trim( $settings['button_url'] ) ) {
@@ -183,14 +234,6 @@ function ftd_get_gnls_join_cta_settings( $overrides = array() ) {
 		$settings['button_url'] = ftd_normalize_banner_link_url( $settings['button_url'] );
 	} else {
 		$settings['button_url'] = esc_url_raw( $settings['button_url'] );
-	}
-
-	if ( '' === trim( $settings['share_link_url'] ) ) {
-		$settings['share_link_url'] = $defaults['share_link_url'];
-	} elseif ( function_exists( 'ftd_normalize_banner_link_url' ) ) {
-		$settings['share_link_url'] = ftd_normalize_banner_link_url( $settings['share_link_url'] );
-	} else {
-		$settings['share_link_url'] = esc_url_raw( $settings['share_link_url'] );
 	}
 
 	return $settings;
@@ -257,37 +300,19 @@ function ftd_register_gnls_join_cta_acf_fields() {
 					'default_value' => $defaults['button_enabled'],
 				),
 				array(
-					'key'               => 'field_ftd_gnjc_button_label',
-					'label'             => 'Button label',
-					'name'              => 'button_label',
-					'type'              => 'text',
-					'default_value'     => $defaults['button_label'],
-					'conditional_logic' => array(
-						array(
-							array(
-								'field'    => 'field_ftd_gnjc_button_enabled',
-								'operator' => '==',
-								'value'    => '1',
-							),
-						),
-					),
+					'key'           => 'field_ftd_gnjc_button_label',
+					'label'         => 'Button label',
+					'name'          => 'button_label',
+					'type'          => 'text',
+					'default_value' => $defaults['button_label'],
 				),
 				array(
-					'key'               => 'field_ftd_gnjc_button_url',
-					'label'             => 'Button link',
-					'name'              => 'button_url',
-					'type'              => 'text',
-					'placeholder'       => '/join-we-are-geniuses/',
-					'instructions'      => 'Optional. Defaults to the directory signup URL.',
-					'conditional_logic' => array(
-						array(
-							array(
-								'field'    => 'field_ftd_gnjc_button_enabled',
-								'operator' => '==',
-								'value'    => '1',
-							),
-						),
-					),
+					'key'          => 'field_ftd_gnjc_button_url',
+					'label'        => 'Button link',
+					'name'         => 'button_url',
+					'type'         => 'text',
+					'placeholder'  => '/join-we-are-geniuses/',
+					'instructions' => 'Optional. Defaults to the directory signup URL.',
 				),
 				array(
 					'key'           => 'field_ftd_gnjc_footer_tagline',
@@ -295,47 +320,6 @@ function ftd_register_gnls_join_cta_acf_fields() {
 					'name'          => 'footer_tagline',
 					'type'          => 'text',
 					'default_value' => $defaults['footer_tagline'],
-				),
-				array(
-					'key'           => 'field_ftd_gnjc_share_enabled',
-					'label'         => 'Show share link',
-					'name'          => 'share_enabled',
-					'type'          => 'true_false',
-					'ui'            => 1,
-					'default_value' => $defaults['share_enabled'],
-				),
-				array(
-					'key'               => 'field_ftd_gnjc_share_label',
-					'label'             => 'Share link label',
-					'name'              => 'share_link_label',
-					'type'              => 'text',
-					'default_value'     => $defaults['share_link_label'],
-					'conditional_logic' => array(
-						array(
-							array(
-								'field'    => 'field_ftd_gnjc_share_enabled',
-								'operator' => '==',
-								'value'    => '1',
-							),
-						),
-					),
-				),
-				array(
-					'key'               => 'field_ftd_gnjc_share_url',
-					'label'             => 'Share link URL',
-					'name'              => 'share_link_url',
-					'type'              => 'text',
-					'default_value'     => $defaults['share_link_url'],
-					'instructions'      => 'Defaults to the Live Sessions archive page.',
-					'conditional_logic' => array(
-						array(
-							array(
-								'field'    => 'field_ftd_gnjc_share_enabled',
-								'operator' => '==',
-								'value'    => '1',
-							),
-						),
-					),
 				),
 			),
 			'location'              => array(
@@ -354,4 +338,55 @@ function ftd_register_gnls_join_cta_acf_fields() {
 			'instruction_placement' => 'label',
 		)
 	);
+}
+
+/**
+ * Remove deprecated share-link fields still stored in ACF / wp_options.
+ *
+ * Local PHP no longer registers them, but synced DB field groups can keep showing them.
+ */
+function ftd_cleanup_gnls_join_cta_obsolete_fields() {
+	static $done = false;
+
+	if ( $done ) {
+		return;
+	}
+
+	$done = true;
+
+	$obsolete_field_keys = array(
+		'field_ftd_gnjc_share_enabled',
+		'field_ftd_gnjc_share_label',
+		'field_ftd_gnjc_share_url',
+	);
+
+	if ( function_exists( 'acf_get_field' ) && function_exists( 'acf_delete_field' ) ) {
+		foreach ( $obsolete_field_keys as $field_key ) {
+			$field = acf_get_field( $field_key );
+
+			if ( is_array( $field ) && ! empty( $field['ID'] ) ) {
+				acf_delete_field( (int) $field['ID'] );
+			}
+		}
+	}
+
+	if ( function_exists( 'acf_get_local_field_group' ) && function_exists( 'acf_import_field_group' ) ) {
+		$group = acf_get_local_field_group( 'group_ftd_gnls_join_cta' );
+
+		if ( is_array( $group ) ) {
+			acf_import_field_group( $group );
+		}
+	}
+
+	$post_id      = ftd_get_gnls_join_cta_options_post_id();
+	$option_names = array( 'share_enabled', 'share_link_label', 'share_link_url' );
+
+	foreach ( $option_names as $name ) {
+		delete_option( $post_id . '_' . $name );
+		delete_option( '_' . $post_id . '_' . $name );
+		delete_option( 'options_' . $post_id . '_' . $name );
+		delete_option( '_options_' . $post_id . '_' . $name );
+		delete_option( 'options_' . $name );
+		delete_option( '_options_' . $name );
+	}
 }

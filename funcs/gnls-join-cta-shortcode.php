@@ -49,40 +49,31 @@ function ftd_auto_render_gnls_join_cta_on_directory_archive() {
 function ftd_gnls_join_cta_shortcode( $atts ) {
 	$atts = shortcode_atts(
 		array(
-			'eyebrow'      => '',
-			'heading'      => '',
-			'subtitle'     => '',
-			'body'         => '',
-			'button'       => '',
-			'button_url'   => '',
-			'tagline'      => '',
-			'share_label'  => '',
-			'share_url'    => '',
-			'show_button'  => '',
-			'show_share'   => '',
+			'eyebrow'     => '',
+			'heading'     => '',
+			'subtitle'    => '',
+			'body'        => '',
+			'button'      => '',
+			'button_url'  => '',
+			'tagline'     => '',
+			'show_button' => '',
 		),
 		$atts,
 		'gnls_join_cta'
 	);
 
 	$overrides = array(
-		'eyebrow'          => $atts['eyebrow'],
-		'heading'          => $atts['heading'],
-		'subtitle'         => $atts['subtitle'],
-		'body'             => $atts['body'],
-		'button_label'     => $atts['button'],
-		'button_url'       => $atts['button_url'],
-		'footer_tagline'   => $atts['tagline'],
-		'share_link_label' => $atts['share_label'],
-		'share_link_url'   => $atts['share_url'],
+		'eyebrow'        => $atts['eyebrow'],
+		'heading'        => $atts['heading'],
+		'subtitle'       => $atts['subtitle'],
+		'body'           => $atts['body'],
+		'button_label'   => $atts['button'],
+		'button_url'     => $atts['button_url'],
+		'footer_tagline' => $atts['tagline'],
 	);
 
 	if ( '' !== $atts['show_button'] ) {
 		$overrides['button_enabled'] = $atts['show_button'];
-	}
-
-	if ( '' !== $atts['show_share'] ) {
-		$overrides['share_enabled'] = $atts['show_share'];
 	}
 
 	return ftd_render_gnls_join_cta( $overrides );
@@ -106,8 +97,6 @@ function ftd_render_gnls_join_cta( $overrides = array() ) {
 	}
 
 	wp_enqueue_style( 'ftd-sc-gnls-join-cta' );
-
-	$show_footer = ( $settings['footer_tagline'] || ( $settings['share_enabled'] && $settings['share_link_label'] && $settings['share_link_url'] ) );
 
 	ob_start();
 	?>
@@ -144,23 +133,12 @@ function ftd_render_gnls_join_cta( $overrides = array() ) {
 				</p>
 			<?php endif; ?>
 
-			<?php if ( $show_footer ) : ?>
+			<?php if ( $settings['footer_tagline'] ) : ?>
 				<footer class="gnls-join-cta-footer">
-					<?php if ( $settings['footer_tagline'] ) : ?>
-						<p class="gnls-join-cta-tagline">
-							<span class="gnls-join-cta-tagline-icon" aria-hidden="true">◆</span>
-							<em><?php echo esc_html( $settings['footer_tagline'] ); ?></em>
-						</p>
-					<?php endif; ?>
-
-					<?php if ( $settings['share_enabled'] && $settings['share_link_label'] && $settings['share_link_url'] ) : ?>
-						<?php if ( $settings['footer_tagline'] ) : ?>
-							<span class="gnls-join-cta-footer-sep" aria-hidden="true"></span>
-						<?php endif; ?>
-						<p class="gnls-join-cta-share">
-							<a href="<?php echo esc_url( $settings['share_link_url'] ); ?>"><?php echo esc_html( $settings['share_link_label'] ); ?></a>
-						</p>
-					<?php endif; ?>
+					<p class="gnls-join-cta-tagline">
+						<span class="gnls-join-cta-tagline-icon" aria-hidden="true">◆</span>
+						<em><?php echo esc_html( $settings['footer_tagline'] ); ?></em>
+					</p>
 				</footer>
 			<?php endif; ?>
 		</div>

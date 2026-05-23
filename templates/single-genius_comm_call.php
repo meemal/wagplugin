@@ -33,6 +33,16 @@ $share_html   = ftd_render_live_session_share_buttons( $post_id );
 						echo ftd_render_community_call_featuring_section( $post_id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 						?>
 
+						<?php
+						if ( function_exists( 'ftd_render_gnls_next_steps_cta' ) ) {
+							echo ftd_render_gnls_next_steps_cta(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						}
+						?>
+
+						<?php if ( $share_html ) : ?>
+							<?php echo $share_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
+						<?php endif; ?>
+
 						<?php if ( $embed_url ) : ?>
 							<section class="gcc-single-recording">
 								<h2 class="gcc-section-title"><?php esc_html_e( 'Recording', 'ftd-directory-listings' ); ?></h2>
@@ -52,15 +62,6 @@ $share_html   = ftd_render_live_session_share_buttons( $post_id );
 					<?php echo ftd_render_community_call_details_sidebar( $post_id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				</div>
 
-				<?php
-				if ( function_exists( 'ftd_render_gnls_join_cta' ) ) {
-					echo ftd_render_gnls_join_cta(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-				}
-				?>
-
-				<?php if ( $share_html ) : ?>
-					<?php echo $share_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
-				<?php endif; ?>
 			</article>
 		</div>
 	</div>

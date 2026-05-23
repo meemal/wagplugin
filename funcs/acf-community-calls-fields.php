@@ -11,6 +11,7 @@ add_action( 'acf/init', 'ftd_ensure_community_calls_acf_local_field_group', 5 );
 add_action( 'acf/init', 'ftd_register_community_calls_acf_fields' );
 add_filter( 'acf/load_value/name=profile_members', 'ftd_default_community_call_profile_members', 10, 3 );
 add_action( 'acf/save_post', 'ftd_cleanup_legacy_community_call_involved_members', 25 );
+add_action( 'acf/save_post', 'ftd_cleanup_obsolete_community_call_promo_fields', 26 );
 
 /**
  * Use the plugin PHP field group only — remove stale DB copies that block saves.
@@ -124,6 +125,32 @@ function ftd_normalize_community_call_profile_members( $value, $post_id, $field 
 }
 
 /**
+ * Remove obsolete promo-card ACF values superseded by the featured image + sidebar generator.
+ *
+ * @param int|string $post_id Post ID.
+ */
+function ftd_cleanup_obsolete_community_call_promo_fields( $post_id ) {
+	$post_id = (int) $post_id;
+
+	if ( $post_id <= 0 || FTD_COMMUNITY_CALL_POST_TYPE !== get_post_type( $post_id ) ) {
+		return;
+	}
+
+	foreach (
+		array(
+			'cta_background_preset',
+			'cta_background_image',
+			'cta_background_color',
+			'_cta_background_preset',
+			'_cta_background_image',
+			'_cta_background_color',
+		) as $key
+	) {
+		delete_post_meta( $post_id, $key );
+	}
+}
+
+/**
  * Remove legacy involved_members once profile_members rows exist.
  *
  * @param int|string $post_id Post ID.
@@ -233,7 +260,7 @@ function ftd_register_community_calls_acf_fields() {
 					'label'   => '',
 					'name'    => '',
 					'type'    => 'message',
-					'message' => 'Use the <strong>title</strong> field above for the session name. Set the <strong>featured image</strong> in the sidebar for the promo card artwork (right-hand panel). Use the <strong>YouTube thumbnail</strong> box in the sidebar to generate a 1280×720 PNG from the promo card.',
+					'message' => 'Set the <strong>featured image</strong> (sidebar) as the poster background, then click <strong>Generate promo images</strong> in the Promo images box.',
 				),
 				array(
 					'key'           => 'field_gcc_short_description',
@@ -323,50 +350,6 @@ function ftd_register_community_calls_acf_fields() {
 					'return_format'  => 'Y-m-d H:i:s',
 					'first_day'      => 1,
 					'instructions'   => 'Optional. Used to sort calls on the archive page.',
-				),
-				array(
-					'key'   => 'field_gcc_promo_tab',
-					'label' => 'Promo card',
-					'name'  => '',
-					'type'  => 'tab',
-				),
-				array(
-					'key'           => 'field_gcc_cta_bg_preset',
-					'label'         => 'Background preset',
-					'name'          => 'cta_background_preset',
-					'type'          => 'select',
-					'choices'       => function_exists( 'ftd_get_page_header_background_preset_choices' ) ? ftd_get_page_header_background_preset_choices() : array(),
-					'allow_null'    => 1,
-					'ui'            => 1,
-					'default_value' => '',
-					'instructions'  => 'Same presets as the page header. Upload a custom image below to override.',
-				),
-				array(
-					'key'           => 'field_gcc_cta_bg_image',
-					'label'         => 'Custom background image',
-					'name'          => 'cta_background_image',
-					'type'          => 'image',
-					'return_format' => 'array',
-					'preview_size'  => 'medium',
-					'instructions'  => 'Optional. Overrides the preset above when set.',
-				),
-				array(
-					'key'           => 'field_gcc_cta_bg_color',
-					'label'         => 'Background colour',
-					'name'          => 'cta_background_color',
-					'type'          => 'color_picker',
-					'default_value' => '#673f69',
-					'instructions'  => 'Applied to the text panel of the promo card (1280×720 layout).',
-				),
-				array(
-					'key'           => 'field_gcc_youtube_thumbnail',
-					'label'         => 'YouTube thumbnail',
-					'name'          => 'youtube_thumbnail',
-					'type'          => 'image',
-					'return_format' => 'id',
-					'preview_size'  => 'medium',
-					'readonly'      => 1,
-					'instructions'  => 'Generated via the YouTube thumbnail box in the sidebar. 1280×720 PNG suitable for YouTube.',
 				),
 			),
 			'location'              => array(

@@ -526,3 +526,51 @@ button:hover{
 #sidebar .directory-card-mini h4 a {
   color: var(--color-purple);
 }
+
+/* Pull quotes in plugin content — overrides Gutenberg/theme white-on-grey blocks */
+.ftd-sc .entry-content blockquote:not(.ftd-fq-quote):not(.user-card-quote),
+.ftd-sc .entry-content .wp-block-quote,
+.ftd-sc .gcc-archive-intro-prose blockquote,
+.ftd-sc .gcc-archive-intro-prose .wp-block-quote,
+.ftd-sc .gcc-single-body blockquote,
+.ftd-sc .gcc-single-body .wp-block-quote {
+  margin: 1.5rem 0;
+  padding: clamp(1.1rem, 2.5vw, 1.35rem) clamp(1.15rem, 2.5vw, 1.5rem);
+  border: 1px solid rgba(103, 63, 105, 0.1);
+  border-left: 3px solid var(--color-coral, #f26849);
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.85) !important;
+  box-shadow: 0 10px 24px rgba(103, 63, 105, 0.06);
+  font-family: Georgia, "Times New Roman", serif;
+  font-style: italic;
+  font-size: clamp(1.05rem, 2vw, 1.25rem);
+  line-height: 1.55;
+  color: var(--color-purple, #673f69) !important;
+}
+
+.ftd-sc .entry-content blockquote:not(.ftd-fq-quote):not(.user-card-quote) p,
+.ftd-sc .entry-content .wp-block-quote p,
+.ftd-sc .gcc-archive-intro-prose blockquote p,
+.ftd-sc .gcc-archive-intro-prose .wp-block-quote p,
+.ftd-sc .gcc-single-body blockquote p,
+.ftd-sc .gcc-single-body .wp-block-quote p {
+  margin: 0;
+  color: inherit !important;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.ftd-sc .entry-content blockquote.has-white-color,
+.ftd-sc .entry-content .wp-block-quote.has-white-color,
+.ftd-sc .gcc-archive-intro-prose blockquote.has-white-color,
+.ftd-sc .gcc-archive-intro-prose .wp-block-quote.has-white-color,
+.ftd-sc .gcc-single-body blockquote.has-white-color,
+.ftd-sc .gcc-single-body .wp-block-quote.has-white-color,
+.ftd-sc .entry-content blockquote.has-white-color p,
+.ftd-sc .entry-content .wp-block-quote.has-white-color p,
+.ftd-sc .gcc-archive-intro-prose blockquote.has-white-color p,
+.ftd-sc .gcc-archive-intro-prose .wp-block-quote.has-white-color p,
+.ftd-sc .gcc-single-body blockquote.has-white-color p,
+.ftd-sc .gcc-single-body .wp-block-quote.has-white-color p {
+  color: var(--color-purple, #673f69) !important;
+}

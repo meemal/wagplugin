@@ -377,7 +377,7 @@ function ftd_get_showcase_backgrounds() {
 		array(
 			'label' => __( 'Session CTA default purple', 'ftd-directory-listings' ),
 			'value' => '#673f69',
-			'note'  => 'cta_background_color',
+			'note'  => 'session poster fallback',
 		),
 	);
 

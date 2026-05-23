@@ -7,7 +7,6 @@
  * Usage:
  *   [gnls_session_cta]
  *   [gnls_session_cta id="123"]
- *   [gnls_session_cta button="Save my seat"]
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -121,7 +120,7 @@ function ftd_get_wag_logo_sm_url() {
 /**
  * Logo markup for the session promo CTA header.
  *
- * @param bool $for_capture Whether this is for YouTube thumbnail capture.
+ * @param bool $for_capture Whether this is for html2canvas capture.
  * @return string
  */
 function ftd_get_gnls_session_cta_logo_html( $for_capture = false ) {
@@ -133,7 +132,7 @@ function ftd_get_gnls_session_cta_logo_html( $for_capture = false ) {
 			$data_uri = 'data:image/svg+xml;base64,' . base64_encode( $svg );
 
 			return sprintf(
-				'<img class="gnls-cta-logo gnls-cta-logo--stacked" src="%1$s" alt="%2$s" width="220" height="160" decoding="sync" />',
+				'<img class="gnls-cta-logo gnls-cta-logo--stacked" src="%1$s" alt="%2$s" decoding="sync" />',
 				esc_attr( $data_uri ),
 				esc_attr__( 'We Are Geniuses', 'ftd-directory-listings' )
 			);
@@ -154,19 +153,250 @@ function ftd_get_gnls_session_cta_logo_html( $for_capture = false ) {
 }
 
 /**
+ * Render one host block for poster layouts.
+ *
+ * @param array<string, mixed> $host        Host data.
+ * @param int                  $index       Zero-based index.
+ * @param bool                 $for_capture Inline images for html2canvas.
+ * @return string
+ */
+function ftd_render_gnls_session_cta_host_item( $host, $index, $for_capture = false ) {
+	$profile_url       = ! empty( $host['url'] ) ? $host['url'] : ftd_get_member_profile_url( $host['id'] );
+	$host_subtitle     = trim( (string) ( $host['subtitle'] ?? '' ) );
+	$has_custom_avatar = function_exists( 'ftd_user_has_custom_profile_image' ) && ftd_user_has_custom_profile_image( $host['id'] );
+	$avatar_url        = function_exists( 'ftd_get_user_profile_image_url' )
+		? ftd_get_user_profile_image_url( $host['id'], 144 )
+		: ( $host['avatar_url'] ?? '' );
+
+	if ( $for_capture && $has_custom_avatar && $avatar_url && function_exists( 'ftd_get_gnls_capture_image_data_uri' ) ) {
+		$avatar_url = ftd_get_gnls_capture_image_data_uri( $avatar_url );
+
+		if ( 0 !== strpos( $avatar_url, 'data:' ) ) {
+			$has_custom_avatar = false;
+		}
+	}
+
+	$initials = ftd_get_member_initials( $host['name'] );
+	$tag      = ( $profile_url && ! $for_capture ) ? 'a' : 'div';
+	$href     = ( $profile_url && ! $for_capture ) ? ' href="' . esc_url( $profile_url ) . '"' : '';
+
+	ob_start();
+	printf(
+		'<%1$s class="gnls-cta-host gnls-cta-host--%2$d"%3$s>',
+		$tag,
+		$index + 1,
+		$href
+	);
+	?>
+	<div class="gnls-cta-host-avatar-wrap">
+		<?php if ( $has_custom_avatar && $avatar_url ) : ?>
+			<img
+				class="gnls-cta-host-avatar gnls-cta-host-avatar--photo"
+				src="<?php echo $for_capture ? esc_attr( $avatar_url ) : esc_url( $avatar_url ); ?>"
+				alt="<?php echo esc_attr( $host['name'] ); ?>"
+				width="72"
+				height="72"
+				<?php echo $for_capture ? 'decoding="sync"' : 'loading="lazy" decoding="async"'; ?>
+			/>
+		<?php else : ?>
+			<span class="gnls-cta-host-avatar gnls-cta-host-avatar--initials"><?php echo esc_html( $initials ); ?></span>
+		<?php endif; ?>
+	</div>
+	<div class="gnls-cta-host-copy">
+		<span class="gnls-cta-host-name"><?php echo esc_html( strtoupper( $host['name'] ) ); ?></span>
+		<?php if ( $host_subtitle ) : ?>
+			<span class="gnls-cta-host-tagline"><?php echo esc_html( $host_subtitle ); ?></span>
+		<?php else : ?>
+			<span class="gnls-cta-host-tagline gnls-cta-host-tagline--empty" aria-hidden="true"></span>
+		<?php endif; ?>
+	</div>
+	<?php
+	printf( '</%s>', $tag );
+
+	return (string) ob_get_clean();
+}
+
+/**
+ * Full-bleed centred poster layout — front-end, social capture, and YouTube capture.
+ *
+ * @param int                  $post_id Session post ID.
+ * @param array<string, mixed> $atts    Shortcode attributes.
+ * @param array<string, mixed> $context Render context.
+ * @return string
+ */
+function ftd_render_gnls_session_cta_poster( $post_id, $atts = array(), $context = array() ) {
+	$post_id = (int) $post_id;
+
+	$context = wp_parse_args(
+		$context,
+		array(
+			'for_capture'     => false,
+			'capture_variant' => '',
+			'link_to_session' => false,
+		)
+	);
+
+	$for_capture     = ! empty( $context['for_capture'] );
+	$capture_variant = (string) $context['capture_variant'];
+	$link_to_session = ! empty( $context['link_to_session'] );
+	$show_logo       = ! isset( $atts['show_logo'] ) || filter_var( $atts['show_logo'], FILTER_VALIDATE_BOOLEAN );
+	$presents        = ! empty( $atts['presents'] ) ? (string) $atts['presents'] : __( 'We Are Geniuses presents...', 'ftd-directory-listings' );
+	$logo_html       = $show_logo ? ftd_get_gnls_session_cta_logo_html( $for_capture ) : '';
+	$permalink       = get_permalink( $post_id );
+	$schedule        = ftd_get_community_call_schedule_parts( $post_id );
+	$members         = array_slice( ftd_get_community_call_members( $post_id ), 0, 2 );
+	$title_html      = ftd_format_gnls_session_cta_title( get_the_title( $post_id ) );
+	$tagline         = $schedule['subtitle'];
+	$kicker          = function_exists( 'ftd_get_community_call_single_kicker' )
+		? ftd_get_community_call_single_kicker( $post_id )
+		: '';
+	$promo_times     = function_exists( 'ftd_get_community_call_promo_times' )
+		? ftd_get_community_call_promo_times( $post_id )
+		: '';
+	$bg_color        = '#673f69';
+	$bg_src          = '';
+
+	if ( function_exists( 'ftd_get_session_cta_background_config' ) ) {
+		$bg_color = ftd_get_session_cta_background_config( $post_id )['color'];
+	}
+
+	$attachment_id = ftd_get_community_call_feature_image_id( $post_id );
+
+	if ( $attachment_id > 0 ) {
+		if ( $for_capture ) {
+			$img_url = wp_get_attachment_image_url( $attachment_id, 'full' );
+			$bg_src  = function_exists( 'ftd_get_gnls_capture_image_data_uri' )
+				? ftd_get_gnls_capture_image_data_uri( $img_url )
+				: $img_url;
+
+			if ( 0 !== strpos( (string) $bg_src, 'data:' ) && $img_url ) {
+				$bg_src = $img_url;
+			}
+		} else {
+			$bg_src = wp_get_attachment_image_url( $attachment_id, 'large' );
+		}
+	}
+
+	$card_classes = array( 'ftd-sc', 'ftd-sc--gnls-session-cta', 'gnls-session-cta', 'gnls-cta--poster' );
+
+	if ( 'social' === $capture_variant ) {
+		$card_classes[] = 'gnls-cta--capture-social';
+	} elseif ( 'youtube' === $capture_variant ) {
+		$card_classes[] = 'gnls-cta--capture-youtube';
+	}
+
+	if ( $link_to_session && $permalink ) {
+		$card_classes[] = 'gnls-cta--linked';
+	}
+
+	$site_tag  = $for_capture ? 'span' : 'a';
+	$site_href = $for_capture ? '' : ' href="' . esc_url( ftd_get_gnls_session_cta_site_url() ) . '"';
+
+	ob_start();
+	?>
+	<div class="<?php echo esc_attr( implode( ' ', $card_classes ) ); ?>" style="--gnls-cta-bg: <?php echo esc_attr( $bg_color ); ?>;">
+		<?php if ( $link_to_session && $permalink ) : ?>
+			<a class="gnls-cta-card-link" href="<?php echo esc_url( $permalink ); ?>">
+				<span class="screen-reader-text">
+					<?php
+					echo esc_html(
+						sprintf(
+							/* translators: %s: session title */
+							__( 'View session: %s', 'ftd-directory-listings' ),
+							get_the_title( $post_id )
+						)
+					);
+					?>
+				</span>
+			</a>
+		<?php endif; ?>
+
+		<?php if ( $bg_src ) : ?>
+			<img class="gnls-cta-poster-bg" src="<?php echo $for_capture ? esc_attr( $bg_src ) : esc_url( $bg_src ); ?>" alt="" <?php echo $for_capture ? 'decoding="sync"' : 'loading="lazy" decoding="async"'; ?> />
+		<?php endif; ?>
+		<div class="gnls-cta-poster-overlay" aria-hidden="true"></div>
+
+		<div class="gnls-cta-poster-inner">
+			<header class="gnls-cta-poster-header">
+				<?php if ( $logo_html ) : ?>
+					<div class="gnls-cta-brand"><?php echo $logo_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
+				<?php endif; ?>
+				<?php if ( $presents ) : ?>
+					<p class="gnls-cta-presents"><?php echo esc_html( $presents ); ?></p>
+				<?php endif; ?>
+				<?php if ( $kicker ) : ?>
+					<p class="gnls-cta-series gnls-cta-series--poster"><?php echo esc_html( $kicker ); ?></p>
+				<?php endif; ?>
+			</header>
+
+			<div class="gnls-cta-poster-main">
+				<?php if ( $title_html ) : ?>
+					<h2 class="gnls-cta-title"><?php echo $title_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></h2>
+				<?php endif; ?>
+				<?php if ( $tagline ) : ?>
+					<p class="gnls-cta-tagline"><?php echo esc_html( $tagline ); ?></p>
+				<?php endif; ?>
+			</div>
+
+			<?php if ( ! empty( $members ) ) : ?>
+				<div class="gnls-cta-hosts gnls-cta-hosts--poster">
+					<?php
+					foreach ( $members as $index => $host ) {
+						echo ftd_render_gnls_session_cta_host_item( $host, $index, $for_capture ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					}
+					?>
+				</div>
+			<?php endif; ?>
+		</div>
+
+		<?php if ( $schedule['day_name'] || $schedule['day_num'] || $schedule['month_name'] || $promo_times ) : ?>
+			<div class="gnls-cta-poster-date" aria-hidden="true">
+				<?php if ( $schedule['day_name'] ) : ?>
+					<span class="gnls-cta-day"><?php echo esc_html( $schedule['day_name'] ); ?></span>
+				<?php endif; ?>
+				<?php if ( $schedule['day_num'] || $schedule['month_name'] ) : ?>
+					<p class="gnls-cta-date-block">
+						<?php if ( $schedule['day_num'] ) : ?>
+							<span class="gnls-cta-date-num"><?php echo esc_html( ltrim( $schedule['day_num'], '0' ) ); ?></span>
+						<?php endif; ?>
+						<?php if ( $schedule['month_name'] ) : ?>
+							<span class="gnls-cta-date-month"><?php echo esc_html( $schedule['month_name'] ); ?></span>
+						<?php endif; ?>
+					</p>
+				<?php endif; ?>
+				<?php if ( $promo_times ) : ?>
+					<p class="gnls-cta-times"><?php echo esc_html( $promo_times ); ?></p>
+				<?php endif; ?>
+			</div>
+		<?php endif; ?>
+
+		<div class="gnls-cta-poster-site" aria-hidden="true">
+			<span class="gnls-cta-poster-more"><?php esc_html_e( 'FIND OUT MORE', 'ftd-directory-listings' ); ?></span>
+			<?php
+			printf(
+				'<%1$s class="gnls-cta-site"%2$s>%3$s</%1$s>',
+				$site_tag,
+				$site_href,
+				esc_html( ftd_get_gnls_session_cta_site_label() )
+			);
+			?>
+		</div>
+	</div>
+	<?php
+	return (string) ob_get_clean();
+}
+
+/**
  * @param array<string, mixed> $atts Shortcode attributes.
  * @return string
  */
 function ftd_gnls_session_cta_shortcode( $atts ) {
 	$atts = shortcode_atts(
 		array(
-			'id'           => 0,
-			'button'       => '',
-			'button_url'   => '',
-			'show_button'  => '1',
-			'show_logo'    => '1',
-			'footnote'     => 'your seat is waiting,',
-			'presents'     => '',
+			'id'              => 0,
+			'show_logo'       => '1',
+			'presents'        => '',
+			'link_to_session' => '',
 		),
 		$atts,
 		'gnls_session_cta'
@@ -197,227 +427,43 @@ function ftd_render_gnls_session_cta( $post_id, $atts = array() ) {
 		return '';
 	}
 
-	$show_button = true;
-	if ( isset( $atts['show_button'] ) && ! filter_var( $atts['show_button'], FILTER_VALIDATE_BOOLEAN ) ) {
-		$show_button = false;
+	$capture_mode    = isset( $atts['capture'] ) ? (string) $atts['capture'] : '';
+	$capture_variant = '';
+
+	if ( 'social' === $capture_mode ) {
+		$capture_variant = 'social';
+	} elseif ( in_array( $capture_mode, array( '1', 'youtube', 'true' ), true ) ) {
+		$capture_variant = 'youtube';
 	}
 
 	$link_to_session = ! empty( $atts['link_to_session'] ) && filter_var( $atts['link_to_session'], FILTER_VALIDATE_BOOLEAN );
-	$show_logo       = ! isset( $atts['show_logo'] ) || filter_var( $atts['show_logo'], FILTER_VALIDATE_BOOLEAN );
-	$is_capture      = ! empty( $atts['capture'] ) && filter_var( $atts['capture'], FILTER_VALIDATE_BOOLEAN );
-	$logo_html       = $show_logo ? ftd_get_gnls_session_cta_logo_html( $is_capture ) : '';
-	$presents        = ! empty( $atts['presents'] ) ? (string) $atts['presents'] : '';
 
-	$schedule   = ftd_get_community_call_schedule_parts( $post_id );
-	$members    = ftd_get_community_call_members( $post_id );
-	$permalink  = get_permalink( $post_id );
-	$settings   = function_exists( 'ftd_get_gnls_featured_panel_settings' ) ? ftd_get_gnls_featured_panel_settings() : array();
-	$button     = ! empty( $atts['button'] ) ? (string) $atts['button'] : ( $settings['cta_label'] ?? __( 'Save my seat', 'ftd-directory-listings' ) );
-	$button_url = ! empty( $atts['button_url'] ) ? (string) $atts['button_url'] : (string) $permalink;
-	$footnote   = ! empty( $atts['footnote'] ) ? (string) $atts['footnote'] : __( 'your seat is waiting,', 'ftd-directory-listings' );
-	$session_no = ftd_get_live_session_number( $post_id );
-	$series     = ftd_gnls_label_singular();
+	return ftd_render_gnls_session_cta_poster(
+		$post_id,
+		$atts,
+		array(
+			'for_capture'     => '' !== $capture_variant,
+			'capture_variant' => $capture_variant,
+			'link_to_session' => $link_to_session,
+		)
+	);
+}
 
-	if ( $session_no > 0 ) {
-		$series = sprintf(
-			/* translators: 1: session label, 2: zero-padded session number */
-			__( '%1$s · NO. %2$s', 'ftd-directory-listings' ),
-			strtoupper( $series ),
-			str_pad( (string) $session_no, 2, '0', STR_PAD_LEFT )
-		);
-	} else {
-		$series = strtoupper( $series );
-	}
-
-	$title_html = ftd_format_gnls_session_cta_title( get_the_title( $post_id ) );
-	$tagline    = $schedule['subtitle'];
-	$day_name   = $schedule['day_name'];
-	$date_line  = ftd_get_community_call_promo_date( $post_id );
-	$time_line  = ftd_get_community_call_promo_times( $post_id );
-	$image_html = '';
-
-	if ( $is_capture ) {
-		$attachment_id = ftd_get_community_call_feature_image_id( $post_id );
-
-		if ( $attachment_id > 0 ) {
-			$img_url = wp_get_attachment_image_url( $attachment_id, 'full' );
-			$img_src = function_exists( 'ftd_get_gnls_capture_image_data_uri' )
-				? ftd_get_gnls_capture_image_data_uri( $img_url )
-				: $img_url;
-
-			if ( $img_src ) {
-				$image_html = sprintf(
-					'<img class="gnls-cta-image" src="%1$s" alt="" width="472" height="720" decoding="sync" />',
-					esc_attr( $img_src )
-				);
-			}
-		}
-	} else {
-		$image_html = ftd_get_community_call_feature_image_html(
-			$post_id,
-			'large',
-			array(
-				'class' => 'gnls-cta-image',
-			)
-		);
-	}
-
-	$card_classes = array( 'ftd-sc', 'ftd-sc--gnls-session-cta', 'gnls-session-cta' );
-	if ( $is_capture ) {
-		$card_classes[] = 'gnls-cta--capture';
-	}
-	if ( $link_to_session && $permalink ) {
-		$card_classes[] = 'gnls-cta--linked';
-	}
-
-	$content_style = '';
-	$bg_config     = function_exists( 'ftd_get_session_cta_background_config' )
-		? ftd_get_session_cta_background_config( $post_id )
-		: array(
-			'color' => '#673f69',
-			'image' => '',
-		);
-
-	if ( ! $is_capture && function_exists( 'ftd_get_session_cta_background_style_attr' ) ) {
-		$content_style = ftd_get_session_cta_background_style_attr( $post_id );
-	} elseif ( $is_capture ) {
-		$content_style = 'background-color:' . esc_attr( $bg_config['color'] );
-	}
-
-	$bg_color = $bg_config['color'];
-	$bg_src   = ( $is_capture && ! empty( $bg_config['image'] ) && function_exists( 'ftd_get_gnls_capture_image_data_uri' ) )
-		? ftd_get_gnls_capture_image_data_uri( $bg_config['image'] )
-		: ( $bg_config['image'] ?? '' );
-
-	ob_start();
-	?>
-	<div class="<?php echo esc_attr( implode( ' ', $card_classes ) ); ?>" style="--gnls-cta-bg: <?php echo esc_attr( $bg_color ); ?>;">
-		<?php if ( $link_to_session && $permalink ) : ?>
-			<a class="gnls-cta-card-link" href="<?php echo esc_url( $permalink ); ?>">
-				<span class="screen-reader-text">
-					<?php
-					echo esc_html(
-						sprintf(
-							/* translators: %s: session title */
-							__( 'View session: %s', 'ftd-directory-listings' ),
-							get_the_title( $post_id )
-						)
-					);
-					?>
-				</span>
-			</a>
-		<?php endif; ?>
-		<div class="gnls-cta-content"<?php echo $content_style ? ' style="' . esc_attr( $content_style ) . '"' : ''; ?>>
-			<?php if ( $is_capture && $bg_src ) : ?>
-				<img class="gnls-cta-capture-bg" src="<?php echo esc_attr( $bg_src ); ?>" alt="" decoding="sync" />
-			<?php endif; ?>
-			<?php if ( $logo_html ) : ?>
-				<div class="gnls-cta-brand"><?php echo $logo_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?></div>
-			<?php elseif ( $presents ) : ?>
-				<p class="gnls-cta-presents"><?php echo esc_html( $presents ); ?></p>
-			<?php endif; ?>
-
-			<p class="gnls-cta-series"><?php echo esc_html( $series ); ?></p>
-
-			<?php if ( $title_html ) : ?>
-				<h2 class="gnls-cta-title"><?php echo $title_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?></h2>
-			<?php endif; ?>
-
-			<?php if ( $tagline ) : ?>
-				<p class="gnls-cta-tagline"><?php echo esc_html( $tagline ); ?></p>
-			<?php endif; ?>
-
-			<div class="gnls-cta-bottom">
-				<?php if ( ! empty( $members ) ) : ?>
-					<div class="gnls-cta-hosts">
-						<?php
-						foreach ( $members as $index => $host ) :
-							$profile_url       = ! empty( $host['url'] ) ? $host['url'] : ftd_get_member_profile_url( $host['id'] );
-							$host_subtitle     = trim( (string) ( $host['subtitle'] ?? '' ) );
-							$has_custom_avatar = function_exists( 'ftd_user_has_custom_profile_image' ) && ftd_user_has_custom_profile_image( $host['id'] );
-							$avatar_url        = function_exists( 'ftd_get_user_profile_image_url' )
-								? ftd_get_user_profile_image_url( $host['id'], 144 )
-								: ( $host['avatar_url'] ?? '' );
-							if ( $is_capture && $has_custom_avatar && $avatar_url && function_exists( 'ftd_get_gnls_capture_image_data_uri' ) ) {
-								$avatar_url = ftd_get_gnls_capture_image_data_uri( $avatar_url );
-							}
-							$initials          = ftd_get_member_initials( $host['name'] );
-							?>
-							<?php if ( $index > 0 ) : ?>
-								<span class="gnls-cta-host-sep" aria-hidden="true">&amp;</span>
-							<?php endif; ?>
-
-							<?php if ( $profile_url ) : ?>
-								<a class="gnls-cta-host gnls-cta-host--<?php echo esc_attr( (string) ( $index + 1 ) ); ?>" href="<?php echo esc_url( $profile_url ); ?>">
-							<?php else : ?>
-								<div class="gnls-cta-host gnls-cta-host--<?php echo esc_attr( (string) ( $index + 1 ) ); ?>">
-							<?php endif; ?>
-									<div class="gnls-cta-host-avatar-wrap">
-										<?php if ( $has_custom_avatar ) : ?>
-											<img
-												class="gnls-cta-host-avatar gnls-cta-host-avatar--photo"
-												src="<?php echo $is_capture ? esc_attr( $avatar_url ) : esc_url( $avatar_url ); ?>"
-												alt="<?php echo esc_attr( $host['name'] ); ?>"
-												width="72"
-												height="72"
-												<?php echo $is_capture ? 'decoding="sync"' : 'loading="lazy" decoding="async"'; ?>
-											/>
-										<?php else : ?>
-											<span class="gnls-cta-host-avatar gnls-cta-host-avatar--initials"><?php echo esc_html( $initials ); ?></span>
-										<?php endif; ?>
-									</div>
-									<div class="gnls-cta-host-copy">
-										<span class="gnls-cta-host-name"><?php echo esc_html( strtoupper( $host['name'] ) ); ?></span>
-										<?php if ( $host_subtitle ) : ?>
-											<span class="gnls-cta-host-tagline"><?php echo esc_html( $host_subtitle ); ?></span>
-										<?php else : ?>
-											<span class="gnls-cta-host-tagline gnls-cta-host-tagline--empty" aria-hidden="true"></span>
-										<?php endif; ?>
-									</div>
-							<?php if ( $profile_url ) : ?>
-								</a>
-							<?php else : ?>
-								</div>
-							<?php endif; ?>
-						<?php endforeach; ?>
-					</div>
-				<?php endif; ?>
-
-				<div class="gnls-cta-when">
-					<?php if ( $day_name ) : ?>
-						<p class="gnls-cta-day"><?php echo esc_html( $day_name ); ?></p>
-					<?php endif; ?>
-					<?php if ( $date_line ) : ?>
-						<p class="gnls-cta-date"><?php echo esc_html( $date_line ); ?></p>
-					<?php endif; ?>
-					<?php if ( $time_line ) : ?>
-						<p class="gnls-cta-times"><?php echo esc_html( $time_line ); ?></p>
-					<?php endif; ?>
-					<?php if ( $show_button && $button && $button_url ) : ?>
-						<a class="btn gnls-cta-button" href="<?php echo esc_url( $button_url ); ?>">
-						<span class="gnls-cta-button-icon ftd-btn-arrow" aria-hidden="true"></span>
-							<span><?php echo esc_html( $button ); ?></span>
-						</a>
-					<?php endif; ?>
-				</div>
-			</div>
-
-			<div class="gnls-cta-footer">
-				<?php if ( $footnote ) : ?>
-					<span class="gnls-cta-footnote"><?php echo esc_html( $footnote ); ?></span>
-				<?php endif; ?>
-				<a class="gnls-cta-site" href="<?php echo esc_url( ftd_get_gnls_session_cta_site_url() ); ?>">
-					<?php echo esc_html( ftd_get_gnls_session_cta_site_label() ); ?>
-				</a>
-			</div>
-		</div>
-
-		<?php if ( $image_html || $is_capture ) : ?>
-			<div class="gnls-cta-media">
-				<?php echo $image_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
-			</div>
-		<?php endif; ?>
-	</div>
-	<?php
-	return ob_get_clean();
+/**
+ * Back-compat alias for social capture renderer.
+ *
+ * @param int                  $post_id Session post ID.
+ * @param array<string, mixed> $atts    Shortcode attributes.
+ * @return string
+ */
+function ftd_render_gnls_session_cta_social_capture( $post_id, $atts = array() ) {
+	return ftd_render_gnls_session_cta_poster(
+		$post_id,
+		$atts,
+		array(
+			'for_capture'     => true,
+			'capture_variant' => 'social',
+			'link_to_session' => false,
+		)
+	);
 }
