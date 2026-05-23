@@ -388,14 +388,14 @@ function ftd_enqueue_gnls_cta_capture_admin_assets( $hook ) {
 		'ftd-gnls-session-cta',
 		plugin_dir_url( FTD_DIRECTORY_LISTINGS_FILE ) . 'css/gnls-session-cta.css',
 		array( 'directory-listings-style' ),
-		FTD_DIRECTORY_LISTINGS_VERSION
+		ftd_get_plugin_asset_version()
 	);
 
 	wp_enqueue_style(
 		'ftd-gnls-session-cta-poster-capture',
 		plugin_dir_url( FTD_DIRECTORY_LISTINGS_FILE ) . 'css/gnls-session-cta-poster-capture.css',
 		array( 'ftd-gnls-session-cta' ),
-		FTD_DIRECTORY_LISTINGS_VERSION
+		ftd_get_plugin_asset_version()
 	);
 
 	wp_enqueue_script(
@@ -410,7 +410,7 @@ function ftd_enqueue_gnls_cta_capture_admin_assets( $hook ) {
 		'ftd-gnls-cta-capture',
 		plugin_dir_url( FTD_DIRECTORY_LISTINGS_FILE ) . 'js/gnls-session-cta-capture.js',
 		array( 'html2canvas', 'jquery' ),
-		FTD_DIRECTORY_LISTINGS_VERSION,
+		ftd_get_plugin_asset_version(),
 		true
 	);
 
@@ -468,7 +468,7 @@ function ftd_handle_gnls_cta_capture_preview() {
 	);
 
 	$css_base  = plugin_dir_url( FTD_DIRECTORY_LISTINGS_FILE ) . 'css/';
-	$ver       = FTD_DIRECTORY_LISTINGS_VERSION;
+	$ver       = ftd_get_plugin_asset_version();
 	$fonts_css = ftd_get_gnls_capture_fonts_css();
 	$inline_css = ftd_get_gnls_capture_inline_styles();
 	$width     = $is_social ? FTD_GNLS_SOCIAL_WIDTH : FTD_GNLS_CAPTURE_RENDER_WIDTH;

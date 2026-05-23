@@ -26,7 +26,7 @@ function ftd_register_gnls_session_cta_assets() {
 		'ftd-sc-gnls-session-cta',
 		plugin_dir_url( FTD_DIRECTORY_LISTINGS_FILE ) . 'css/gnls-session-cta.css',
 		array( 'directory-listings-style' ),
-		FTD_DIRECTORY_LISTINGS_VERSION
+		ftd_get_plugin_asset_version()
 	);
 }
 

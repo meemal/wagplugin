@@ -1594,22 +1594,56 @@ function ftd_compact_live_session_share_text( $text ) {
 }
 
 /**
- * Default social share copy for a live session (when the ACF field is empty).
+ * Default social share intro (opening line).
+ *
+ * @return string
+ */
+function ftd_get_live_session_share_intro_default() {
+	return __( 'Join us for {title} — a Genius Network Live Session with We Are Geniuses.', 'ftd-directory-listings' );
+}
+
+/**
+ * Social share intro for a live session (ACF override or default).
+ *
+ * @param int $post_id Post ID.
+ * @return string Intro with {title} already replaced.
+ */
+function ftd_get_live_session_share_intro( $post_id = 0 ) {
+	$post_id = $post_id ? (int) $post_id : get_the_ID();
+	$intro   = ftd_get_community_call_field( 'social_share_intro', $post_id );
+
+	if ( ! is_string( $intro ) || '' === trim( $intro ) ) {
+		$intro = ftd_get_live_session_share_intro_default();
+	} else {
+		$intro = trim( $intro );
+
+		if ( function_exists( 'ftd_normalize_share_message_text' ) ) {
+			$intro = ftd_normalize_share_message_text( $intro );
+		} else {
+			$intro = preg_replace( '#<br\s*/?>#i', "\n", $intro );
+			$intro = wp_strip_all_tags( $intro );
+		}
+
+		$intro = trim( preg_replace( "/\s+/", ' ', str_replace( array( "\r\n", "\r", "\n" ), ' ', $intro ) ) );
+	}
+
+	$title = wp_strip_all_tags( get_the_title( $post_id ) );
+
+	return str_replace( '{title}', $title, $intro );
+}
+
+/**
+ * Default social share copy for a live session (when the full override field is empty).
  *
  * @param int $post_id Post ID.
  * @return string
  */
 function ftd_get_live_session_share_message_default( $post_id = 0 ) {
 	$post_id = $post_id ? (int) $post_id : get_the_ID();
-	$title   = wp_strip_all_tags( get_the_title( $post_id ) );
 	$times   = ftd_get_community_call_promo_times( $post_id );
 
 	$lines = array(
-		sprintf(
-			/* translators: %s: live session title */
-			__( 'Join us for %s — a Genius Network Live Session with We Are Geniuses.', 'ftd-directory-listings' ),
-			$title
-		),
+		ftd_get_live_session_share_intro( $post_id ),
 	);
 
 	if ( '' !== $times ) {

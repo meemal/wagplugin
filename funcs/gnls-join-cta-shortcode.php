@@ -27,7 +27,7 @@ function ftd_register_gnls_join_cta_assets() {
 		'ftd-sc-gnls-join-cta',
 		plugin_dir_url( FTD_DIRECTORY_LISTINGS_FILE ) . 'css/gnls-join-cta.css',
 		array( 'directory-listings-style' ),
-		FTD_DIRECTORY_LISTINGS_VERSION
+		ftd_get_plugin_asset_version()
 	);
 }
 

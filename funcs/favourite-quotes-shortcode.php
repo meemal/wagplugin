@@ -291,14 +291,14 @@ function ftd_register_favourite_quotes_assets() {
 		'ftd-sc-favourite-quotes',
 		plugin_dir_url( FTD_DIRECTORY_LISTINGS_FILE ) . 'css/favourite-quotes.css',
 		array( 'directory-listings-style' ),
-		FTD_DIRECTORY_LISTINGS_VERSION
+		ftd_get_plugin_asset_version()
 	);
 
 	wp_register_script(
 		'ftd-favourite-quotes',
 		plugin_dir_url( FTD_DIRECTORY_LISTINGS_FILE ) . 'js/favourite-quotes.js',
 		array(),
-		FTD_DIRECTORY_LISTINGS_VERSION,
+		ftd_get_plugin_asset_version(),
 		true
 	);
 }

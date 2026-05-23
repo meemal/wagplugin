@@ -56,7 +56,7 @@ function ftd_enqueue_shortcode_showcase_assets() {
 	}
 
 	$base   = plugin_dir_url( FTD_DIRECTORY_LISTINGS_FILE );
-	$ver    = FTD_DIRECTORY_LISTINGS_VERSION;
+	$ver    = ftd_get_plugin_asset_version();
 	$styles = array(
 		'ftd-showcase'           => 'css/shortcode-showcase.css',
 		'ftd-page-header'        => 'css/page-header.css',

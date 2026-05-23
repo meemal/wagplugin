@@ -314,14 +314,14 @@ function ftd_register_social_share_assets() {
 		'ftd-sc-social-share',
 		plugin_dir_url( FTD_DIRECTORY_LISTINGS_FILE ) . 'css/social-share.css',
 		array( 'directory-listings-style' ),
-		FTD_DIRECTORY_LISTINGS_VERSION
+		ftd_get_plugin_asset_version()
 	);
 
 	wp_register_script(
 		'ftd-social-share',
 		plugin_dir_url( FTD_DIRECTORY_LISTINGS_FILE ) . 'js/social-share.js',
 		array(),
-		FTD_DIRECTORY_LISTINGS_VERSION,
+		ftd_get_plugin_asset_version(),
 		true
 	);
 }

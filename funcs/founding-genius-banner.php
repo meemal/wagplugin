@@ -23,7 +23,7 @@ function ftd_register_founding_genius_banner_assets() {
 		'ftd-founding-genius-banner',
 		plugin_dir_url( FTD_DIRECTORY_LISTINGS_FILE ) . 'js/founding-genius-banner.js',
 		array(),
-		FTD_DIRECTORY_LISTINGS_VERSION,
+		ftd_get_plugin_asset_version(),
 		true
 	);
 }
@@ -201,7 +201,7 @@ function ftd_founding_genius_banner_shortcode( $atts ) {
 				<div class="fg-counter" aria-label="<?php echo esc_attr( $counter_aria ); ?>">
 					<span class="fg-counter-num fg-animated-num" data-fg-count-to="<?php echo esc_attr( (string) $remaining ); ?>">0</span>
 					<span class="fg-counter-of">of</span>
-					<span class="fg-counter-total fg-animated-num" data-fg-count-to="<?php echo esc_attr( (string) $total ); ?>">0</span>
+					<span class="fg-counter-total"><?php echo esc_html( (string) $total ); ?></span>
 				</div>
 
 				<div class="fg-progress">

@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'FTD_STATS_TICKER_CACHE_KEY', 'ftd_stats_ticker_slides' );
+define( 'FTD_STATS_TICKER_CACHE_KEY', 'ftd_stats_ticker_slides_v2' );
 define( 'FTD_STATS_TICKER_CACHE_TTL', 5 * MINUTE_IN_SECONDS );
 
 /**
@@ -66,48 +66,106 @@ function ftd_stats_count_members() {
 }
 
 /**
- * Whether a user should appear on the Genius Map (matches PMPro Membership Maps logic).
+ * Stat keys stored in the stats ticker cache.
  *
- * @param int $user_id User ID.
- * @return bool
+ * @return array<int, string>
  */
-function ftd_stats_user_is_on_map( $user_id ) {
-	$user_id = (int) $user_id;
-
-	if ( ! $user_id ) {
-		return false;
-	}
-
-	$member_address = get_user_meta( $user_id, 'pmpromm_pin_location', true );
-	if ( ! is_array( $member_address ) ) {
-		$member_address = array();
-	}
-
-	$old_lat = get_user_meta( $user_id, 'pmpro_lat', true );
-	$old_lng = get_user_meta( $user_id, 'pmpro_lng', true );
-
-	if ( empty( $member_address ) && ! empty( $old_lat ) ) {
-		$member_address['old_lat'] = $old_lat;
-		$member_address['old_lng'] = $old_lng;
-	}
-
-	if ( ! isset( $member_address['optin'] ) && ! empty( $member_address['old_lat'] ) ) {
-		$member_address['optin'] = true;
-	}
-
-	if ( empty( $member_address['optin'] ) ) {
-		return false;
-	}
-
-	return true;
+function ftd_stats_ticker_value_keys() {
+	return array( 'members', 'profiles', 'map', 'listings', 'creator', 'quantum', 'last_signup' );
 }
 
 /**
- * Active members with a visible Genius Map pin (opted in with coordinates).
+ * Base SQL parts for visible member directory members.
+ *
+ * @return array<string, string>
+ */
+function ftd_stats_get_directory_member_sql_parts() {
+	global $wpdb;
+
+	$sql_parts = array(
+		'SELECT' => "SELECT u.ID, u.user_nicename, u.display_name, u.user_email, ummap.meta_value AS maplocation FROM {$wpdb->users} u ",
+		'JOIN'   => "
+			LEFT JOIN {$wpdb->usermeta} umh
+				ON umh.meta_key = 'pmpromd_hide_directory' AND u.ID = umh.user_id
+			INNER JOIN {$wpdb->pmpro_memberships_users} mu
+				ON u.ID = mu.user_id
+			LEFT JOIN {$wpdb->usermeta} ummap
+				ON ummap.meta_key = 'pmpromd_pin_location' AND u.ID = ummap.user_id
+		",
+		'WHERE'  => "
+			WHERE mu.status = 'active'
+			  AND (umh.meta_value IS NULL OR umh.meta_value <> '1')
+			  AND mu.membership_id > 0
+		",
+		'GROUP'  => 'GROUP BY u.ID ',
+		'ORDER'  => 'ORDER BY u.display_name ASC ',
+		'LIMIT'  => '',
+	);
+
+	if ( class_exists( 'PMPro_Approvals' ) ) {
+		$sql_parts['JOIN'] .= "
+			LEFT JOIN {$wpdb->usermeta} umm
+				ON umm.meta_key = CONCAT('pmpro_approval_', mu.membership_id)
+			   AND u.ID = umm.user_id
+		";
+		$sql_parts['WHERE'] .= "
+			  AND (umm.meta_value LIKE '%approved%' OR umm.meta_value IS NULL)
+		";
+	}
+
+	return apply_filters(
+		'pmpro_member_directory_sql_parts',
+		$sql_parts,
+		false,
+		'',
+		1,
+		0,
+		0,
+		0,
+		'u.display_name',
+		'ASC'
+	);
+}
+
+/**
+ * Active directory members for map counting.
+ *
+ * @return array<int, object>
+ */
+function ftd_stats_get_directory_members_for_map() {
+	global $wpdb;
+
+	$sql_parts = ftd_stats_get_directory_member_sql_parts();
+	$sql       = $sql_parts['SELECT'] . $sql_parts['JOIN'] . $sql_parts['WHERE'] . $sql_parts['GROUP'] . $sql_parts['ORDER'];
+
+	return $wpdb->get_results( $sql );
+}
+
+/**
+ * Active members shown on the Genius Map (matches member directory map logic).
  *
  * @return int
  */
 function ftd_stats_count_on_map() {
+	if ( function_exists( 'pmpromd_generate_marker_data' ) ) {
+		$members = ftd_stats_get_directory_members_for_map();
+
+		if ( empty( $members ) ) {
+			return 0;
+		}
+
+		$marker_attributes = array(
+			'show_avatar'    => false,
+			'link'           => false,
+			'show_email'     => false,
+			'show_level'     => false,
+			'show_startdate' => false,
+			'elements'       => '',
+		);
+
+		return count( pmpromd_generate_marker_data( $members, $marker_attributes ) );
+	}
+
 	global $wpdb;
 
 	$user_ids = $wpdb->get_col(
@@ -117,20 +175,9 @@ function ftd_stats_count_on_map() {
 			 ON umh.meta_key = 'pmpromd_hide_directory' AND u.ID = umh.user_id
 		 INNER JOIN {$wpdb->pmpro_memberships_users} mu
 			 ON u.ID = mu.user_id
-			AND mu.status = 'active'
-			AND mu.membership_id > 0
-		 LEFT JOIN {$wpdb->usermeta} umlat
-			 ON umlat.meta_key = 'pmpro_lat' AND u.ID = umlat.user_id
-		 LEFT JOIN {$wpdb->usermeta} umlng
-			 ON umlng.meta_key = 'pmpro_lng' AND u.ID = umlng.user_id
-		 LEFT JOIN {$wpdb->usermeta} ummap
-			 ON ummap.meta_key = 'pmpromm_pin_location' AND u.ID = ummap.user_id
-		 WHERE (umh.meta_value IS NULL OR umh.meta_value <> '1')
-		   AND (
-			   (umlat.meta_value IS NOT NULL AND umlat.meta_value <> '')
-			   OR (umlng.meta_value IS NOT NULL AND umlng.meta_value <> '')
-			   OR (ummap.meta_value IS NOT NULL AND ummap.meta_value <> '')
-		   )"
+		 WHERE mu.status = 'active'
+		   AND (umh.meta_value IS NULL OR umh.meta_value <> '1')
+		   AND mu.membership_id > 0"
 	);
 
 	if ( empty( $user_ids ) ) {
@@ -146,6 +193,52 @@ function ftd_stats_count_on_map() {
 	}
 
 	return $count;
+}
+
+/**
+ * Whether a user should appear on the Genius Map (fallback when directory map helpers are unavailable).
+ *
+ * @param int $user_id User ID.
+ * @return bool
+ */
+function ftd_stats_user_is_on_map( $user_id ) {
+	$user_id = (int) $user_id;
+
+	if ( ! $user_id ) {
+		return false;
+	}
+
+	$member_address    = get_user_meta( $user_id, 'pmpromd_pin_location', true );
+	$used_old_location = false;
+
+	if ( ! is_array( $member_address ) ) {
+		$member_address = array();
+	}
+
+	if ( empty( $member_address ) ) {
+		$old_lat = get_user_meta( $user_id, 'pmpro_lat', true );
+		$old_lng = get_user_meta( $user_id, 'pmpro_lng', true );
+
+		if ( ! empty( $old_lat ) && ! empty( $old_lng ) ) {
+			$used_old_location = true;
+		} elseif ( function_exists( 'pmpromd_get_member_address' ) ) {
+			$resolved = get_user_meta( $user_id, 'pmpromm_pin_location', true );
+			if ( is_array( $resolved ) && ! empty( $resolved ) ) {
+				$member_address = $resolved;
+			}
+		} else {
+			$legacy = get_user_meta( $user_id, 'pmpromm_pin_location', true );
+			if ( is_array( $legacy ) && ! empty( $legacy ) ) {
+				$member_address = $legacy;
+			}
+		}
+	}
+
+	if ( ! isset( $member_address['optin'] ) && $used_old_location ) {
+		$member_address['optin'] = true;
+	}
+
+	return ! empty( $member_address['optin'] );
 }
 
 /**
@@ -301,6 +394,15 @@ function ftd_stats_count_directory_listings() {
  */
 function ftd_get_stats_ticker_values() {
 	$cached = get_transient( FTD_STATS_TICKER_CACHE_KEY );
+
+	if ( false !== $cached && is_array( $cached ) ) {
+		foreach ( ftd_stats_ticker_value_keys() as $key ) {
+			if ( ! array_key_exists( $key, $cached ) ) {
+				$cached = false;
+				break;
+			}
+		}
+	}
 
 	if ( false !== $cached && is_array( $cached ) ) {
 		return $cached;

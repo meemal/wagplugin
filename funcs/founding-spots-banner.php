@@ -268,7 +268,7 @@ function ftd_enqueue_founding_spots_banner_styles() {
 		'ftd-sc-founding-spots-banner',
 		plugin_dir_url( FTD_DIRECTORY_LISTINGS_FILE ) . 'css/founding-spots-banner.css',
 		array( 'directory-listings-style' ),
-		FTD_DIRECTORY_LISTINGS_VERSION
+		ftd_get_plugin_asset_version()
 	);
 }
 

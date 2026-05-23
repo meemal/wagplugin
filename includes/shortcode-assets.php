@@ -8,6 +8,41 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Cache-busting version for enqueued CSS/JS.
+ *
+ * Uses the newest modification time across plugin css/ and js/ files so copied
+ * assets get a new ?ver= on deploy without manually bumping the plugin version.
+ *
+ * @return string
+ */
+function ftd_get_plugin_asset_version() {
+	static $version = null;
+
+	if ( null !== $version ) {
+		return $version;
+	}
+
+	$base   = plugin_dir_path( FTD_DIRECTORY_LISTINGS_FILE );
+	$latest = (int) @filemtime( FTD_DIRECTORY_LISTINGS_FILE );
+
+	foreach ( array( 'css', 'js' ) as $dir ) {
+		$files = glob( $base . $dir . '/*.{css,js}', GLOB_BRACE );
+
+		if ( ! is_array( $files ) ) {
+			continue;
+		}
+
+		foreach ( $files as $file ) {
+			$latest = max( $latest, (int) @filemtime( $file ) );
+		}
+	}
+
+	$version = $latest > 0 ? (string) $latest : FTD_DIRECTORY_LISTINGS_VERSION;
+
+	return $version;
+}
+
+/**
  * Shortcode tag => CSS path relative to plugin root.
  *
  * Also register new styles in ftd_enqueue_shortcode_showcase_assets() (shortcode-showcase.php)
@@ -63,7 +98,7 @@ function ftd_enqueue_shortcode_styles() {
 			$handle,
 			$plugin_url . $relative_path,
 			array( $base_handle ),
-			FTD_DIRECTORY_LISTINGS_VERSION
+			ftd_get_plugin_asset_version()
 		);
 	}
 }
@@ -76,10 +111,13 @@ function ftd_enqueue_directory_single_styles() {
 		return;
 	}
 
+	$theme_css = get_stylesheet_directory() . '/css/directory-style.css';
+	$version   = file_exists( $theme_css ) ? (string) filemtime( $theme_css ) : ftd_get_plugin_asset_version();
+
 	wp_enqueue_style(
 		'ftd-directory-single',
 		get_stylesheet_directory_uri() . '/css/directory-style.css',
 		array( 'directory-listings-style' ),
-		FTD_DIRECTORY_LISTINGS_VERSION
+		$version
 	);
 }

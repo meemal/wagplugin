@@ -58,7 +58,7 @@ function ftd_register_stats_ticker_assets() {
 		'ftd-sc-founding-spots-banner',
 		plugin_dir_url( FTD_DIRECTORY_LISTINGS_FILE ) . 'css/founding-spots-banner.css',
 		array( 'directory-listings-style' ),
-		FTD_DIRECTORY_LISTINGS_VERSION
+		ftd_get_plugin_asset_version()
 	);
 }
 

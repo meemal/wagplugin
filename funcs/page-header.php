@@ -521,7 +521,7 @@ function ftd_enqueue_page_header_assets() {
 		'ftd-page-header',
 		plugin_dir_url( FTD_DIRECTORY_LISTINGS_FILE ) . 'css/page-header.css',
 		array( 'directory-listings-style' ),
-		FTD_DIRECTORY_LISTINGS_VERSION
+		ftd_get_plugin_asset_version()
 	);
 }
 

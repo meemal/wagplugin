@@ -174,7 +174,7 @@ function ftd_register_live_session_share_assets() {
 		'ftd-live-session-share',
 		plugin_dir_url( FTD_DIRECTORY_LISTINGS_FILE ) . 'js/live-session-share.js',
 		array(),
-		FTD_DIRECTORY_LISTINGS_VERSION,
+		ftd_get_plugin_asset_version(),
 		true
 	);
 
@@ -185,7 +185,7 @@ function ftd_register_live_session_share_assets() {
 			'ftd-sc-social-share',
 			plugin_dir_url( FTD_DIRECTORY_LISTINGS_FILE ) . 'css/social-share.css',
 			array( 'directory-listings-style' ),
-			FTD_DIRECTORY_LISTINGS_VERSION
+			ftd_get_plugin_asset_version()
 		);
 	}
 
@@ -193,14 +193,14 @@ function ftd_register_live_session_share_assets() {
 		'ftd-sc-founding-genius',
 		plugin_dir_url( FTD_DIRECTORY_LISTINGS_FILE ) . 'css/founding-genius-banner.css',
 		array( 'directory-listings-style' ),
-		FTD_DIRECTORY_LISTINGS_VERSION
+		ftd_get_plugin_asset_version()
 	);
 
 	wp_register_style(
 		'ftd-sc-wag-features-ctas',
 		plugin_dir_url( FTD_DIRECTORY_LISTINGS_FILE ) . 'css/wag-features-ctas.css',
 		array( 'directory-listings-style' ),
-		FTD_DIRECTORY_LISTINGS_VERSION
+		ftd_get_plugin_asset_version()
 	);
 
 	if ( function_exists( 'ftd_register_gnls_join_cta_assets' ) ) {
@@ -223,7 +223,7 @@ function ftd_enqueue_community_calls_styles() {
 		'ftd-community-calls',
 		plugin_dir_url( FTD_DIRECTORY_LISTINGS_FILE ) . 'css/community-calls.css',
 		array( 'directory-listings-style' ),
-		FTD_DIRECTORY_LISTINGS_VERSION
+		ftd_get_plugin_asset_version()
 	);
 
 	if ( $is_calls_single || $is_calls_archive ) {

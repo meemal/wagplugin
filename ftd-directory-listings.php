@@ -11,7 +11,7 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 define( 'FTD_DIRECTORY_LISTINGS_FILE', __FILE__ );
-define( 'FTD_DIRECTORY_LISTINGS_VERSION', '1.0.52' );
+define( 'FTD_DIRECTORY_LISTINGS_VERSION', '1.0.53' );
 define( 'FTD_COMMUNITY_CALL_POST_TYPE', 'genius_comm_call' );
 
 require_once plugin_dir_path( __FILE__ ) . 'includes/shortcode-assets.php';
@@ -29,7 +29,7 @@ add_action('wp_enqueue_scripts', function() {
         'directory-listings-style',
         plugin_dir_url(__FILE__) . 'css/directory-listings.css',
         array(),
-        FTD_DIRECTORY_LISTINGS_VERSION
+        ftd_get_plugin_asset_version()
     );
 
     ftd_enqueue_shortcode_styles();
@@ -40,7 +40,7 @@ add_action('wp_enqueue_scripts', function() {
             'genius-map-style',
             plugin_dir_url(__FILE__) . 'css/genius-map.css',
             array( 'directory-listings-style' ),
-            FTD_DIRECTORY_LISTINGS_VERSION
+            ftd_get_plugin_asset_version()
         );
     }
 });
@@ -64,7 +64,7 @@ function ftd_enqueue_view_counter_script() {
         'ftd-view-counter',
         plugin_dir_url(__FILE__) . 'js/view-counter.js',
         ['jquery'],
-        FTD_DIRECTORY_LISTINGS_VERSION,
+        ftd_get_plugin_asset_version(),
         true
     );
 
@@ -105,7 +105,7 @@ add_action('wp_enqueue_scripts', function() {
         'directory-ajax-filter',
         plugin_dir_url(__FILE__) . 'js/directory-ajax-filter.js',
         ['jquery'],
-        FTD_DIRECTORY_LISTINGS_VERSION,
+        ftd_get_plugin_asset_version(),
         true
     );
 
@@ -119,7 +119,7 @@ add_action('wp_enqueue_scripts', function() {
             'map-settings-ajax',
             plugin_dir_url(__FILE__) .  '/js/map-settings.js',
             ['jquery'],
-            FTD_DIRECTORY_LISTINGS_VERSION,
+            ftd_get_plugin_asset_version(),
             true
           );
           wp_localize_script('map-settings-ajax', 'directory_ajax_obj', [
